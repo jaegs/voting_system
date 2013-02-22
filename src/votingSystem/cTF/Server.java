@@ -11,17 +11,13 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CTFServer implements Runnable{
+public class Server implements Runnable{
 
-    protected int          serverPort   = 8080;
+    protected int          serverPort   = Constants.PORT;
     protected ServerSocket serverSocket = null;
     protected boolean      isStopped    = false;
     protected Thread       runningThread= null;
-    protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
-
-    public CTFServer(int port){
-        this.serverPort = port;
-    }
+    protected ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
 
     public void run(){
         synchronized(this){
@@ -40,7 +36,11 @@ public class CTFServer implements Runnable{
                 throw new RuntimeException(
                     "Error accepting client connection", e);
             }
-            this.threadPool.execute(new CTFThread(clientSocket));
+            try {
+				this.threadPool.execute(new ServerThread(clientSocket));
+			} catch (IOException e) {
+				throw new RuntimeException("Error reading socket",e);
+			}
         }
         this.threadPool.shutdown();
         System.out.println("Server Stopped.") ;
