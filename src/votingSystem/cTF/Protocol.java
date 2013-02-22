@@ -1,25 +1,17 @@
 package votingSystem.cTF;
-/*
- * Questions
- * How does ANDOS work?
- * Passwords for #2 a good idea?
- * How to network CTF and voters? sockets
- * How to send anonymous messages? - mixnet - bounce message around, onion routing
- * Query CTF instead of "publishing" - maybe use 3rd party
- * How to format byte messages? come up with our own - first bytes say operation
- * Why is d (k_v) sent in same message for steps 9 and 10?
- * What are the expectations for phase III? - pick out crypto pieces - setting up keys
- * Good example of Java RSA
- * 
- * efficiency with asymmetric encryption
- * 
- */
 
-// Z*_m - finite field define
+/**
+ * This class only has static methods, the CTF state will be in a different class.
+ * @author test
+ *
+ */
 public class Protocol {
+
 	public static byte[] processMessage(byte[] msg){
 		/**
-		 * Processes every received message. Called by ServerThread.
+		 * Processes every received message.
+		 * Calls one of the other methods based on operation type. 
+		 * This method is invoked by ServerThread.
 		 * #1 decrypt message
 		 */
 		return null;
@@ -86,6 +78,7 @@ public class Protocol {
 		 * in: {e, op, {I,v}K_v}K_CTF
 		 * out: {e, op, I', {I,v}K_v}k_CTF
 		 */
+		return null;
 	}
 	
 	public static void processVote(byte[] msg) {
