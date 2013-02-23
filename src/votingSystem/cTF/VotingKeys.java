@@ -16,6 +16,11 @@ public class VotingKeys {
         
     }
     
+    public generateK(){
+        
+    }
     
-
+    public sendMessages(){
+        
+    }
 }
