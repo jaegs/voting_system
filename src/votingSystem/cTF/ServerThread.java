@@ -1,9 +1,7 @@
 package votingSystem.cTF;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 
 
 public class ServerThread implements Runnable {
@@ -23,18 +21,20 @@ public class ServerThread implements Runnable {
 		//http://stackoverflow.com/questions/8274966/reading-a-byte-array-from-socket
 		try {	
 			InputStream in = soc.getInputStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte buffer[] = new byte[1024];
-			for(int s; (s=in.read(buffer)) != -1; )
-			{
-			  baos.write(buffer, 0, s);
-			}
-			byte input[] = baos.toByteArray();
-			in.close();
-			byte[] response = Protocol.processMessage(input);
 			OutputStream out = soc.getOutputStream();
-			out.write(response);
-			out.close();
+			
+			DataInputStream dis = new DataInputStream(in);
+			int len = dis.readInt();
+			byte[] input = new byte[len];
+			if (len > 0) {
+				dis.readFully(input);
+			}
+			System.out.println(Arrays.toString(input));
+			//byte[] response = Protocol.processMessage(input);
+			byte[] response = {0, 0, 45, -67, 23, 5, 7, 6, 87, -1};
+			DataOutputStream dos = new DataOutputStream(out);
+			dos.writeInt(response.length);
+			dos.write(response);
 			soc.close();
 		} catch(IOException e) {
 			e.printStackTrace();

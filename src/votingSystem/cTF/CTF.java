@@ -9,4 +9,9 @@ import java.util.List;
  */
 public class CTF {
 	private List<Election> elections;
+	
+	
+	public CTF() {
+		new Protocol(this);
+	}
 }

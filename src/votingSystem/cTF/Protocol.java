@@ -6,6 +6,11 @@ package votingSystem.cTF;
  *
  */
 public class Protocol {
+	private CTF ctf;
+	
+	public Protocol(CTF ctf){
+		this.ctf = ctf;
+	}
 
 	public static byte[] processMessage(byte[] msg){
 		/**
