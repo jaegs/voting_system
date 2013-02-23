@@ -32,6 +32,7 @@ public class Protocol {
 		/**
 		 * #2
 		 * in: {e, op, name, password}K_CTF
+		 * SEE: PASSWORDS.JAVA
 		 */
 	}
 	
