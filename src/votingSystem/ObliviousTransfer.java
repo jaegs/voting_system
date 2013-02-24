@@ -1,8 +1,7 @@
-package votingSystem.encrpytion;
+package votingSystem;
 
 
 import votingSystem.voter.*;
-import votingSystem.encrpytion.*;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -149,11 +148,11 @@ public class ObliviousTransfer {
     	
     	BigInteger k = test.generateK();
 
-    	int e = Integer.parseInt(rsa.getE().toString());
-    	BigInteger v = test.calculateV(randomMessages[b], k, e, rsa.getN());
+    	int e = rsa.getPrivKey().intValue();
+    	BigInteger v = test.calculateV(randomMessages[b], k, e, rsa.getModulus());
     	
     	//server side action
-    	BigInteger[] ms = test.calculateMs(randomMessages, v, rsa.getD(), rsa.getN());
+    	BigInteger[] ms = test.calculateMs(randomMessages, v, rsa.getPubKey(), rsa.getModulus());
     	
     	//client side action
     	BigInteger message = test.determineMessage(ms, b, k);
