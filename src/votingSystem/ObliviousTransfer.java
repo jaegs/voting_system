@@ -10,49 +10,35 @@ import java.util.*;
 
 public class ObliviousTransfer {
 
-  
-    private HashSet<BigInteger> availableKeys;
-    private HashSet<BigInteger> takenKeys;
-    private SecureRandom random;
-   
-    //private RSAEncryption rsa;
-    
-    /*private byte[] privateRSAKey;
-    private byte[] publicRSAModulo;
-    private byte[] publicRSAExponent;*/
-    
-    //private RSAEncrpytion rsa;
+	
+    private BigInteger[] availableKeys;
+    private byte[] takenKeys;
+    private static SecureRandom random;
     
     public ObliviousTransfer(int numKeys){
     	
     	//initialize instance variables. 
 		random = new SecureRandom();
-		availableKeys = new HashSet<BigInteger>();
-		takenKeys = new HashSet<BigInteger>();
+		availableKeys = new BigInteger[numKeys];//<BigInteger>();
+		takenKeys = new byte[numKeys];//<BigInteger>();
     	
 		//generate random keys
     	for(int i = 0; i < numKeys; i++){
    		 	
    		 	//Generate 128-bit voting keys and set the all as available...
    		 	BigInteger p = new BigInteger(128, 100, random);
-   		 	availableKeys.add(p);
+   		 	
+   		 	availableKeys[i] = p;
+   		 	takenKeys[i] = 0;
    		 	//Alternatively, we might want to use RSA keys here here
     	}
     }
 
-    /*private int numBits(int value){
-    	int count = 0;
-    	while (value > 0) {
-    	    count++;
-    	    value = value >> 1;
-    	}
-    	return count;
-    }*/
     
     public BigInteger[] randomMessages(){
     	
     	//the number of keys left available
-    	int size = availableKeys.size();
+    	int size = availableKeys.length;
 
     	
     	//a list of random messages cooresponding to private keys
@@ -72,7 +58,7 @@ public class ObliviousTransfer {
      * @param randomMessages - a list of random messages to choose from
      * @return the index of the random message
      */
-    public int chooseSecret(BigInteger[] randomMessages){
+    public static int chooseSecret(BigInteger[] randomMessages){
     	
     	//randomly choose one of the random messages
     	int size = randomMessages.length;
@@ -85,7 +71,7 @@ public class ObliviousTransfer {
      * generate K - generates a random value (used client side)
      * @return
      */
-    public BigInteger generateK(){
+    public static BigInteger generateK(){
     	return new BigInteger(128, random);
     }
     
@@ -97,13 +83,10 @@ public class ObliviousTransfer {
      * @param N - the N aspect of the public RSA key
      * @return the calculated V value
      */
-    public BigInteger calculateV(BigInteger x, BigInteger k, int e, BigInteger n){
+    public static BigInteger calculateV(BigInteger x, BigInteger k, int e, BigInteger n){
     	
-    	BigInteger res1 = k.pow(e);
-    	BigInteger res2 = x.add(res1);
-    	
-    	return res2.mod(n);
-    }
+    	return (x.add(k.pow(e)).mod(n));//randomMessages[b].add(k.pow(e)))
+     }
     
     /**
      * Calculates the K values for all of the random messages
@@ -113,12 +96,12 @@ public class ObliviousTransfer {
      * @param n - the N aspect of the public RSA key
      * @return - the encrypted k values of the random mesages
      */
-    public BigInteger[] calculateK(BigInteger[] randomMessages, BigInteger v, BigInteger d, BigInteger n){
+    public BigInteger[] calculateMs(BigInteger[] randomMessages, BigInteger v, BigInteger d, BigInteger n){
     	
     	BigInteger[] toRet = new BigInteger[randomMessages.length];
     	
     	for(int i = 0; i < randomMessages.length; i++){
-    		toRet[i] = (v.subtract(randomMessages[i])).modPow(d, n);
+    		toRet[i] = availableKeys[i].add((v.subtract(randomMessages[i])).modPow(d, n));
     	}
     	
     	return toRet;
@@ -132,8 +115,8 @@ public class ObliviousTransfer {
      * @param k - the random K value (chosen earlier)
      * @return the decrypted message
      */
-    public BigInteger determineMessage(BigInteger[] kValues, int index, BigInteger k){
-    	return kValues[index].subtract(k);
+    public static BigInteger determineMessage(BigInteger[] mValues, int index, BigInteger k){
+    	return (mValues[index]).subtract(k);
     }
     
     /**
@@ -142,16 +125,19 @@ public class ObliviousTransfer {
      * @return true or false based on the key's validity
      */
     public boolean checkSecret(BigInteger toCheck){	
-    	return takenKeys.contains(toCheck);
+    	
+    	//TODO IMPLEMENT THISISISIS
+    	return false;//return takenKeys.contains(toCheck);
     }
     
+    public BigInteger getSecret(int index){
+    	return availableKeys[index];
+    }
     
     public static void main(String[] args){
     	
     	ObliviousTransfer test = new ObliviousTransfer(10);
     	RSAEncryption rsa = new RSAEncryption(128);
-    	
-    	//System.out.println(rsa.decrypt(rsa.encrypt(new BigInteger("1111111100001111000011114290219117"))));
     	
     	
     	//server side starting
@@ -162,31 +148,19 @@ public class ObliviousTransfer {
     	System.out.println("b: " + b);
     	
     	BigInteger k = test.generateK();
-    	System.out.println("k: " + k);
-    	
+
     	int e = Integer.parseInt(rsa.getE().toString());
     	BigInteger v = test.calculateV(randomMessages[b], k, e, rsa.getN());
     	
     	//server side action
-    	BigInteger[] ks = test.calculateK(randomMessages, v, rsa.getD(), rsa.getN());
-    	
-    	for(int i = 0; i < ks.length; i++){
-    		System.out.println(ks[i]);
-    	}
+    	BigInteger[] ms = test.calculateMs(randomMessages, v, rsa.getD(), rsa.getN());
     	
     	//client side action
-    	BigInteger message = test.determineMessage(ks, b, k);
+    	BigInteger message = test.determineMessage(ms, b, k);
     	
-    	System.out.println("Start: " + randomMessages[b]);
-    	System.out.println("End: " + ks[b]);
+    	System.out.println("Start: " + test.getSecret(b));
+    	System.out.println("End: " + message);
     
     }
-//    
-//    public generateK(){
-//        
-//    }
-//    
-//    public sendMessages(){
-//        
-//    }
+
 }
