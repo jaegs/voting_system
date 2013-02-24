@@ -1,5 +1,7 @@
 package votingSystem.cTF;
 
+import java.util.Arrays;
+
 import votingSystem.Constants;
 import votingSystem.Constants.Operation;
 /**
@@ -15,13 +17,15 @@ public class Protocol {
 		this.ctf = ctf;
 	}
 
-	public static byte[] processMessage(byte[] msg){
+	public byte[] processMessage(byte[] msg){
 		/**
 		 * Processes every received message.
 		 * Calls one of the other methods based on operation type. 
 		 * This method is invoked by ServerThread.
 		 * #1 decrypt message
 		 */
+		//Assumes message is length < modulus
+		msg = ctf.rsa.decrypt(msg);
 		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
 		byte[] response = null;
 		switch (op){
@@ -50,34 +54,51 @@ public class Protocol {
 		case CHANGE:
 			willVote(msg);
 		}
+		//Assumes response length is < modulus
+		return ctf.rsa.encrypt(response);
+	}
+	
+	public byte[] isEligible(byte[] msg) {
+		/** 
+		 * #1
+		 * in {Election, r, Voter name}K_CTF
+		 * out {election, r+1, voter name, bool}k_CTF
+		 * e = election
+		 */
+		byte[] response = Arrays.copyOf(msg, msg.length + 1);
+		response[2] = (byte) (msg[2] + 1);
+		if (msg[1] == ctf.election.id
+				&& ctf.election.eligibleUsers.contains(String.valueOf((char) msg[3])) )
+			response[msg.length] = 1;
 		return response;
 	}
 	
-	public static byte[] isEligible(byte[] msg) {
-		/** 
-		 * #1
-		 * in {Election, Voter name}K_CTF
-		 * out {election, voter name, bool}k_CTF
-		 * e = election
-		 * op = operation
-		 */
-		return null;
-	}
-	
-	public static void willVote(byte[] msg) {
+	public void willVote(byte[] msg) {
 		/**
 		 * #2
-		 * in: {e, op, name, password}K_CTF
+		 * in: {e, name, password}K_CTF
 		 * SEE: PASSWORDS.JAVA
 		 */
+		if(msg[1] == ctf.election.id) {
+			byte[] pass = Arrays.copyOfRange(msg, 3,msg.length);
+			String user = String.valueOf((char) msg[2]);
+			if( ctf.election.passwords.verify(user, pass)) {
+				ctf.election.votingUsers.add(user);
+			}
+		}
 	}
 	
-	public static byte[] isVoting(byte[] msg) {
+	public byte[] isVoting(byte[] msg) {
 		/**
 		 * #3
-		 * in: {e, op, name}K_CTF
-		 * out: {e, op, name, bool}k_CTF
+		 * in: {e, r, name}K_CTF
+		 * out: {e, r + 1, name, bool}k_CTF
 		 */
+		byte[] response = Arrays.copyOf(msg, msg.length + 1);
+		response[2] = (byte) (msg[2] + 1);
+		String user = String.valueOf((char) msg[3]);
+		if (ctf.election.votingUsers.contains(user))
+			response[msg.length + 1] = 1;
 		return null;
 	}
 	
