@@ -6,7 +6,7 @@ import java.security.SecureRandom;
 
 public class RSAEncryption {
 
-	private BigInteger modulus, pubKey, privKey;
+	private BigInteger modulus, secret, exponent;
 	private static SecureRandom random = new SecureRandom();
 	private MessageDigest hasher = null; 
 	
@@ -17,21 +17,27 @@ public class RSAEncryption {
 	    modulus = p.multiply(q);
 	    BigInteger m = (p.subtract(BigInteger.ONE))
 	                   .multiply(q.subtract(BigInteger.ONE));
-	    privKey = new BigInteger("3");
-	    while(m.gcd(privKey).intValue() > 1) privKey = privKey.add(new BigInteger("2"));
-	    pubKey = privKey.modInverse(m);
+	    exponent = new BigInteger("3");
+	    while(m.gcd(exponent).intValue() > 1) exponent = exponent.add(new BigInteger("2"));
+	    secret = exponent.modInverse(m);
 	}
 	
 	public RSAEncryption(String privFilename, String pubFilename) {
 		//TODO
 	}
 	
+	public RSAEncryption(String exponent, String secret, String modulus) {
+		this.exponent = new BigInteger(exponent);
+		this.secret = new BigInteger(secret);
+		this.modulus = new BigInteger(modulus);
+	}
+	
 	public BigInteger encrypt(BigInteger message) {
-	    return message.modPow(privKey, modulus);
+	    return message.modPow(exponent, modulus);
 	}
 	  
 	public BigInteger decrypt(BigInteger message) {
-	    return message.modPow(pubKey, modulus);
+	    return message.modPow(secret, modulus);
 	}	
 	
 	public byte[] encrypt(byte[] msg) {
@@ -46,12 +52,12 @@ public class RSAEncryption {
 		return modulus;
 	}
 
-	public BigInteger getPubKey() {
-		return pubKey;
+	public BigInteger getSecret() {
+		return secret;
 	}
 
-	public BigInteger getPrivKey() {
-		return privKey;
+	public BigInteger getExponent() {
+		return exponent;
 	}
 	
 	/**
@@ -60,8 +66,15 @@ public class RSAEncryption {
 	 * @param pubFilename
 	 */
 	public void backup(String privFilename, String pubFilename) {
+		//TODO
 	}
 	
+	public static void main(String args[]) {
+		RSAEncryption rsa = new RSAEncryption(128);
+		System.out.println("Modulus: " + rsa.modulus);
+		System.out.println("Exponent: " + rsa.exponent);
+		System.out.println("Secret: " + rsa.secret);
+	}
 }
 
 

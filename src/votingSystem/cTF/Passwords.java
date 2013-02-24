@@ -60,6 +60,7 @@ public class Passwords {
 		 */
 		//Make an alphanumeric password
 		String pass = new BigInteger(Constants.PASSWORD_LENGTH, random).toString(32);
+		System.out.println("username: " + username + " pass: " + pass);
         hasher.update(pass.getBytes());
  
         byte[] hashedPass = hasher.digest();
@@ -71,6 +72,7 @@ public class Passwords {
 	public boolean verify(String username, byte[] password) {
 		/**
 		 * Verifies that user -> h(pass) in map
+		 * 
 		 */
 		if (!passwords.containsKey(username))
 			return false;
@@ -94,5 +96,13 @@ public class Passwords {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
+	}
+	
+	public static void main(String args[]) {
+		new File("passwords.ser").delete();
+		Passwords passwords = new Passwords("passwords.ser");
+		passwords.generate("a");
+		passwords.generate("b");
+		passwords.generate("c");
 	}
 }

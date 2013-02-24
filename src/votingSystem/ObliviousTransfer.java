@@ -148,11 +148,11 @@ public class ObliviousTransfer {
     	
     	BigInteger k = test.generateK();
 
-    	int e = rsa.getPrivKey().intValue();
+    	int e = rsa.getExponent().intValue();
     	BigInteger v = test.calculateV(randomMessages[b], k, e, rsa.getModulus());
     	
     	//server side action
-    	BigInteger[] ms = test.calculateMs(randomMessages, v, rsa.getPubKey(), rsa.getModulus());
+    	BigInteger[] ms = test.calculateMs(randomMessages, v, rsa.getSecret(), rsa.getModulus());
     	
     	//client side action
     	BigInteger message = test.determineMessage(ms, b, k);
