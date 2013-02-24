@@ -10,17 +10,17 @@ public class VotingKeys {
         
         keys = null;
     }
-    
-    public generateKeySet(){
-        
-        
-    }
-    
-    public generateK(){
-        
-    }
-    
-    public sendMessages(){
-        
-    }
+//    
+//    public generateKeySet(){
+//        
+//        
+//    }
+//    
+//    public generateK(){
+//        
+//    }
+//    
+//    public sendMessages(){
+//        
+//    }
 }

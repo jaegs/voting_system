@@ -1,5 +1,7 @@
 package votingSystem.cTF;
 
+import votingSystem.Constants;
+import votingSystem.Constants.Operation;
 /**
  * This class only has static methods, the CTF state will be in a different class.
  * @author test
@@ -7,6 +9,7 @@ package votingSystem.cTF;
  */
 public class Protocol {
 	private CTF ctf;
+	
 	
 	public Protocol(CTF ctf){
 		this.ctf = ctf;
@@ -19,7 +22,35 @@ public class Protocol {
 		 * This method is invoked by ServerThread.
 		 * #1 decrypt message
 		 */
-		return null;
+		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
+		byte[] response = null;
+		switch (op){
+		case ISELIGIBLE:
+			response = isEligible(msg);
+		case WILLVOTE:
+			willVote(msg);
+		case ISVOTING:
+			response = isVoting(msg);
+		case GETIDENTIFICATION:
+			response = getIdentification(msg);
+		case VOTE:
+			vote(msg);
+		case VOTED:
+			response = voted(msg);
+		case CHECKIDCOLLISION:
+			response = checkIDCollision(msg);
+		case PROCESSVOTE:
+			processVote(msg);
+		case RESULTS:
+			results();
+		case COUNTED:
+			response = counted(msg);
+		case PROTEST:
+			protest(msg);
+		case CHANGE:
+			willVote(msg);
+		}
+		return response;
 	}
 	
 	public static byte[] isEligible(byte[] msg) {
