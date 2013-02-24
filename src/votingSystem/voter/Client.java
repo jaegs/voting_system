@@ -32,8 +32,19 @@ public class Client {
 		return response;
 	}
 	
-	public static void main(String[] args){
-		
+		/**
+	 * Define the Client Interface!
+	 * 
+	 * "CheckElections" -> prints a list of open elections
+	 * "Register -ElectionNo" -> registers a voter for a given election
+	 * "ConfirmRegistration" -> confirms that a voter has successfully registered
+	 * "GetCandidates -ElectionNo" -> prints the list of candidates for a given election
+	 * "Vote -ElectionNo -CandidateNo" -> vote for a given candidate in a given election
+	 * "ConfirmVote -ElectionNo -CandidateNo" -> confirms a vote in a given election
+	 * "Revote - ElectionNo -CandidateNo" -> revotes in a new election
+	 * 
+	 */
+	public void run(){
 		String input = "";
 		//create a console instance
 		Console console = System.console();
@@ -60,8 +71,18 @@ public class Client {
 			String in = console.readLine();
 			System.out.println(in);
 			
+			
+			
 		}
 		
+		
+	}
+		
+	
+	public static void main(String[] args){
+		
+		Client voter = new Client();
+		voter.run();
 		
 	}
 }
