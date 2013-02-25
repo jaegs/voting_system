@@ -1,15 +1,4 @@
-package votingSystem.cTF;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Arrays;
-
-import votingSystem.Constants;
-import votingSystem.Constants.Operation;
-/**
- * This class only has static methods, the CTF state will be in a different class.
- * @author test
+* @author test
  *
  */
 public class Protocol {
@@ -29,8 +18,8 @@ public class Protocol {
 		 */
 		//Assumes message is length < modulus
 		msg = ctf.rsa.decrypt(msg);
-		System.out.println(Arrays.toString(msg));
-		System.out.println(msg[0]);
+		/*System.out.println(Arrays.toString(msg));
+		System.out.println(msg[0]);*/
 		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
 		byte[] response = null;
 		switch (op){
@@ -38,7 +27,7 @@ public class Protocol {
 			response = isEligible(msg);
 			break;
 		case WILLVOTE:
-			willVote(msg);
+			response = willVote(msg);
 			break;
 		case ISVOTING:
 			response = isVoting(msg);
@@ -77,6 +66,7 @@ public class Protocol {
 			response = OTgetSecrets(msg);
 			break;
 		}
+		
 		if (response.length < ctf.rsa.getModulus().toByteArray().length) {
 			return ctf.rsa.decrypt(response);
 		}
@@ -101,31 +91,37 @@ public class Protocol {
 		return response;
 	}
 	
-	public void willVote(byte[] msg) {
+	public byte[] willVote(byte[] msg) {
 		/**
 		 * #2
 		 * in: {e, name, password}K_CTF
 		 * SEE: PASSWORDS.JAVA
 		 */
+	
+		byte[] response = new byte[1];
 		if(checkElection(msg)) {
 			Election election = getElection(msg);
 			byte[] pwd = new byte[msg.length - 3];
 			for(int i = 3; i < msg.length; i++){
-				System.out.println(msg[i]);
+				//System.out.println(msg[i]);
 				pwd[i-3] = msg[i];
-				System.out.println(pwd[i-3]);
+				//System.out.println(pwd[i-3]);
 			}
 			
 			String user = String.valueOf((char) msg[2]);
 			
-			System.out.println("Pass: " + pwd.toString());
-			System.out.println(election.passwords);
+			//System.out.println("Pass: " + pwd.toString());
+			//System.out.println(election.passwords);
 			
 			if( election.passwords.verify(user, pwd)) {
-				System.out.println("Adding to the votingUsers");
 				election.votingUsers.add(user);
+				response[0] = 1;
+			}
+			else{
+				response[0] = 0;
 			}
 		}
+		return response;
 	}
 	
 	public byte[] isVoting(byte[] msg) {
@@ -134,13 +130,14 @@ public class Protocol {
 		 * in: {e, r, name}K_CTF
 		 * out: {e, r + 1, name, bool}k_CTF
 		 */
+		Election election = getElection(msg);
 		byte[] response = Arrays.copyOf(msg, msg.length + 1);
 		response[2] = (byte) (msg[2] + 1);
 		String user = String.valueOf((char) msg[3]);
 		if (checkElection(msg)
-				&& ctf.getElections().get(msg[1]).votingUsers.contains(user))
-			response[msg.length + 1] = 1;
-		return null;
+				&& election.votingUsers.contains(user))
+			response[msg.length] = 1;
+		return response;
 	}
 	
 	
