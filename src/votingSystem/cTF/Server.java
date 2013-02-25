@@ -19,7 +19,12 @@ public class Server implements Runnable{
     protected boolean      isStopped    = false;
     protected Thread       runningThread= null;
     protected ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
-
+    private CTF ctf;
+    
+    public Server(CTF ctf) {
+    	this.ctf = ctf;
+    }
+    
     public void run(){
         synchronized(this){
             this.runningThread = Thread.currentThread();
@@ -38,7 +43,7 @@ public class Server implements Runnable{
                     "Error accepting client connection", e);
             }
             try {
-				this.threadPool.execute(new ServerThread(clientSocket));
+				this.threadPool.execute(new ServerThread(clientSocket, ctf));
 			} catch (IOException e) {
 				throw new RuntimeException("Error reading socket",e);
 			}

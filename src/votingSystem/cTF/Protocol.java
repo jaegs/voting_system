@@ -28,7 +28,8 @@ public class Protocol {
 		 * #1 decrypt message
 		 */
 		//Assumes message is length < modulus
-		msg = ctf.rsa.encrypt(msg);
+		msg = ctf.rsa.decrypt(msg);
+		System.out.println(Arrays.toString(msg));
 		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
 		byte[] response = null;
 		switch (op){

@@ -104,5 +104,6 @@ public class Passwords {
 		passwords.generate("a");
 		passwords.generate("b");
 		passwords.generate("c");
+		passwords.backup();
 	}
 }

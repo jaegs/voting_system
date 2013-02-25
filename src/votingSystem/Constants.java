@@ -2,6 +2,7 @@ package votingSystem;
 
 public final class Constants {
 	public static enum Operation {
+		NOOP, //Zero value operation gets chopped off by RSA
 		ISELIGIBLE,
 		WILLVOTE, 
 		ISVOTING, 

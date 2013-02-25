@@ -6,9 +6,13 @@ import java.util.Arrays;
 
 public class ServerThread implements Runnable {
 	private Socket soc;
+	private CTF ctf;
+	private Protocol protocol;
 
-	public ServerThread(Socket clientSocket) throws IOException {
+	public ServerThread(Socket clientSocket, CTF ctf) throws IOException {
 		soc = clientSocket;
+		this.ctf = ctf;
+		protocol = new Protocol(ctf);
 	}
 
 
@@ -26,12 +30,13 @@ public class ServerThread implements Runnable {
 			DataInputStream dis = new DataInputStream(in);
 			int len = dis.readInt();
 			byte[] input = new byte[len];
+			System.out.println(len);
 			if (len > 0) {
 				dis.readFully(input);
 			}
 			System.out.println(Arrays.toString(input));
-			//byte[] response = Protocol.processMessage(input);
-			byte[] response = {0, 0, 45, -67, 23, 5, 7, 6, 87, -1};
+			byte[] response = protocol.processMessage(input);
+			//byte[] response = {0, 0, 45, -67, 23, 5, 7, 6, 87, -1};
 			DataOutputStream dos = new DataOutputStream(out);
 			dos.writeInt(response.length);
 			dos.write(response);
