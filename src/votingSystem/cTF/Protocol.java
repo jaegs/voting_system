@@ -30,37 +30,52 @@ public class Protocol {
 		//Assumes message is length < modulus
 		msg = ctf.rsa.decrypt(msg);
 		System.out.println(Arrays.toString(msg));
+		System.out.println(msg[0]);
 		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
 		byte[] response = null;
 		switch (op){
 		case ISELIGIBLE:
 			response = isEligible(msg);
+			break;
 		case WILLVOTE:
 			willVote(msg);
+			break;
 		case ISVOTING:
 			response = isVoting(msg);
+			break;
 		case GETIDENTIFICATION:
 			response = getIdentification(msg);
+			break;
 		case VOTE:
 			vote(msg);
+			break;
 		case VOTED:
 			response = voted(msg);
+			break;
 		case CHECKIDCOLLISION:
 			response = checkIDCollision(msg);
+			break;
 		case PROCESSVOTE:
 			processVote(msg);
+			break;
 		case RESULTS:
 			results();
+			break;
 		case COUNTED:
 			response = counted(msg);
+			break;
 		case PROTEST:
 			protest(msg);
+			break;
 		case CHANGE:
 			willVote(msg);
+			break;
 		case OTGETRANDOMMESSAGES:
 			response = OTgetRandomMessages(msg);
+			break;
 		case OTGETSECRETS:
 			response = OTgetSecrets(msg);
+			break;
 		}
 		if (response.length < ctf.rsa.getModulus().toByteArray().length) {
 			return ctf.rsa.decrypt(response);
@@ -78,8 +93,10 @@ public class Protocol {
 		 */
 		byte[] response = Arrays.copyOf(msg, msg.length + 1);
 		response[2] = (byte) (msg[2] + 1);
+		String user = String.valueOf((char) msg[3]);
+		Election election = getElection(msg);
 		if (checkElection(msg)
-				&& ctf.getElections().get(msg[1]).eligibleUsers.contains(String.valueOf((char) msg[3])) )
+				&& election.eligibleUsers.contains(user) )
 			response[msg.length] = 1;
 		return response;
 	}
