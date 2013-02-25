@@ -43,8 +43,11 @@ public class Protocol {
 		case ISVOTING:
 			response = isVoting(msg);
 			break;
-		case GETIDENTIFICATION:
-			response = getIdentification(msg);
+		case OTGETRANDOMMESSAGES:
+			response = OTgetRandomMessages(msg);
+			break;
+		case OTGETSECRETS:
+			response = OTgetSecrets(msg);
 			break;
 		case VOTE:
 			vote(msg);
@@ -69,12 +72,6 @@ public class Protocol {
 			break;
 		case CHANGE:
 			willVote(msg);
-			break;
-		case OTGETRANDOMMESSAGES:
-			response = OTgetRandomMessages(msg);
-			break;
-		case OTGETSECRETS:
-			response = OTgetSecrets(msg);
 			break;
 		}
 		if (response.length < ctf.rsa.getModulus().toByteArray().length) {
@@ -135,6 +132,7 @@ public class Protocol {
 	
 	public byte[] OTgetRandomMessages(byte[] msg) {
 		/**
+		 * #4 Oblivious Transfer
 		 * in {e, r}K_CTF
 		 * out {e, r+1, N, exponent, x_0,...,x_n}
 		 */
@@ -157,6 +155,7 @@ public class Protocol {
 	
 	public byte[] OTgetSecrets(byte[] msg) {
 		/**
+		 * #4 Oblivious Transfer
 		 * in {e, r, v}K_CTF
 		 * out: {e, r+1, m'}
 		 */
@@ -173,16 +172,6 @@ public class Protocol {
 			e2.printStackTrace();
 		}
 		return baos.toByteArray();
-	}
-	
-	
-	public static byte[] getIdentification(byte[] msg)
-	{
-		/**
-		 * #4
-		 * ANDOS
-		 */
-		return null;
 	}
 	
 	public static void vote(byte[] msg)
