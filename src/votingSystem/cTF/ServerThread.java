@@ -36,10 +36,11 @@ public class ServerThread implements Runnable {
 			}
 			System.out.println(Arrays.toString(input));
 			byte[] response = protocol.processMessage(input);
-			//byte[] response = {0, 0, 45, -67, 23, 5, 7, 6, 87, -1};
-			DataOutputStream dos = new DataOutputStream(out);
-			dos.writeInt(response.length);
-			dos.write(response);
+			if (response != null) {
+				DataOutputStream dos = new DataOutputStream(out);
+				dos.writeInt(response.length);
+				dos.write(response);
+			}
 			soc.close();
 		} catch(IOException e) {
 			e.printStackTrace();
