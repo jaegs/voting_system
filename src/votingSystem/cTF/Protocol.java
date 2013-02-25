@@ -105,10 +105,21 @@ public class Protocol {
 		 * SEE: PASSWORDS.JAVA
 		 */
 		if(checkElection(msg)) {
-			Election election = ctf.getElections().get(msg[1]);
-			byte[] pass = Arrays.copyOfRange(msg, 3,msg.length);
+			Election election = getElection(msg);
+			byte[] pwd = new byte[msg.length - 3];
+			for(int i = 3; i < msg.length; i++){
+				System.out.println(msg[i]);
+				pwd[i-3] = msg[i];
+				System.out.println(pwd[i-3]);
+			}
+			
 			String user = String.valueOf((char) msg[2]);
-			if( election.passwords.verify(user, pass)) {
+			
+			System.out.println("Pass: " + pwd.toString());
+			System.out.println(election.passwords);
+			
+			if( election.passwords.verify(user, pwd)) {
+				System.out.println("Adding to the votingUsers");
 				election.votingUsers.add(user);
 			}
 		}
