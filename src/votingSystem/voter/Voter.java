@@ -24,7 +24,7 @@ public class Voter {
 	 * "Revote - ElectionNo -CandidateNo" -> revotes in a new election
 	 * 
 	 */
-	public void run(){
+public void run(){
 		String in = "";
 		
 	    try{
@@ -77,19 +77,52 @@ public class Voter {
 							System.out.println("Invalid Command!");
 						}
 						else{
+							//sending constants here
 							byte[] unBytes = un.getBytes();
 							byte[] toSend = new byte[4];
-							toSend[0] = 0;
-							toSend[1] = 1;
-							toSend[2] = 2;
-							toSend[3] = 'a';
+							byte[] nonce = new byte[1];
+							random.nextBytes(nonce);
 							
-							byte[] response = Client.send(toSend);
+							
+							//Cooresponds to ISELIGIBLE OPERATION
+							toSend[0] = 0;
+							//Election ID (always 1 in this rendition)
+							toSend[1] = 1;
+							//A random nonce
+							toSend[2] = nonce[0];
+							//the name of the user (in this case only one byte)
+							toSend[3] = unBytes[0];
+							
+							byte[] response = encrypt(Client.send(encrypt(toSend)));
+							
+							//Check the nonce value
+							if(response[2] == nonce[0] + 1){
+								if (response[toSend.length] == 1){
+									System.out.println("The user \'" + un + "\' is eligible to vote");
+								}
+								else{
+									System.out.println("The user \'" + un + "\' is not eligible to vote");
+								}
+							}
+							else{
+								System.out.println("Error in signal transmission, please try again!");
+							}
+							
 						}
 						
 			
 						//SEND THIS QUERY TO SERVER
 					}
+					
+					
+				}
+				else if(){
+					
+					
+				}
+				else if(){
+					
+					
 				}
 			}
 			
