@@ -157,6 +157,8 @@ public class ObliviousTransfer {
     	//client side action
     	BigInteger message = test.determineMessage(ms, b, k);
     	
+    	
+    	//These should be the same
     	System.out.println("Start: " + test.getSecret(b));
     	System.out.println("End: " + message);
     

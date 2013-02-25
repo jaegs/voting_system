@@ -13,7 +13,9 @@ public final class Constants {
 		RESULTS,
 		COUNTED,
 		PROTEST,
-		CHANGE
+		CHANGE,
+		OTGETRANDOMMESSAGES,
+		OTGETSECRETS
 	}
 	public static final Operation[] OPERATION_VALUES = Constants.Operation.values();
 	//Server

@@ -1,5 +1,8 @@
 package votingSystem.cTF;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import votingSystem.Constants;
@@ -25,7 +28,7 @@ public class Protocol {
 		 * #1 decrypt message
 		 */
 		//Assumes message is length < modulus
-		msg = ctf.rsa.decrypt(msg);
+		msg = ctf.rsa.encrypt(msg);
 		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
 		byte[] response = null;
 		switch (op){
@@ -53,9 +56,16 @@ public class Protocol {
 			protest(msg);
 		case CHANGE:
 			willVote(msg);
+		case OTGETRANDOMMESSAGES:
+			response = OTgetRandomMessages(msg);
+		case OTGETSECRETS:
+			response = OTgetSecrets(msg);
 		}
-		//Assumes response length is < modulus
-		return ctf.rsa.encrypt(response);
+		if (response.length < ctf.rsa.getModulus().toByteArray().length) {
+			return ctf.rsa.decrypt(response);
+		}
+		System.out.println(op + ": Not encrypting - message longer than modulus");
+		return response;
 	}
 	
 	public byte[] isEligible(byte[] msg) {
@@ -67,8 +77,8 @@ public class Protocol {
 		 */
 		byte[] response = Arrays.copyOf(msg, msg.length + 1);
 		response[2] = (byte) (msg[2] + 1);
-		if (msg[1] == ctf.election.id
-				&& ctf.election.eligibleUsers.contains(String.valueOf((char) msg[3])) )
+		if (checkElection(msg)
+				&& ctf.getElections().get(msg[1]).eligibleUsers.contains(String.valueOf((char) msg[3])) )
 			response[msg.length] = 1;
 		return response;
 	}
@@ -79,11 +89,12 @@ public class Protocol {
 		 * in: {e, name, password}K_CTF
 		 * SEE: PASSWORDS.JAVA
 		 */
-		if(msg[1] == ctf.election.id) {
+		if(checkElection(msg)) {
+			Election election = ctf.getElections().get(msg[1]);
 			byte[] pass = Arrays.copyOfRange(msg, 3,msg.length);
 			String user = String.valueOf((char) msg[2]);
-			if( ctf.election.passwords.verify(user, pass)) {
-				ctf.election.votingUsers.add(user);
+			if( election.passwords.verify(user, pass)) {
+				election.votingUsers.add(user);
 			}
 		}
 	}
@@ -97,10 +108,55 @@ public class Protocol {
 		byte[] response = Arrays.copyOf(msg, msg.length + 1);
 		response[2] = (byte) (msg[2] + 1);
 		String user = String.valueOf((char) msg[3]);
-		if (ctf.election.votingUsers.contains(user))
+		if (checkElection(msg)
+				&& ctf.getElections().get(msg[1]).votingUsers.contains(user))
 			response[msg.length + 1] = 1;
 		return null;
 	}
+	
+	
+	public byte[] OTgetRandomMessages(byte[] msg) {
+		/**
+		 * in {e, r}K_CTF
+		 * out {e, r+1, N, exponent, x_0,...,x_n}
+		 */
+		Election e = getElection(msg);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			baos.write(msg[0]);
+			baos.write(msg[1]);
+			baos.write((byte)(msg[2] + 1));
+			baos.write(e.otRSA.getExponent().toByteArray());
+			baos.write(e.otRSA.getModulus().toByteArray());
+			for (BigInteger r : e.randomMessages) {
+				baos.write(r.toByteArray());
+			}
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+		return baos.toByteArray();
+	}
+	
+	public byte[] OTgetSecrets(byte[] msg) {
+		/**
+		 * in {e, r, v}K_CTF
+		 * out: {e, r+1, m'}
+		 */
+		Election e = getElection(msg);
+		BigInteger[] ms = e.getSecrets(new BigInteger(Arrays.copyOfRange(msg, 3, msg.length)));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(msg[0]);baos.write(msg[1]);
+		baos.write((byte) (msg[2] + 1));
+		try {
+			for (BigInteger r : ms) {
+				baos.write(r.toByteArray());
+			}
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+		return baos.toByteArray();
+	}
+	
 	
 	public static byte[] getIdentification(byte[] msg)
 	{
@@ -175,5 +231,17 @@ public class Protocol {
 		 * #10
 		 * {e, op, I, (I, v'}K_v, k_v}K_CTF
 		 */
+	}
+	
+	private int getElectionID(byte[] msg) {
+		return msg[1];
+	}
+	
+	private boolean checkElection(byte[] msg) {
+		return ctf.getElections().containsKey(getElectionID(msg));
+	}
+	
+	private Election getElection(byte[] msg) {
+		return ctf.getElections().get(getElectionID(msg));
 	}
 }

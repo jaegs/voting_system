@@ -41,14 +41,12 @@ public class PasswordsTest {
 
 	@Test	
 	public void testBackup() {
-		System.out.println("backup");
 		String username = "u4";
 		String pass = passwords.generate(username);
 		passwords.backup();
 		Passwords passwords2 = new Passwords(filename);
 		byte [] pb = pass.getBytes();
 		boolean result = passwords2.verify(username, pb);
-		System.out.println(result);
 		assertTrue(result);
 	}
 
