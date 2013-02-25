@@ -10,6 +10,15 @@ import votingSystem.Constants;
 
 public class Voter {
 
+	private static BigInteger CTFPublic = new BigInteger("136578382103380560086232017154571694323");
+	private static BigInteger CTFModulo = new BigInteger("318682891574554640236911507202669852853");
+	private static SecureRandom random = new SecureRandom();
+	
+	private byte[] encrypt(byte[] toEncrypt){
+		
+		BigInteger message = new BigInteger(toEncrypt);
+		return (message.modPow(CTFPublic, CTFModulo)).toByteArray();
+	}
 	
 	/**
 	 * Define the Client Interface!
