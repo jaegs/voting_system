@@ -52,12 +52,11 @@ public class Voter {
 	    try{
 	    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	    
-	    	System.out.println("Welcome to VotingSystem! Type \'man\' or \'help\' for assistance at any point.");
+	    	System.out.println("Welcome to Voting System! Type \'man\' or \'help\' for assistance at any point.");
 			//VALIDATE USER AND PASSWORD
 			while(!in.equals("exit")){
 				System.out.print("\nEnter Command (\"exit\") to quit: ");
 				in = br.readLine();
-				System.out.println(in);
 			
 				String[] split = in.split(" ");
 				
@@ -134,11 +133,11 @@ public class Voter {
 				else if(split[0].equals("Register")){
 					
 					 //gets the voter's name from the console
-					System.out.print("\nPlease enter your username: ");
+					System.out.print("Please enter your username: ");
 					String username = br.readLine();
 					
 					//get the voter's password from the console
-					System.out.print("\nPlease enter your password: ");
+					System.out.print("Please enter your password: ");
 					String password = br.readLine();
 					
 					if (username.length() < 1 || password.length() < 1){
@@ -158,25 +157,87 @@ public class Voter {
 						toSend[3 + i] = pw[i];
 					}
 				
-					for(int y = 0; y < toSend.length; y++){
+					/*for(int y = 0; y < toSend.length; y++){
 						System.out.println("Byte Np: " + y + " = " + toSend[y]);
 					}
 					
-					byte[] toSend2 = decrypt(encrypt(toSend));
+					byte[] toSend2 = (encrypt(toSend));
 					
 					for(int y = 0; y < toSend2.length; y++){
 						System.out.println("Byte Np: " + y + " = " + toSend2[y]);
 					}
 					
-					encrypt(Client.send(encrypt(toSend)));
+					byte[] toSend3 = decrypt(encrypt(toSend));
 					
-					System.out.println("Intent to vote sent!");
+					for(int y = 0; y < toSend3.length; y++){
+						System.out.print( toSend[y] + "  ");
+					}
+					*/
+					
+					byte[] response = encrypt(Client.send(encrypt(toSend)));
+					
+					
+					
+					
+					if(response[0] == 0){
+						System.out.println("Invalid username and password!");
+					}
+					
+					if(response[0] == 1){
+						System.out.println("Valid username and password, intent to vote is sent!");
+					}
+					
 				}
-				//else if(){
+				else if(split[0].equals("ConfirmRegistration")){
+					if(split.length < 2){
+						System.out.println("Invalid Command!");
+					}
+					else{
+						
+						String un = split[1];
+						
+						if(un.length() > 1){
+							System.out.println("Invalid Username!");
+						}
+						else{
+							//sending constants here
+							byte[] unBytes = un.getBytes();
+							byte[] toSend = new byte[4];
+							byte[] nonce = new byte[1];
+							random.nextBytes(nonce);
+							
+							
+							//Cooresponds to ISVOTING OPERATION
+							toSend[0] = 3;
+							//Election ID (always 1 in this rendition)
+							toSend[1] = 1;
+							//A random nonce
+							toSend[2] = nonce[0];
+							
+							//the name of the user (in this case only one byte)
+							toSend[3] = unBytes[0];
+							
+						
+							byte[] response = encrypt(Client.send(encrypt(toSend)));
+							
+							//Check the nonce value
+							if(response[2] == nonce[0] + 1){
+								if (response[toSend.length] == 1){
+									System.out.println("The user \'" + un + "\' is registered to vote :)");
+								}
+								else{
+									System.out.println("The user \'" + un + "\' is not registered to vote :(");
+								}
+							}
+							else{
+								System.out.println("Error in signal transmission, please try again!");
+							}
+							
+						}
+					}
 					
-					
-				/*}
-				else{
+				}
+				/*else{
 					
 					
 				}*/
