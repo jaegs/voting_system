@@ -2,4 +2,5 @@
   Related terms: "onion routing," "Tor Browser" 
  - Querying CTF instead of publishing is OK
  - Expectations for Phase III is mostly to have the crypto pieces working.
+Tim was here!
  - RSA Encryption is inefficient but is ok as long as our message sizes are short.
