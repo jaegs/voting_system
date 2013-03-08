@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Map;
 
 import votingSystem.Constants;
 import votingSystem.Constants.Operation;
@@ -42,6 +43,9 @@ public class Protocol {
 			break;
 		case ISVOTING:
 			response = isVoting(msg);
+			break;
+		case GETCANDIDATES:
+			response = getCandidates(msg);
 			break;
 		case GETIDENTIFICATION:
 			response = getIdentification(msg);
@@ -195,13 +199,33 @@ public class Protocol {
 	}
 	
 	
+	
 	public static byte[] getIdentification(byte[] msg)
 	{
+		
 		/**
 		 * #4
 		 * ANDOS
 		 */
 		return null;
+	}
+	
+	
+	/**
+	 * in {e, r}K_CTF
+	 * out: {e, r+1q}
+	 */
+	public byte[] getCandidates(byte[] msg){
+		
+		byte[] toReturn = new byte[4];
+		
+		
+		
+		Map<Integer, Election> elections = ctf.getElections();
+		
+		
+		
+		return toReturn;
 	}
 	
 	public static void vote(byte[] msg)
