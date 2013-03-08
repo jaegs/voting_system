@@ -71,10 +71,10 @@ public class Voter {
 					//System.out.println("CheckElections -> prints a list of open elections");
 					System.out.println("Register-> registers a voter for a given election");
 					System.out.println("ConfirmRegistration -> confirms that a voter has successfully registered");
-					System.out.println("GetCandidates -ElectionNo -> prints the list of candidates for a given election");
-					System.out.println("Vote -ElectionNo -CandidateNo -> vote for a given candidate in a given election");
-					System.out.println("ConfirmVote -ElectionNo -CandidateNo -> confirms a vote in a given election");
-	  				System.out.println("Revote - ElectionNo -CandidateNo -> revotes in a new election");
+					System.out.println("GetCandidates-> prints the list of candidates for a given election");
+					System.out.println("Vote -CandidateNo -> vote for a given candidate in a given election");
+					System.out.println("ConfirmVote -CandidateNo -> confirms a vote in a given election");
+	  				System.out.println("Revote -CandidateNo -> revotes in a new election");
 	  				
 				}
 				else if (split[0].equals("CheckEligible")){
@@ -237,10 +237,32 @@ public class Voter {
 					}
 					
 				}
-				/*else{
-					
+				else if(split[0].equals("GetCandidates")){
+					if(split.length < 2){
+						System.out.println("Invalid Command!");
+					}
+					else{
+						String electionNumber = split[1];
+						try{
+							Integer electionNum = Integer.parseInt(electionNumber);
+							byte byteNum = electionNum.byteValue();
+							byte[] nonce = new byte[1];
+							random.nextBytes(nonce);
+							
+							byte[] toSend = new byte[2];
+							toSend[0] = 4;
+							toSend[1] = nonce[0];
+							toSend[2] = byteNum;
+							
+							byte[] response = encrypt(Client.send(encrypt(toSend)));
+							
+							
+						}catch(NumberFormatException e){
+							System.out.println("Invalid Election Number!");
+						}
+					}
 				//	
-				}*/
+				}
 			}
 			
 	    }
