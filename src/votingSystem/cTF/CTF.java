@@ -18,7 +18,14 @@ public class CTF {
 	
 	public CTF() {
 		elections = new HashMap<Integer, Election>();
-		elections.put(1, new Election(1));
+		List<String> candidates = new ArrayList();
+		candidates.add("Ben Jaeger");
+		candidates.add("Tim Lenardo");
+		candidates.add("Clover CantRememberLastName");
+		
+		Election testElection = new Election(1, candidates);
+		elections.put(1, testElection);
+		
 		new Protocol(this);
 		
 	}
