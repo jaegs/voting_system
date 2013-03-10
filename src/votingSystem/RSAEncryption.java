@@ -51,15 +51,4 @@ public class RSAEncryption {
         cipher.init(Cipher.DECRYPT_MODE, keys.getPrivate());
         return cipher.doFinal(msg);
 	}
-	
-	public static void main(String args[]) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		String s = "Hello, World!";
-		byte[] m = s.getBytes();
-		RSAEncryption test = new RSAEncryption(512);
-		byte[] enc = test.encrypt(m);
-		byte[] dec = test.decrypt(enc);
-		System.out.println(new String(dec));
-		System.out.println(test.maxLength());
-		System.out.println(test.messageSize());
-	}
 }	

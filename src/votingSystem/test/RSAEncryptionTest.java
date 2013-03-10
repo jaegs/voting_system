@@ -1,36 +1,34 @@
 package votingSystem.test;
 
-import java.math.BigInteger;
-
 import votingSystem.RSAEncryption;
-import static org.junit.Assert.*;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import java.util.Arrays;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class RSAEncryptionTest {
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	@Test
+	public void testEncryptDecrypt() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		RSAEncryption RSA = new RSAEncryption(512);
+		String s = "Hello, World!";
+		byte[] msg = s.getBytes();
+		assertTrue(Arrays.equals(msg,RSA.decrypt(RSA.encrypt(msg))));
 	}
 
 	@Test
-	public void testDecryptEncrypt() {
-		RSAEncryption RSA = new RSAEncryption(128);
-		BigInteger msg = new BigInteger("12345678901234567890");
-		assertTrue(msg.equals(RSA.encrypt(RSA.decrypt(msg))));
+	// This probably needs to be a Java signature instead
+	public void testDecryptEncrypt() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		RSAEncryption RSA = new RSAEncryption(512);
+		String s = "Hello, World!";
+		byte[] msg = s.getBytes();
+		assertTrue(Arrays.equals(msg,RSA.encrypt(RSA.decrypt(msg))));
 	}
-	
-	@Test
-	public void testEncryptDecrypt() {
-		RSAEncryption RSA = new RSAEncryption(128);
-		BigInteger msg = new BigInteger("12345678901234567890");
-		assertTrue(msg.equals(RSA.decrypt(RSA.encrypt(msg))));
-	}
-
 }
