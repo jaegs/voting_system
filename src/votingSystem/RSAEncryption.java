@@ -10,6 +10,10 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 
+/**
+ * RSA Encryption
+ * @author Clover
+ */
 public class RSAEncryption {
 	
 	private int keysize;
