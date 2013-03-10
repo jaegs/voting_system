@@ -1,4 +1,16 @@
-* @author test
+package votingSystem.cTF;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Map;
+
+import votingSystem.Constants;
+import votingSystem.Constants.Operation;
+/**
+ * This class only has static methods, the CTF state will be in a different class.
+ * @author test
  *
  */
 public class Protocol {
