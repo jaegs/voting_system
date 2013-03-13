@@ -21,7 +21,7 @@ public class CTF {
 		List<String> candidates = new ArrayList();
 		candidates.add("Ben Jaeger");
 		candidates.add("Tim Lenardo");
-		candidates.add("Clover CantRememberLastName");
+		candidates.add("Clover Bobker");
 		
 		Election testElection = new Election(1, candidates);
 		elections.put(1, testElection);
