@@ -33,14 +33,18 @@ public class RSAEncryptionStatic {
 	 * 
 	 * @return the encrypted message
 	 */
-	public static byte[] encrypt(PublicKey pub, byte[] toEncrypt) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public static byte[] encrypt(PublicKey pub, byte[] toEncrypt, int length) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		
-		int length = pub.getEncoded().length / 8;
 		//new chunk of correct size
 		byte[] curEncrypt = new byte[length];
 		
 		int split = toEncrypt.length / length;
 		int remainder = toEncrypt.length % length;
+		
+		System.out.println("Split: " + split);
+		System.out.println("Remainder: " + remainder);
+		
+		
 		
 		//get determines the number of chunks in the encrypted message
 		int multiple = split;
@@ -49,8 +53,8 @@ public class RSAEncryptionStatic {
 		}
 		
 		//the byte array to  be returned!
-		byte[] toRet = new byte[length * multiple];
-		
+		byte[] toRet = new byte[(length + 11) * multiple];
+
 		//perform encryption for all complete chunks
 		for(int i = 0; i < split; i++){
 			
@@ -64,7 +68,9 @@ public class RSAEncryptionStatic {
 			//encrypt the chunk!
 			Cipher cipher = Cipher.getInstance("RSA"); 
 		    cipher.init(Cipher.ENCRYPT_MODE, pub);
-		    curEncrypt = cipher.doFinal(curEncrypt);
+		    byte[] encrypted = cipher.doFinal(curEncrypt);
+		    
+		    System.out.println("LENGTH: " + encrypted.length);
 		    
 		    //copy data into the array to return
 		    for(int y=0; y < length; y++){
@@ -88,11 +94,12 @@ public class RSAEncryptionStatic {
 			//encrypt the final chunk
 			Cipher cipher = Cipher.getInstance("RSA"); 
 		    cipher.init(Cipher.ENCRYPT_MODE, pub);
-		    curEncrypt = cipher.doFinal(curEncrypt);
+		    byte[] encrypted = cipher.doFinal(curEncrypt);
 		    
+		    System.out.println("LENGTH: " + encrypted.length);
 		    //copy encrypted data into the array to return
-		    for(int y=0; y < length; y++){
-				toRet[(split*length) + y] = curEncrypt[y]; 				
+		    for(int y=0; y < encrypted.length; y++){
+				toRet[(split*encrypted.length) + y] = encrypted[y]; 				
 			}
 		}
 		
@@ -111,10 +118,9 @@ public class RSAEncryptionStatic {
 	 * @return to decrypted message
 	 * @throws BadPaddingException 
 	 */
-	public static byte[] decrypt(PrivateKey priv, byte[] toDecrypt) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public static byte[] decrypt(PrivateKey priv, byte[] toDecrypt, int length) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		
-		int length = priv.getEncoded().length / 8;
-		
+
 		//used for determining padding/splits
 		int split = toDecrypt.length / length;
 		int remainder = toDecrypt.length % length;
@@ -130,7 +136,7 @@ public class RSAEncryptionStatic {
 		else{
 			
 			//the byte array to  be returned!
-			byte[] toRet = new byte[length * split];
+			byte[] toRet = new byte[(length - 11) * split];
 			
 			//perform encryption for all complete chunks
 			for(int i = 0; i < split; i++){
@@ -142,16 +148,62 @@ public class RSAEncryptionStatic {
 				
 				Cipher cipher = Cipher.getInstance("RSA");
 		        cipher.init(Cipher.DECRYPT_MODE, priv);
-		        curEncrypt = cipher.doFinal(curEncrypt);
+		        byte[] decrypted = cipher.doFinal(curEncrypt);
 		        
 		        //copy decrypted data into the array to return
-			    for(int y=0; y < length; y++){
-					toRet[(i*length) + y] = curEncrypt[y]; 				
+			    for(int y=0; y < decrypted.length; y++){
+					toRet[(i*length) + y] = decrypted[y]; 				
 				}
 		        
 			}
 			
 			return toRet;
 		}
+	}
+	
+	public static void printByteArray(byte[] toPrint){
+		
+		System.out.print("[");
+		for(int i = 0; i < toPrint.length; i++){
+			
+			System.out.print(toPrint[i] + ", ");
+		}
+		System.out.println("]");
+	}
+	
+	public static void main(String args[]) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
+		RSAEncryption rsa = new RSAEncryption(1024);
+		PublicKey pub = rsa.getPublic();
+		PrivateKey priv = rsa.getPrivate();
+		
+		/*byte[] msg = new byte[5];
+		msg[0] = 'a';
+		msg[1] = 't';
+		msg[2] = 'i';
+		msg[3] = 'm';
+		msg[4] = 'l';*/
+		
+		byte[] msg = new byte[200];
+		for(int z = 0; z< msg.length; z++){
+			msg[z] = 'a';
+		}
+		
+		byte[] msg3 = new byte[117];
+		
+		RSAEncryptionStatic.printByteArray(msg);
+		
+		byte[] msg2 = RSAEncryptionStatic.encrypt(pub, msg, rsa.maxLength());
+		System.out.println(msg2.length);
+		
+		//msg3 = rsa.decrypt(msg2);
+		
+		msg3 = RSAEncryptionStatic.decrypt(priv, msg2, rsa.maxLength()+ 11);
+		
+		System.out.print("MSG: ");
+		RSAEncryptionStatic.printByteArray(msg);
+		System.out.print("MSG2: ");
+		RSAEncryptionStatic.printByteArray(msg2);
+		System.out.print("MSG3: ");
+		RSAEncryptionStatic.printByteArray(msg3);
 	}
 }
