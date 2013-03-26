@@ -32,6 +32,15 @@ public class RSAEncryption {
 		}		
 	}
 	
+	public PublicKey getPublic(){
+		return keys.getPublic();
+	}
+	
+	public PrivateKey getPrivate(){
+		return keys.getPrivate();
+	}
+	
+	
 	public int maxLength() {
 		return (keysize/8) - 11;
 	}
