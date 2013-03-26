@@ -29,12 +29,11 @@ public final class Constants {
 	public static final int MESSAGE_SIZE = 2048;
 	public static final int PASSWORD_LENGTH = 50; //Length of BigInteger
 	public static final String HOST = null;
-	public static final String CTF_PUBLIC_KEY = null;
 	
 	// Client Constants
 	
 	// Encryption Constants
 	public static final int RSA_KEY_SIZE = 2048;
 	public static final int AES_KEY_SIZE = 128;
-	public static PublicKey ctfpublic;
+	public static PublicKey CTF_PUBLIC_KEY;
 }
