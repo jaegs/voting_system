@@ -1,8 +1,10 @@
 package votingSystem.cTF;
 
 import votingSystem.Constants;
-import votingSystem.MessageTemplate;
 import votingSystem.RSAEncryption;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.util.*;
 
 /**
@@ -12,21 +14,23 @@ import java.util.*;
  */
 public class CTF {
 	private Map<Integer, Election> elections;
-	//We know this isn't secure, it's just temporary!!!
-	public RSAEncryption rsa = new RSAEncryption("7", 
-			"136578382103380560086232017154571694323",
-			"318682891574554640236911507202669852853");
-	
+	private RSAEncryption ctfrsa;
+	private PrivateKey ctfpriv;
 	
 	public CTF() {
 		elections = new HashMap<Integer, Election>();
-		List<String> candidates = new ArrayList();
+		List<String> candidates = new ArrayList<String>();
 		candidates.add("Ben Jaeger");
 		candidates.add("Tim Lenardo");
 		candidates.add("Clover Bobker");
 		
 		Election testElection = new Election(1, candidates);
 		elections.put(1, testElection);
+		
+		ctfrsa = new RSAEncryption();
+		KeyPair ctfkeys = ctfrsa.genKeys();
+		Constants.CTF_PUBLIC_KEY = ctfkeys.getPublic();
+		ctfpriv = ctfkeys.getPrivate();
 		
 		new Protocol(this);
 		

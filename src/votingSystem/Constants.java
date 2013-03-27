@@ -1,5 +1,7 @@
 package votingSystem;
 
+import java.security.PublicKey;
+
 public final class Constants {
 
 	public static final Operation[] OPERATION_VALUES = Operation.values();
@@ -14,5 +16,11 @@ public final class Constants {
 	//Client
 	
 	public static enum VoteStatus {SUCCESS,ID_COLLISION, NOT_RECORDED};
-	}
+	
+	// Client Constants
+	
+	// Encryption Constants
+	public static final int RSA_KEY_SIZE = 2048;
+	public static final int AES_KEY_SIZE = 128;
+	//public static PublicKey CTF_PUBLIC_KEY;
 }
