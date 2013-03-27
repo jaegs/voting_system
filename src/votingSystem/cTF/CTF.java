@@ -1,5 +1,7 @@
 package votingSystem.cTF;
 
+import votingSystem.Constants;
+import votingSystem.MessageTemplate;
 import votingSystem.RSAEncryption;
 import java.util.*;
 
@@ -32,5 +34,13 @@ public class CTF {
 	
 	public Map<Integer, Election> getElections() {
 		return Collections.unmodifiableMap(elections);
+	}
+	
+	public Election getElection(int electionId) {
+		return elections.get(electionId);
+	}
+	
+	public boolean isActiveElection(int electionId) {
+		return elections.containsKey(electionId);
 	}
 }

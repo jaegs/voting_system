@@ -1,7 +1,6 @@
 package votingSystem;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -29,28 +28,35 @@ public class MessageTemplate {
 		return fieldLengths.get(fieldName);
 	}
 	
-	public static Map<String, MessageTemplate> loadTemplates(String filename) throws IOException {
+	public static Map<Operation, MessageTemplate> loadTemplates(){
 		/**
 		 * Specify a template in a csv file
 		 * templateName1,fieldName1,length1,fieldName2,length2,...
 		 * templateName2,fieldName1,length1,fieldName2,length2,...
 		 * ...
 		 */
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		Map<String, MessageTemplate> templates = new HashMap<String, MessageTemplate>();
-		String line;
-		while ((line = br.readLine()) != null) {
-		   String[] columns = line.split(",");
-		   String templateName = columns[0];
-		   MessageTemplate template = new MessageTemplate();
-		   for (int i = 1; i < columns.length - 1; i+=2){
-			   String name = columns[i].replaceAll("[\\r\\n]+\\s", "");
-			   int length = Integer.parseInt(columns[i+1].replaceAll("[\\r\\n]+\\s", ""));
-			   template.addField(name, length);
-		   }
-		   templates.put(templateName, template);
+		Map<Operation, MessageTemplate> templates = new HashMap<Operation, MessageTemplate>();
+		try {
+			String filename = Constants.TEMPLATE_FILENAME;
+			BufferedReader br = new BufferedReader(new FileReader(filename));
+			String line;
+			while ((line = br.readLine()) != null) {
+			   String[] columns = line.split(",");
+			   String templateName = columns[0];
+			   MessageTemplate template = new MessageTemplate();
+			   for (int i = 1; i < columns.length - 1; i+=2){
+				   String name = columns[i].replaceAll("[\\r\\n]+\\s", "");
+				   int length = Integer.parseInt(columns[i+1].replaceAll("[\\r\\n]+\\s", ""));
+				   template.addField(name, length);
+			   }
+			   Operation op = Operation.valueOf(templateName);
+			   templates.put(op, template);
+			}
+			br.close();
+		} catch (IOException e) {
+			System.err.println("Error reading template file");
+			e.printStackTrace();
 		}
-		br.close();
 		return templates;
 	}
 }

@@ -3,11 +3,19 @@ package votingSystem.cTF;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import votingSystem.Constants;
-import votingSystem.Constants.Operation;
+import votingSystem.MessageMap;
+import votingSystem.MessageTemplate;
+import votingSystem.Operation;
 /**
  * This class only has static methods, the CTF state will be in a different class.
  * @author test
@@ -21,136 +29,117 @@ public class Protocol {
 		this.ctf = ctf;
 	}
 
-	public byte[] processMessage(byte[] msg){
+	public byte[] processMessage(byte[] msg) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
 		/**
 		 * Processes every received message.
 		 * Calls one of the other methods based on operation type. 
 		 * This method is invoked by ServerThread.
 		 * #1 decrypt message
 		 */
-		//Assumes message is length < modulus
-		msg = ctf.rsa.decrypt(msg);
+		msg = ctf.rsa.decrypt(msg); //CHANGE
 		/*System.out.println(Arrays.toString(msg));
 		System.out.println(msg[0]);*/
-		Constants.Operation op = Constants.OPERATION_VALUES[msg[0]];
-		byte[] response = null;
-		switch (op){
-		case ISELIGIBLE:
-			response = isEligible(msg);
-			break;
-		case WILLVOTE:
-			response = willVote(msg);
-			break;
-		case ISVOTING:
-			response = isVoting(msg);
-			break;
-		case OTGETRANDOMMESSAGES:
-			response = OTgetRandomMessages(msg);
-			break;
-		case OTGETSECRETS:
-			response = OTgetSecrets(msg);
-			break;
-		case VOTE:
-			vote(msg);
-			break;
-		case VOTED:
-			response = voted(msg);
-			break;
-		case CHECKIDCOLLISION:
-			response = checkIDCollision(msg);
-			break;
-		case PROCESSVOTE:
-			processVote(msg);
-			break;
-		case RESULTS:
-			results();
-			break;
-		case COUNTED:
-			response = counted(msg);
-			break;
-		case PROTEST:
-			protest(msg);
-			break;
-		case CHANGE:
-			willVote(msg);
-			break;
+		MessageMap received = MessageMap.fromByteArray(msg);
+		Operation op = received.getOperation();
+		MessageMap response = null;
+		int electionId = received.getInt("electionId"); 
+		if (!ctf.isActiveElection(electionId)) {
+			response = new MessageMap(Operation.R_ERROR);
+			String error_msg = "Invalid Election ID";
+			response.set("msg", error_msg.getBytes());
 		}
-		
-		if (response.length < ctf.rsa.getModulus().toByteArray().length) {
-			return ctf.rsa.decrypt(response);
+		else {
+			Election election = ctf.getElection(electionId);
+			switch (op){
+				case ISELIGIBLE:
+					response = isEligible(received, election);
+					break;
+				case WILLVOTE:
+					willVote(received, election);
+					break;
+				case ISVOTING:
+					response = isVoting(received, election);
+				case OTGETRANDOMMESSAGES:
+					response = OTgetRandomMessages(received);
+					break;
+				case OTGETSECRETS:
+					response = OTgetSecrets(received);
+					break;
+				case VOTE:
+					vote(received, election);
+					break;
+				case VOTED:
+					response = voted(received);
+					break;
+				case CHECKIDCOLLISION:
+					response = checkIDCollision(received);
+					break;
+				case PROCESSVOTE:
+					processVote(received);
+					break;
+				case RESULTS:
+					results();
+					break;
+				case COUNTED:
+					response = counted(received);
+					break;
+				case PROTEST:
+					protest(received);
+					break;
+				case CHANGE:
+					willVote(received);
+					break;
+			}
 		}
-		System.out.println(op + ": Not encrypting - message longer than modulus");
-		return response;
+		if (response == null) {
+			response = new MessageMap(Operation.R_SUCCESS);
+		}
+		int nonce = received.getInt("nonce");
+		response.set("nonce", nonce + 1);
+		response.set("election", electionId);
+		return ctf.rsa.decrypt(response.toByteArray()); //CHANGE
 	}
 	
-	public byte[] isEligible(byte[] msg) {
+	public MessageMap isEligible(MessageMap received, Election election) {
 		/** 
 		 * #1
 		 * in {Election, r, Voter name}K_CTF
 		 * out {election, r+1, voter name, bool}k_CTF
 		 * e = election
 		 */
-		byte[] response = Arrays.copyOf(msg, msg.length + 1);
-		response[2] = (byte) (msg[2] + 1);
-		String user = String.valueOf((char) msg[3]);
-		Election election = getElection(msg);
-		if (checkElection(msg)
-				&& election.eligibleUsers.contains(user) )
-			response[msg.length] = 1;
+		String voter = received.getString("voter");
+		MessageMap response = new MessageMap(Operation.ISELIGIBLE_R);
+		response.set("voter", voter);
+		response.set("eligible", election.isEligible(voter));
 		return response;
 	}
 	
-	public byte[] willVote(byte[] msg) {
+	public void willVote(MessageMap received, Election election) {
 		/**
 		 * #2
 		 * in: {e, name, password}K_CTF
 		 * SEE: PASSWORDS.JAVA
 		 */
-	
-		byte[] response = new byte[1];
-		if(checkElection(msg)) {
-			Election election = getElection(msg);
-			byte[] pwd = new byte[msg.length - 3];
-			for(int i = 3; i < msg.length; i++){
-				//System.out.println(msg[i]);
-				pwd[i-3] = msg[i];
-				//System.out.println(pwd[i-3]);
-			}
-			
-			String user = String.valueOf((char) msg[2]);
-			
-			//System.out.println("Pass: " + pwd.toString());
-			//System.out.println(election.passwords);
-			
-			if( election.passwords.verify(user, pwd)) {
-				election.votingUsers.add(user);
-				response[0] = 1;
-			}
-			else{
-				response[0] = 0;
-			}
-		}
-		return response;
+		String voter = received.getString("voter");
+		byte[] password = received.get("password");
+		election.addVoter(voter, password);
 	}
 	
-	public byte[] isVoting(byte[] msg) {
+	public MessageMap isVoting(MessageMap received, Election election) {
 		/**
 		 * #3
 		 * in: {e, r, name}K_CTF
 		 * out: {e, r + 1, name, bool}k_CTF
 		 */
-		Election election = getElection(msg);
-		byte[] response = Arrays.copyOf(msg, msg.length + 1);
-		response[2] = (byte) (msg[2] + 1);
-		String user = String.valueOf((char) msg[3]);
-		if (checkElection(msg)
-				&& election.votingUsers.contains(user))
-			response[msg.length] = 1;
+		String voter = received.getString("voter");
+		MessageMap response = new MessageMap(Operation.ISVOTING_R);
+		response.set("voter", voter);
+		response.set("isVoting", election.isVoting(voter));
 		return response;
 	}
 	
 	
-	public byte[] OTgetRandomMessages(byte[] msg) {
+	public MessageMap OTgetRandomMessages(MessageMap mm) {
 		/**
 		 * #4 Oblivious Transfer
 		 * in {e, r}K_CTF
@@ -173,7 +162,7 @@ public class Protocol {
 		return baos.toByteArray();
 	}
 	
-	public byte[] OTgetSecrets(byte[] msg) {
+	public MessageMap OTgetSecrets(MessageMap mm) {
 		/**
 		 * #4 Oblivious Transfer
 		 * in {e, r, v}K_CTF
@@ -194,25 +183,31 @@ public class Protocol {
 		return baos.toByteArray();
 	}
 	
-	public static void vote(byte[] msg)
+	public void vote(MessageMap received, Election election)
 	{
 		/**
 		 * #5
 		 * {e,op, I, {I,v}K_v}K_CTF
 		 */
+		byte[] voterId = received.get("voterId");
+		byte[] encryptedVote = received.get("encryptedVote");
+		election.addEncyptedVote(voterId, encryptedVote);
 	}
 	
-	public static byte[] voted(byte[] msg)
+	public static MessageMap voted(MessageMap mm)
 	{
 		/**
 		 * #6
 		 * in: {e, op, {I,v}K_v}K_CTF
 		 * out: {e, op, {I,v}K_v, bool}k_CTF
 		 */
-		return null;
+		byte[] voterId = received.get("voterId");
+		byte[] encryptedVote = received.get("encryptedVote");
+		
+		election.addEncyptedVote(voterId, encryptedVote);
 	}
 	
-	public static byte[] checkIDCollision(byte[] msg)
+	public static MessageMap checkIDCollision(MessageMap mm)
 	{
 		/**
 		 * If #6 fails
@@ -222,14 +217,14 @@ public class Protocol {
 		return null;
 	}
 	
-	public static void processVote(byte[] msg) {
+	public static void processVote(MessageMap mm) {
 		/**
 		 * #7
 		 * in: {e, op, I, k_v}K_CTF
 		 */
 	}
 	
-	public static byte[] results() {
+	public static MessageMap results() {
 		/**
 		 * #8
 		 * out: {e, op, (v1:count), (v2:count), ...}K_CTF
@@ -237,7 +232,7 @@ public class Protocol {
 		return null;
 	}
 	
-	public static byte[] counted(byte msg[]) {
+	public static MessageMap counted(MessageMap mm) {
 		/**
 		 * #8
 		 * in: {e, op, {I,v}K_v}K_CTF
@@ -246,29 +241,27 @@ public class Protocol {
 		return null;
 	}
 	
-	public static void protest(byte msg[]) {
+	public static void protest(MessageMap mm) {
 		/**
 		 * #9
 		 * {e, op, I, {I,v}K_v, k_v}K_CTF
 		 */
 	}
 	
-	public static void change(byte msg[]) {
+	public static void change(MessageMap mm) {
 		/**
 		 * #10
 		 * {e, op, I, (I, v'}K_v, k_v}K_CTF
 		 */
 	}
 	
-	private int getElectionID(byte[] msg) {
+	private int getElectionID(MessageMap mm) {
 		return msg[1];
 	}
 	
-	private boolean checkElection(byte[] msg) {
+	private boolean checkElection(MessageMap mm) {
 		return ctf.getElections().containsKey(getElectionID(msg));
 	}
 	
-	private Election getElection(byte[] msg) {
-		return ctf.getElections().get(getElectionID(msg));
-	}
+	
 }
