@@ -15,7 +15,7 @@ public final class Constants {
 	public static final String TEMPLATE_FILENAME = "blah";
 	//Client
 	
-	public static enum VoteStatus {SUCCESS,ID_COLLISION, NOT_RECORDED};
+	public static enum VoteStatus {SUCCESS,ID_COLLISION, NOT_RECORDED, INVALID_ELECTION_STATE};
 	
 	// Client Constants
 	
