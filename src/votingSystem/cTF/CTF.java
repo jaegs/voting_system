@@ -14,7 +14,6 @@ import java.util.*;
  */
 public class CTF {
 	private Map<Integer, Election> elections;
-	private RSAEncryption ctfrsa;
 	private PrivateKey ctfpriv;
 	
 	public CTF() {
@@ -27,8 +26,7 @@ public class CTF {
 		Election testElection = new Election(1, candidates);
 		elections.put(1, testElection);
 		
-		ctfrsa = new RSAEncryption();
-		KeyPair ctfkeys = ctfrsa.genKeys();
+		KeyPair ctfkeys = RSAEncryption.genKeys();
 		Constants.CTF_PUBLIC_KEY = ctfkeys.getPublic();
 		ctfpriv = ctfkeys.getPrivate();
 		
