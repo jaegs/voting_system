@@ -17,7 +17,9 @@ public final class Constants {
 	public static enum VoteStatus {SUCCESS,ID_COLLISION, NOT_RECORDED, INVALID_ELECTION_STATE};
 		
 	// Encryption Constants
-	public static final int RSA_KEY_SIZE = 2048;
-	public static final int AES_KEY_SIZE = 128;
+	public static final int RSA_KEY_SIZE = 2048; // bits
+	public static final int RSA_ENCRYPTED_SIZE = 256; // bytes
+	public static final int AES_KEY_SIZE = 128; // bits
+	public static final int AES_IV_SIZE = 16; // bytes
 	public static PublicKey CTF_PUBLIC_KEY;
 }
