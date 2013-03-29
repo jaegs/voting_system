@@ -1,5 +1,6 @@
 package votingSystem;
 
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -29,13 +30,13 @@ public class AESEncryption {
 	}
 	
 	public byte[] encrypt(byte[] msg, PublicKey pubk) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException {
-	    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5");
+	    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 	    KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		keygen.init(Constants.AES_KEY_SIZE);
 	    SecretKey key = keygen.generateKey();
 	    SecretKeySpec keyspec = new SecretKeySpec(key.getEncoded(), "AES");
-	    IvParameterSpec ivspec = cipher.getParameters().getParameterSpec(IvParameterSpec.class);
-		cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
+	    cipher.init(Cipher.ENCRYPT_MODE, keyspec);
+	    IvParameterSpec ivspec = cipher.getParameters().getParameterSpec(IvParameterSpec.class);		
 
 		// Construct final message with AES key and IV prepended to original message
 		byte[] k = key.getEncoded();
@@ -51,7 +52,7 @@ public class AESEncryption {
 	}
 	
 	public byte[] decrypt(byte[] msg, PrivateKey pk) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-	    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5");
+	    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 		
 	    int prepend = Constants.RSA_ENCRYPTED_SIZE + Constants.AES_IV_SIZE;
 		int msglen = msg.length - prepend;
@@ -72,9 +73,4 @@ public class AESEncryption {
 		
 		return cipher.doFinal(message);
 	}
-	
-	public static void main(String args[]) {
-		// TODO: TESTINGGGGGGGG ALL OF IT
-	}
-	
 }
