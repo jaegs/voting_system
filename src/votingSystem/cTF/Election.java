@@ -48,7 +48,6 @@ public class Election {
 	public Election(int id, int numCandidates) {
 		this.id = id;
 		passwords = new Passwords("passwords.ser");
-		randomMessages = obliviousTransfer.randomMessages();
 		results = new int[numCandidates];
 	}
 	

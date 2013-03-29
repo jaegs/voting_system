@@ -5,32 +5,97 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 
 import votingSystem.Constants;
+import votingSystem.Message;
+import votingSystem.Operation;
+import votingSystem.Tools;
 
 
 public class Voter {
-
-	//Public key and modulo hard coded into the program
-	//We realize this is not an appropriate way to handle this, and will change in the next phase
-	private static BigInteger CTFPublic = new BigInteger("7");
-	private static BigInteger CTFModulo = new BigInteger("318682891574554640236911507202669852853");
-	private static BigInteger CTFPrivate = new BigInteger("136578382103380560086232017154571694323");
+	private int electionId;
+	private String name;
+	private byte[] voterId;
+	private byte[] encryptedVote;
 	private static SecureRandom random = new SecureRandom();
-	
-	private byte[] encrypt(byte[] toEncrypt){
-		
-		BigInteger message = new BigInteger(toEncrypt);
-		return (message.modPow(CTFPublic, CTFModulo)).toByteArray();
+
+	private Message prepareMessage(Message send, Operation responseType) throws InvalidNonceException, UnknownHostException, IOException {
+		send.electionId = electionId;
+		int nonce = random.nextInt();
+		send.nonce = nonce;
+		byte[] msg = Tools.ObjectToByteArray(send);
+		byte[] encryptedMsg = AESEncryption.
+		byte[] responseBytes = Client.send(msg);
+		Message response = (Message) Tools.ByteArrayToObject(responseBytes);
+		if (nonce + 1 != response.nonce) {
+			throw new InvalidNonceException();
+		}
+		return response;
 	}
 	
-	private byte[] decrypt(byte[] toDecrypt){
-		
-		BigInteger message = new BigInteger(toDecrypt);
-		return (message.modPow(CTFPrivate, CTFModulo)).toByteArray();
+	public Message prepareMessage(Message send) {
+		return null;
+	}
+
+	public boolean isEligible() throws Exception{
+		Message send = new Message(Operation.ISELIGIBLE);
+		send.voter = name;
+		Message response = prepareMessage(send, Operation.ISELIGIBLE_R);
+		return response.eligible;
 	}
 	
+	public void willVote() throws Exception{
+		Message send = new Message(Operation.WILLVOTE);
+		send.voter = name;
+		prepareMessage(send);
+	}
+	
+	public boolean isVoting() throws Exception{
+		Message send = new Message(Operation.ISVOTING);
+		send.voter = name;
+		Message response = prepareMessage(send, Operation.ISVOTING_R);
+		return response.isVoting;
+	}
+	
+	public void vote() {
+		Message send = new Message(Operation.VOTE);
+		send.voterId = voterId;
+		send.encryptedVote = encryptedVote;
+	}
+	
+	public voted() throws InvalidNonceException {
+		
+	}
+	
+	public void run2() {
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("Please enter the election ID for the election you would like to vote in");
+			electionId = Integer.parseInt(br.readLine());
+			System.out.println("Please enter you name");
+			name = br.readLine();
+			if (!isEligible()) {
+				System.out.println("Sorry " + name + ", at this time you are not eligible to vote in election " + electionId);
+				return;
+			}
+			System.out.println("Success! " + name + ". You are eligible to vote in " + electionId);
+			System.out.println("Do you intend to vote (y/n)?");
+			if (br.readLine() != "y") {
+				System.out.println("OK, exiting");
+			} 
+			willVote();
+			if(!isVoting()) {
+				System.out.println("Sorry " + name + ", at this time we could not confirm your voting status");
+			}
+			System.out.println("Success! " + name + ". You are confirmed as voting in " + electionId);
+		} catch (InvalidNonceException ine) {
+			System.out.print("Error communication with server: invalid nonce");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/**

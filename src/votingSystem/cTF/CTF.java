@@ -14,8 +14,8 @@ import java.util.*;
  */
 public class CTF {
 	private Map<Integer, Election> elections;
-	private RSAEncryption ctfrsa;
-	private PrivateKey ctfpriv;
+	private RSAEncryption rsa;
+	private PrivateKey privKey;
 	
 	public CTF() {
 		elections = new HashMap<Integer, Election>();
@@ -27,15 +27,17 @@ public class CTF {
 		Election testElection = new Election(1, candidates);
 		elections.put(1, testElection);
 		
-		ctfrsa = new RSAEncryption();
-		KeyPair ctfkeys = ctfrsa.genKeys();
-		Constants.CTF_PUBLIC_KEY = ctfkeys.getPublic();
-		ctfpriv = ctfkeys.getPrivate();
+		rsa = new RSAEncryption();
+		KeyPair keys = rsa.genKeys();
+		Constants.CTF_PUBLIC_KEY = keys.getPublic();
+		privKey = keys.getPrivate();
 		
 		new Protocol(this);
 		
 	}
-	
+	public PrivateKey getPrivateKey() {
+		return privKey;
+	}
 	public Map<Integer, Election> getElections() {
 		return Collections.unmodifiableMap(elections);
 	}

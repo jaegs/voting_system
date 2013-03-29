@@ -18,6 +18,7 @@ import votingSystem.Message;
 import votingSystem.MessageMap;
 import votingSystem.MessageTemplate;
 import votingSystem.Operation;
+import votingSystem.RSAEncryption;
 import votingSystem.Tools;
 /**
  * This class only has static methods, the CTF state will be in a different class.
@@ -39,7 +40,7 @@ public class Protocol {
 		 * This method is invoked by ServerThread.
 		 * #1 decrypt message
 		 */
-		msg = ctf.rsa.decrypt(msg); //CHANGE
+		msg = RSAEncryption.decrypt(msg, ctf.ctfPrivKey); //CHANGE
 		/*System.out.println(Arrays.toString(msg));
 		System.out.println(msg[0]);*/
 		Message received = (Message) Tools.ByteArrayToObject(msg);
