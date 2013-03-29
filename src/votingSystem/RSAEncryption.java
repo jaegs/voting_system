@@ -28,13 +28,13 @@ public class RSAEncryption {
 }
 	
 	public byte[] encrypt(byte[] msg, PublicKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		 Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding"); 
+		 Cipher cipher = Cipher.getInstance("RSA"); 
 	     cipher.init(Cipher.ENCRYPT_MODE, key);
 	     return cipher.doFinal(msg);
 	}
 	
 	public byte[] decrypt(byte[] msg, PrivateKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+		Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(msg);
 	}
