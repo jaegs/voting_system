@@ -37,18 +37,19 @@ public class AESEncryption {
 	    SecretKeySpec keyspec = new SecretKeySpec(key.getEncoded(), "AES");
 	    cipher.init(Cipher.ENCRYPT_MODE, keyspec);
 	    IvParameterSpec ivspec = cipher.getParameters().getParameterSpec(IvParameterSpec.class);		
-
-		// Construct final message with AES key and IV prepended to original message
+	    byte[] encMsg = cipher.doFinal(msg);
+	    
 		byte[] k = key.getEncoded();
 		RSAEncryption rsa = new RSAEncryption();
 		byte[] encKey = rsa.encrypt(k, pubk);
 	    byte[] iv = ivspec.getIV();
-	    byte[] message = new byte[encKey.length + iv.length + msg.length];
+	    
+	    byte[] message = new byte[encKey.length + iv.length + encMsg.length];
 	    System.arraycopy(encKey, 0, message, 0, encKey.length);
 	    System.arraycopy(iv, 0, message, encKey.length, iv.length);
-	    System.arraycopy(msg, 0, message, encKey.length + iv.length, msg.length);
+	    System.arraycopy(encMsg, 0, message, encKey.length + iv.length, encMsg.length);
 	    
-	    return cipher.doFinal(message);
+	    return message;
 	}
 	
 	public byte[] decrypt(byte[] msg, PrivateKey pk) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
