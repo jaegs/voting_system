@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import votingSystem.Constants;
 import votingSystem.MessageMap;
 import votingSystem.MessageTemplate;
 import votingSystem.Operation;
+import votingSystem.Tools;
 /**
  * This class only has static methods, the CTF state will be in a different class.
  * @author test
@@ -69,16 +71,16 @@ public class Protocol {
 					vote(received, election);
 					break;
 				case VOTED:
-					response = voted(received);
+					response = voted(received, election);
 					break;
 				case CHECKIDCOLLISION:
-					response = checkIDCollision(received);
+					response = checkIDCollision(received, election);
 					break;
 				case PROCESSVOTE:
-					processVote(received);
+					processVote(received, election);
 					break;
 				case RESULTS:
-					results();
+					results(election);
 					break;
 				case COUNTED:
 					response = counted(received);
@@ -88,6 +90,9 @@ public class Protocol {
 					break;
 				case CHANGE:
 					willVote(received);
+					break;
+				case GETELECTIONSTATE:
+					getState(election);
 					break;
 			}
 		}
@@ -194,7 +199,7 @@ public class Protocol {
 		election.addEncyptedVote(voterId, encryptedVote);
 	}
 	
-	public static MessageMap voted(MessageMap mm)
+	public static MessageMap voted(MessageMap received, Election election)
 	{
 		/**
 		 * #6
@@ -203,8 +208,11 @@ public class Protocol {
 		 */
 		byte[] voterId = received.get("voterId");
 		byte[] encryptedVote = received.get("encryptedVote");
-		
-		election.addEncyptedVote(voterId, encryptedVote);
+		MessageMap response = new MessageMap(Operation.VOTED_R);
+		response.set("voterId", voterId);
+		response.set("encryptedVote", encryptedVote);
+		response.set("voted", election.isVoting(voterId).ordinal());
+		return response;
 	}
 	
 	public static MessageMap checkIDCollision(MessageMap mm)
@@ -214,54 +222,71 @@ public class Protocol {
 		 * in: {e, op, {I,v}K_v}K_CTF
 		 * out: {e, op, I', {I,v}K_v}k_CTF
 		 */
+		
 		return null;
 	}
 	
-	public static void processVote(MessageMap mm) {
+	public static void processVote(MessageMap received, Election election) {
 		/**
 		 * #7
 		 * in: {e, op, I, k_v}K_CTF
 		 */
+		byte[] voterId = received.get("voterId");
+		byte[] voteKeyArr = received.get("voteKey");
+		PrivateKey voteKey = (PrivateKey) Tools.ByteArrayToObject(voteKeyArr);
+		election.processVote(voterId, voteKey);
 	}
 	
-	public static MessageMap results() {
+	public MessageMap results(Election election) {
 		/**
 		 * #8
 		 * out: {e, op, (v1:count), (v2:count), ...}K_CTF
 		 */
-		return null;
+		int[] results = election.results();
+		MessageMap response;
+		if (results != null) {
+			response = new MessageMap(Operation.RESULTS_R);
+			response.set("results", Tools.ObjectToByteArray(results));
+		}
+		else {
+			response = new MessageMap(Operation.R_ERROR);
+			String error_msg = "Election not yet completed";
+			response.set("msg", error_msg.getBytes());
+		}
+		return response;
 	}
 	
-	public static MessageMap counted(MessageMap mm) {
+	public MessageMap counted(MessageMap received, Election election) {
 		/**
 		 * #8
 		 * in: {e, op, {I,v}K_v}K_CTF
 		 * out: {e, op, {I,v}K_v, v}k_CTF
 		 */
-		return null;
+		byte[] encryptedVote = received.get("encryptedVote");
+		Constants.VoteStatus status = election.counted(encryptedVote);
+		MessageMap response = new MessageMap(Operation.COUNTED_R);
+		response.set("counted", status.ordinal());
+		return response;
 	}
 	
-	public static void protest(MessageMap mm) {
+	public  void protest(MessageMap mm) {
 		/**
 		 * #9
 		 * {e, op, I, {I,v}K_v, k_v}K_CTF
 		 */
 	}
 	
-	public static void change(MessageMap mm) {
+	public  void change(MessageMap mm) {
 		/**
 		 * #10
 		 * {e, op, I, (I, v'}K_v, k_v}K_CTF
 		 */
 	}
 	
-	private int getElectionID(MessageMap mm) {
-		return msg[1];
+	public MessageMap getState(Election election) {
+		
 	}
-	
-	private boolean checkElection(MessageMap mm) {
-		return ctf.getElections().containsKey(getElectionID(msg));
-	}
+
 	
 	
 }

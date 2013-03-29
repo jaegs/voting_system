@@ -1,8 +1,11 @@
 package votingSystem.cTF;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.PrivateKey;
 import java.util.*;
 
+import votingSystem.Constants;
 import votingSystem.ObliviousTransfer;
 import votingSystem.RSAEncryption;
 
@@ -21,9 +24,12 @@ public class Election {
 	private Date endTime;
 	private Set<String> eligibleUsers = new HashSet<String>();
 	private Set<String> votingUsers = new HashSet<String>(); //made from willVote responses
+	private Set<byte[]> IdCollisions = new HashSet<byte[]>();
 
 
 	private Map<byte[],byte[]> encryptedVotes = new HashMap<byte[],byte[]>();
+	private Map<byte[], Integer> processedVotes = new HashMap<byte[], Integer>();
+	private int[] voteTally;
 	private List<String> candidates;
 	//private Results results;
 	private ElectionState state;
@@ -36,7 +42,7 @@ public class Election {
 		PENDING, PREVOTE, VOTE, COMPLETED
 	}
 	
-	public Election(int id) {
+	public Election(int id, int numCandidates) {
 		this.id = id;
 		eligibleUsers.add("a");
 		eligibleUsers.add("b");
@@ -45,6 +51,7 @@ public class Election {
 		obliviousTransfer = new ObliviousTransfer(20);
 		otRSA = new RSAEncryption(128);
 		randomMessages = obliviousTransfer.randomMessages();
+		voteTally = new int[numCandidates];
 	}
 	
 	public Passwords getPasswords() {
@@ -59,24 +66,61 @@ public class Election {
 		return id;
 	}
 
+	public boolean isEligible(String voter) {
+		return eligibleUsers.contains(voter);
+	}
 	
 	public boolean isVoting(String voter) {
 		return votingUsers.contains(voter);
 	}
 	
 	public void addVoter(String voter, byte[] password) {
-		if (passwords.verify(voter, password)) {
+		if (state == ElectionState.PREVOTE && passwords.verify(voter, password)) {
 			votingUsers.add(voter);
 		}
 	}
 	
 	public void addEncyptedVote(byte[] voterId, byte[] encryptedVote) {
-		if (encryptedVotes.containsKey(key))
-		encryptedVotes.put(voterId, encryptedVote);
+		if (state == ElectionState.VOTE) {
+			//if someone else has already voted with that voterId
+			if (encryptedVotes.containsKey(voterId)) {
+				IdCollisions.add(voterId);
+			} else {
+				encryptedVotes.put(voterId, encryptedVote);
+			}
+		}
 	}
 
-	public boolean isEligible(String voter) {
-		return eligibleUsers.contains(voter);
+	public Constants.VoteStatus isVoting(byte[] voterId) {
+		if (encryptedVotes.containsKey(voterId)) {
+			return Constants.VoteStatus.SUCCESS;
+		}
+		if (IdCollisions.contains(voterId)) {
+			return Constants.VoteStatus.ID_COLLISION;
+		} 
+		return Constants.VoteStatus.NOT_RECORDED;
+	}
+	
+	public void processVote(byte[] voterId, PrivateKey voteKey) {
+		if(state != ElectionState.VOTE && !encryptedVotes.containsKey(voterId)) {
+			return; //voter calls "counted" to check if vote actually processed. 
+		}
+		byte[] encryptedVote = encryptedVotes.get(voterId);
+		byte[] voteArr = RSAEncryption.decrypt(encryptedVote, voteKey); //decrypt with voteKey
+		int vote = ByteBuffer.wrap(voteArr).getInt();
+		processedVotes.put(voterId, vote);
+		voteTally[vote]++;
+	}
+	
+	public int[] results() {
+		if (state == ElectionState.COMPLETED) {
+			return voteTally;
+		}
+		return null;
+	}
+	
+	public ElectionState getState() {
+		return state;
 	}
 
 	
