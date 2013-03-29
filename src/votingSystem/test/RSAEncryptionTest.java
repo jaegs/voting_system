@@ -17,10 +17,9 @@ import org.junit.Test;
 public class RSAEncryptionTest {
 	@Test	
 	public void testEncryptDecrypt() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		RSAEncryption RSA = new RSAEncryption();
-		KeyPair keys = RSA.genKeys();
+		KeyPair keys = RSAEncryption.genKeys();
 		String s = "Hello, World!";
 		byte[] msg = s.getBytes();
-		assertTrue(Arrays.equals(msg,RSA.decrypt(RSA.encrypt(msg, keys.getPublic()),keys.getPrivate())));
+		assertTrue(Arrays.equals(msg,RSAEncryption.decrypt(RSAEncryption.encrypt(msg, keys.getPublic()),keys.getPrivate())));
 	}
 }

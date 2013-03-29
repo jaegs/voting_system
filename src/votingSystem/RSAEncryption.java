@@ -1,10 +1,6 @@
 package votingSystem;
 
 import javax.crypto.Cipher;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -18,24 +14,39 @@ import java.security.PublicKey;
  */
 public class RSAEncryption {
 		
-	public RSAEncryption() {
-	}
-		
-	public KeyPair genKeys() throws NoSuchAlgorithmException {
-		KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
-		keygen.initialize(Constants.RSA_KEY_SIZE);
-		return keygen.genKeyPair();
+	public static KeyPair genKeys() {
+		KeyPairGenerator keygen;
+		try {
+			keygen = KeyPairGenerator.getInstance("RSA");
+			keygen.initialize(Constants.RSA_KEY_SIZE);
+			return keygen.genKeyPair();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return null;
 }
 	
-	public byte[] encrypt(byte[] msg, PublicKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		 Cipher cipher = Cipher.getInstance("RSA"); 
-	     cipher.init(Cipher.ENCRYPT_MODE, key);
-	     return cipher.doFinal(msg);
+	public static byte[] encrypt(byte[] msg, PublicKey key) throws InvalidKeyException {
+		Cipher cipher;
+		try {
+			cipher = Cipher.getInstance("RSA");
+		    cipher.init(Cipher.ENCRYPT_MODE, key);
+		    return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return null;
 	}
 	
-	public byte[] decrypt(byte[] msg, PrivateKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(msg);
+	public static byte[] decrypt(byte[] msg, PrivateKey key) throws InvalidKeyException {
+		Cipher cipher;
+		try {
+			cipher = Cipher.getInstance("RSA");
+	        cipher.init(Cipher.DECRYPT_MODE, key);
+	        return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }	
