@@ -7,15 +7,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 /**
  * RSA Encryption
  * @author Clover
  */
 public class RSAEncryption {
-		
+	
 	public static KeyPair genKeys() {
 		try {
 			KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
