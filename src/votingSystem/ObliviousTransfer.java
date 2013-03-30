@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ObliviousTransfer {
 
-  
+	
     private BigInteger[] secrets;
     //private byte[] takenKeys;
     private static SecureRandom random;
@@ -106,46 +106,12 @@ public class ObliviousTransfer {
      * @return the calculated V value
      * @throws InvalidKeyException 
      */
-    public static BigInteger calculateV(BigInteger[] x, byte[] k, PublicKey pubk, PrivateKey privk) throws InvalidKeyException{// BigInteger k, int e, BigInteger n){
+    public static BigInteger calculateV(BigInteger x, byte[] k, PublicKey pubk, PrivateKey privk) throws InvalidKeyException{// BigInteger k, int e, BigInteger n){
     	
-    	System.out.print("K: ");
-    	printByteArray(k);
     	//encrypt k then blind it with X
-    	byte[] encrypted = RSAEncryption.encrypt(k, pubk);
-    	BigInteger enc = new BigInteger(encrypted);
-    	
-    	byte[] decrypted = RSAEncryption.decrypt(enc.toByteArray(), privk);
-    	printByteArray(encrypted);
-    	printByteArray(decrypted);
-    	
-    	
-    	//reverse(encrypted);
+    	byte[] encrypted = RSAEncryption.encrypt(k, pubk);	
     	BigInteger k_encrypted = new BigInteger(encrypted);
-    	
-    	
-    	for(int i = 0; i < x.length; i++)
-    	{
-    		k_encrypted = k_encrypted.add(x[0]);
-    		printByteArray(k_encrypted.toByteArray());
-    		k_encrypted = k_encrypted.subtract(x[i]);
-    		
-    		byte[] dec = k_encrypted.toByteArray();
-    		//reverse(dec);
-    		
-    		dec = RSAEncryption.decrypt(dec, privk);
-    		
-    		printByteArray(k_encrypted.toByteArray());
-    		printByteArray(dec);
-    	}
- 
-    	
-    	/*System.out.print("Length: " + encrypted.length + "Encrypted: ");
-    	printByteArray(encrypted);
-    	byte[] decrypted = AESEncryption.decrypt(encrypted, privk);
-    	BigInteger k_encrypted = new BigInteger(decrypted);
-    	*/
-    	
-    	return k_encrypted.add(x[0]);
+    	return k_encrypted.add(x);
     }
     
     /**
@@ -164,20 +130,13 @@ public class ObliviousTransfer {
     	for(int i = 0; i < randomMessages.length; i++){
     		
     		BigInteger to_decrypt = (v.subtract(randomMessages[i]));
-    		byte[] to_dec = to_decrypt.toByteArray();
-
-    		printByteArray(to_dec);
+    		byte[] to_dec = to_decrypt.toByteArray();    		
     		
-    		
-    		byte[] decrypted = AESEncryption.decrypt(to_dec, privk);
-    		System.out.print("Decrypted: ");
-    		printByteArray(decrypted);
-    		/*printByteArray(decrypted);
-    		printByteArray(decrypted);
+    		byte[] decrypted = RSAEncryption.decrypt(to_dec, privk);
     		
     		BigInteger bigI_decrypted = new BigInteger(decrypted);
     		
-    		toRet[i] = secrets[i].add(bigI_decrypted);*/
+    		toRet[i] = secrets[i].add(bigI_decrypted);
     	}
     	
     	return toRet;
@@ -241,7 +200,7 @@ public class ObliviousTransfer {
 
     	printByteArray(k);
     	
-    	BigInteger v = calculateV(randomMessages, k, keypair.getPublic(), keypair.getPrivate());
+    	BigInteger v = calculateV(randomMessages[b], k, keypair.getPublic(), keypair.getPrivate());
     	
     	//server side action
     	BigInteger[] ms = test.calculateMs(randomMessages, v, keypair.getPrivate());// rsa.getSecret(), rsa.getModulus());
