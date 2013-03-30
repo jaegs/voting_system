@@ -17,9 +17,8 @@ import java.security.PublicKey;
 public class RSAEncryption {
 		
 	public static KeyPair genKeys() {
-		KeyPairGenerator keygen;
 		try {
-			keygen = KeyPairGenerator.getInstance("RSA");
+			KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
 			keygen.initialize(Constants.RSA_KEY_SIZE);
 			return keygen.genKeyPair();
 		} catch (NoSuchAlgorithmException e) {
@@ -29,9 +28,8 @@ public class RSAEncryption {
 }
 	
 	public static byte[] encrypt(byte[] msg, Key key) throws InvalidKeyException {
-		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance("RSA");
+			Cipher cipher = Cipher.getInstance(Constants.RSA_ALG);
 		    cipher.init(Cipher.ENCRYPT_MODE, key);
 		    return cipher.doFinal(msg);
 		} catch (Exception e) {
@@ -41,9 +39,8 @@ public class RSAEncryption {
 	}
 	
 	public static byte[] decrypt(byte[] msg, Key key) throws InvalidKeyException {
-		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance("RSA");
+			Cipher cipher = Cipher.getInstance(Constants.RSA_ALG);
 	        cipher.init(Cipher.DECRYPT_MODE, key);
 	        return cipher.doFinal(msg);
 		} catch (Exception e) {

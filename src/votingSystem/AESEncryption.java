@@ -20,7 +20,7 @@ public class AESEncryption {
 	
 	public static byte[] encrypt(byte[] msg, PublicKey pubk) throws InvalidKeyException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			Cipher cipher = Cipher.getInstance(Constants.AES_ALG);
 			KeyGenerator keygen = KeyGenerator.getInstance("AES");
 			keygen.init(Constants.AES_KEY_SIZE);
 			SecretKey key = keygen.generateKey();
@@ -47,7 +47,7 @@ public class AESEncryption {
 	
 	public static byte[] decrypt(byte[] msg, PrivateKey pk) throws InvalidKeyException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+			Cipher cipher = Cipher.getInstance(Constants.AES_ALG);
 		    int prepend = Constants.RSA_ENCRYPTED_SIZE + Constants.AES_IV_SIZE;
 			int msglen = msg.length - prepend;
 			
