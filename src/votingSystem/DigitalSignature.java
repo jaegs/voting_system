@@ -27,9 +27,9 @@ public class DigitalSignature {
 			Signature sig = Signature.getInstance(Constants.SIG_ALG);
 			sig.initVerify(key);
 			byte[] message = new byte[msg.length - Constants.SIG_SIZE];
-			byte[] signature = new byte[Constants.SIG_SIZE];
-			System.arraycopy(msg, 0, message, 0, msg.length);
-			System.arraycopy(msg, msg.length, signature, 0, Constants.SIG_SIZE);
+			byte[] signature = new byte[Constants.SIG_SIZE];			
+			System.arraycopy(msg, 0, message, 0, msg.length - Constants.SIG_SIZE);
+			System.arraycopy(msg, msg.length - Constants.SIG_SIZE, signature, 0, Constants.SIG_SIZE);
 			sig.update(message);
 			if (sig.verify(signature)) {
 				return message;
