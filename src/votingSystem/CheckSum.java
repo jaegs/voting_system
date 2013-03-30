@@ -7,6 +7,7 @@ import java.util.Arrays;
 public class CheckSum {
 
 	private final static String HASH_FUNCTION = "SHA-256";
+	private final static int HASH_LENGTH = 32;
   /**
 	 * getCheckSum
 	 * Returns a SHA256 checksum for a given message
@@ -104,7 +105,57 @@ public class CheckSum {
 		
 	}
 	
-		/**
+	
+	/**
+	 * stripAndCheck
+	 * 
+	 * Given a byte array, strips off the first HASH_LENGTH characters, and checks 
+	 * if they are a valid checksum for the other bytes. 
+	 * 
+	 * @param checkSumMessage - the message to check
+	 * @return true or false if the checkSum is valid
+	 */
+	public static boolean stripAndCheck(byte[] checkSumMessage){
+		
+		byte[] checkSum = new byte[HASH_LENGTH];
+		
+		//sanity check
+		if(checkSumMessage.length <= HASH_LENGTH){
+			return false;
+		}
+		
+		byte[] message = new byte[checkSumMessage.length - HASH_LENGTH];
+		
+		//copy the data into "checkSum" and "message"
+		for(int i = 0; i < checkSumMessage.length; i++){
+			
+			if(i < HASH_LENGTH){
+				checkSum[i] = checkSumMessage[i];
+			}
+			else{
+				message[i - HASH_LENGTH] = checkSumMessage[i];
+			}
+			
+		}
+		
+		//return whether or not the checksum is valid
+		return checkCheckSum(checkSum, message);
+		
+	}
+	
+	
+	public static void printByteArray(byte[] toPrint){
+		
+		System.out.print("[");
+		for(int i = 0; i < toPrint.length; i++){
+			
+			System.out.print(toPrint[i] + ", ");
+		}
+		System.out.println("]");
+	}
+	
+	
+	/**
 	 * Main - Test cases for checkSum
 	 * @param args
 	 */
@@ -114,6 +165,10 @@ public class CheckSum {
 		
 		byte[] fakeCheckSum = {'a', 'b'};
 		byte[] checkSum = getCheckSum(test);
+		
+		printByteArray(test);
+
+		printByteArray(checkSum);
 		
 		//check success for a valid checksum
 		if(checkCheckSum(checkSum, test)){
@@ -125,9 +180,22 @@ public class CheckSum {
 		
 		//check failure for an invalid checksum
 		if(checkCheckSum(fakeCheckSum, test)){
-			System.out.println("Success!");
+			System.out.println("Failed!");
 		}
 		else {
+			System.out.println("Success!");
+		}
+		
+		
+		//Check the appending and stripAndCheck methods
+		byte[] appended = appendCheckSum(test);
+
+		printByteArray(appended);
+		
+		if(stripAndCheck(appended)){
+			System.out.println("Success!");
+		}
+		else{
 			System.out.println("Failed!");
 		}
 		
