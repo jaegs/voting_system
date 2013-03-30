@@ -23,20 +23,20 @@ public class PasswordsTest {
 	public void testVerifyTrue() {
 		String username = "u1";
 		String pass = passwords.generate(username);
-		assertTrue(passwords.verify(username, pass.getBytes()));
+		assertTrue(passwords.verify(username, pass));
 	}
 	
 	@Test	
 	public void testVerifyFalseWrongPass() {
 		String username = "u2";
 		passwords.generate(username);
-		assertFalse(passwords.verify(username, "hi mom".getBytes()));
+		assertFalse(passwords.verify(username, "hi mom"));
 	}
 
 	@Test	
 	public void testVerifyFalseWrongUser() {
 		String username = "u3";
-		assertFalse(passwords.verify(username, "hi mom".getBytes()));
+		assertFalse(passwords.verify(username, "hi mom"));
 	}
 
 	@Test	
@@ -45,8 +45,7 @@ public class PasswordsTest {
 		String pass = passwords.generate(username);
 		passwords.backup();
 		Passwords passwords2 = new Passwords(filename);
-		byte [] pb = pass.getBytes();
-		boolean result = passwords2.verify(username, pb);
+		boolean result = passwords2.verify(username, pass);
 		assertTrue(result);
 	}
 

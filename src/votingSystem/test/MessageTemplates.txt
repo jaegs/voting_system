@@ -1,2 +1,0 @@
-verify,election,1,username,3,reddit,5
-vote,election,1,id,5,vote,1
