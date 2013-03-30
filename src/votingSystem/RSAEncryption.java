@@ -48,4 +48,26 @@ public class RSAEncryption {
 		}
 		return null;
 	}
+	
+	public static byte[] encryptNoPadding(byte[] msg, Key key) throws InvalidKeyException {
+		try {
+			Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+		    cipher.init(Cipher.ENCRYPT_MODE, key);
+		    return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return null;
+	}
+	
+	public static byte[] decryptNoPadding(byte[] msg, Key key) throws InvalidKeyException {
+		try {
+			Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+	        cipher.init(Cipher.DECRYPT_MODE, key);
+	        return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }	
