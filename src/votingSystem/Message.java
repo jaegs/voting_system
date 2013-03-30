@@ -17,13 +17,12 @@ public class Message implements Serializable{
 	public boolean eligible;
 	public String password;
 	public boolean isVoting;
-	public byte[] voterId;
-	public byte[] encryptedVote;
+	public String voterId;
+	public String encryptedVote;
 	public Constants.VoteStatus voted;
 	public String error;
 	public int[] results;
 	public Constants.VoteStatus counted;
-	public byte[] checksum;
 	public PrivateKey voteKey;
 	public int vote;
 	public Election.ElectionState electionState;

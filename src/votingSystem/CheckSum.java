@@ -115,13 +115,13 @@ public class CheckSum {
 	 * @param checkSumMessage - the message to check
 	 * @return true or false if the checkSum is valid
 	 */
-	public static boolean stripAndCheck(byte[] checkSumMessage){
+	public static byte[] stripAndCheck(byte[] checkSumMessage){
 		
 		byte[] checkSum = new byte[HASH_LENGTH];
 		
 		//sanity check
 		if(checkSumMessage.length <= HASH_LENGTH){
-			return false;
+			return null;
 		}
 		
 		byte[] message = new byte[checkSumMessage.length - HASH_LENGTH];
@@ -137,9 +137,10 @@ public class CheckSum {
 			}
 			
 		}
-		
-		//return whether or not the checksum is valid
-		return checkCheckSum(checkSum, message);
+		if(checkCheckSum(checkSum, message)) {
+			return message;
+		}
+		return null;
 		
 	}
 	
@@ -192,7 +193,7 @@ public class CheckSum {
 
 		printByteArray(appended);
 		
-		if(stripAndCheck(appended)){
+		if(stripAndCheck(appended) != null){
 			System.out.println("Success!");
 		}
 		else{

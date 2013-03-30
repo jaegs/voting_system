@@ -4,6 +4,7 @@ package votingSystem.cTF;
 import java.security.InvalidKeyException;
 
 import votingSystem.AESEncryption;
+import votingSystem.CheckSum;
 import votingSystem.Message;
 import votingSystem.Operation;
 import votingSystem.Tools;
@@ -34,67 +35,78 @@ public class Protocol {
 			response = new Message(Operation.OTHER);
 			response.error = "Cannot decrypt message";
 		}
+		msg = CheckSum.stripAndCheck(msg);
+		if (msg == null) {
+			response = new Message(Operation.OTHER);
+			response.error = "Invalid Checksum";
+		}
 		/*System.out.println(Arrays.toString(msg));
 		System.out.println(msg[0]);*/
-		Message received = (Message) Tools.ByteArrayToObject(msg);
-		Operation op = received.operation;
-		int electionId = received.electionId; 
-		if (!ctf.isActiveElection(electionId)) {
-			response = new Message(Operation.OTHER);
-			response.error = "Invalid Election ID";
-		}
 		else {
-			Election election = ctf.getElection(electionId);
-			switch (op){
-				case ISELIGIBLE:
-					response = election.isEligible(received);
-					break;
-				case WILLVOTE:
-					election.willVote(received);
-					break;
-				case ISVOTING:
-					response = election.isVoting(received);
-//				case OTGETRANDOMMESSAGES:
-//					response = OTgetRandomMessages(received);
-//					break;
-//				case OTGETSECRETS:
-//					response = OTgetSecrets(received);
-//					break;
-				case VOTE:
-					election.vote(received);
-					break;
-				case VOTED:
-					response = election.voted(received);
-					break;
-//				case CHECKIDCOLLISION:
-//					response = election.checkIDCollision(received);
-//					break;
-				case PROCESSVOTE:
-					election.processVote(received);
-					break;
-				case RESULTS:
-					response = election.results();
-					break;
-				case COUNTED:
-					response = election.counted(received);
-					break;
-//				case PROTEST:
-//					protest(received);
-//					break;
-//				case CHANGE:
-//					//election.willVote(received);
-//					break;
-				case GETELECTIONSTATE:
-					election.getState();
-					break;
+			Message received = (Message) Tools.ByteArrayToObject(msg);
+		
+			Operation op = received.operation;
+			int electionId = received.electionId; 
+			if (!ctf.isActiveElection(electionId)) {
+				response = new Message(Operation.OTHER);
+				response.error = "Invalid Election ID";
 			}
+			else {
+				Election election = ctf.getElection(electionId);
+				switch (op){
+					case ISELIGIBLE:
+						response = election.isEligible(received);
+						break;
+					case WILLVOTE:
+						election.willVote(received);
+						break;
+					case ISVOTING:
+						response = election.isVoting(received);
+	//				case OTGETRANDOMMESSAGES:
+	//					response = OTgetRandomMessages(received);
+	//					break;
+	//				case OTGETSECRETS:
+	//					response = OTgetSecrets(received);
+	//					break;
+					case VOTE:
+						election.vote(received);
+						break;
+					case VOTED:
+						response = election.voted(received);
+						break;
+	//				case CHECKIDCOLLISION:
+	//					response = election.checkIDCollision(received);
+	//					break;
+					case PROCESSVOTE:
+						election.processVote(received);
+						break;
+					case RESULTS:
+						response = election.results();
+						break;
+					case COUNTED:
+						response = election.counted(received);
+						break;
+	//				case PROTEST:
+	//					protest(received);
+	//					break;
+	//				case CHANGE:
+	//					//election.willVote(received);
+	//					break;
+					case GETELECTIONSTATE:
+						election.getState();
+						break;
+				}
+			}
+			if (response == null) {
+				response = new Message(Operation.OTHER);
+			}
+			response.nonce = received.nonce + 1;
+			response.electionId =  electionId;
 		}
-		if (response == null) {
-			response = new Message(Operation.OTHER);
-		}
-		response.nonce = received.nonce + 1;
-		response.electionId =  electionId;
-		return Tools.ObjectToByteArray(response); //CHANGE TO SIGNATURE
+		byte[] responseArr =  Tools.ObjectToByteArray(response);
+		byte[] checkedResponse = CheckSum.appendCheckSum(responseArr);
+		byte[] signedResponse = checkedResponse; //CHANGE TO SIGNATURE
+		return signedResponse;
 	}
 
 	

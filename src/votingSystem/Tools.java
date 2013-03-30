@@ -11,6 +11,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 public class Tools {
@@ -88,5 +89,4 @@ public class Tools {
 		}
 		return obj;
 	}
-	
 }

@@ -1,47 +1,54 @@
 package votingSystem.voter;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
-import votingSystem.AESEncryption;
-import votingSystem.Constants;
-import votingSystem.Message;
-import votingSystem.Operation;
-import votingSystem.Tools;
+
+import votingSystem.*;
 
 
 public class Voter {
 	private int electionId;
 	private String name;
 	private String password;
-	private byte[] voterId;
-	private byte[] encryptedVote;
+	private String voterId = Base64Coder.encodeLines(new byte[] {1,2,3, 2});
+	private int vote;
+	private String encryptedVote;
+	private KeyPair voteKeys;
 	private static SecureRandom random = new SecureRandom();
 	
 
-	private Message prepareMessage(Message send, Operation responseType) throws InvalidNonceException, UnknownHostException, IOException {
+	private Message prepareMessage(Message send, Operation responseType) 
+			throws InvalidNonceException, UnknownHostException, IOException, InvalidCheckSumException {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
 	}
 	
-	public Message prepareMessage(Message send) throws InvalidNonceException, UnknownHostException, IOException  {
+	public Message prepareMessage(Message send) 
+			throws InvalidNonceException, UnknownHostException, IOException, InvalidCheckSumException  {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
 		byte[] msg = Tools.ObjectToByteArray(send);
+		byte[] checkedMsg = CheckSum.appendCheckSum(msg);
 		byte[] encryptedMsg = null;
 		try {
-			encryptedMsg = AESEncryption.encrypt(msg, Constants.CTF_PUBLIC_KEY);
+			encryptedMsg = AESEncryption.encrypt(checkedMsg, Constants.CTF_PUBLIC_KEY);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		} 
-		byte[] responseBytes = Client.send(encryptedMsg);
-		Message response = (Message) Tools.ByteArrayToObject(responseBytes);
+		byte[] signedResponse = Client.send(encryptedMsg);
+		byte[] checkedResponse = signedResponse; //TODO: CHANGE THIS!
+		byte[] responseArr = CheckSum.stripAndCheck(checkedResponse);
+		if(responseArr == null) {
+			throw new InvalidCheckSumException();
+		}
+		Message response = (Message) Tools.ByteArrayToObject(responseArr);
 		if (nonce + 1 != response.nonce) {
 			throw new InvalidNonceException();
 		}
@@ -49,37 +56,78 @@ public class Voter {
 		return response;
 	}
 
-	public boolean isEligible() throws UnknownHostException, InvalidNonceException, IOException {
+	public boolean isEligible() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
 		Message send = new Message(Operation.ISELIGIBLE);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISELIGIBLE_R);
 		return response.eligible;
 	}
 	
-	public void willVote() throws UnknownHostException, InvalidNonceException, IOException {
+	public void willVote() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
 		Message send = new Message(Operation.WILLVOTE);
 		send.voter = name;
 		send.password = password;
 		prepareMessage(send);
 	}
 	
-	public boolean isVoting() throws UnknownHostException, InvalidNonceException, IOException {
+	public boolean isVoting() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
 		Message send = new Message(Operation.ISVOTING);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISVOTING_R);
 		return response.isVoting;
 	}
 	
-	public void vote() throws UnknownHostException, InvalidNonceException, IOException {
+	public void vote() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
+		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
+		byte[] voteIdPairArr = Tools.ObjectToByteArray(voteIdPair);
+		voteKeys = RSAEncryption.genKeys();
+		try {
+			byte[] encryptedVoteArr = AESEncryption.encrypt(voteIdPairArr, voteKeys.getPublic());
+			encryptedVote = Base64Coder.encodeLines(encryptedVoteArr);
+			System.out.println("HI:" + Arrays.equals(encryptedVoteArr, Base64Coder.decodeLines(encryptedVote)));
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		}
 		send.encryptedVote = encryptedVote;
 		prepareMessage(send);
 	}
 	
-	//public voted() throws InvalidNonceException {
-		//
-	//}
+	public Constants.VoteStatus voted()
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+		Message send = new Message(Operation.VOTED);
+		send.encryptedVote = encryptedVote;
+		Message response = prepareMessage(send, Operation.VOTED_R);
+		return response.voted;
+	}
+	
+	public void processVote() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+		Message send = new Message(Operation.PROCESSVOTE);
+		send.voterId = voterId;
+		send.voteKey = voteKeys.getPrivate();
+		prepareMessage(send);
+	}
+	
+	public boolean counted() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+		Message send = new Message(Operation.COUNTED);
+		send.encryptedVote = encryptedVote;
+		Message response = prepareMessage(send, Operation.COUNTED_R);
+		return response.vote == vote && response.encryptedVote.equals(encryptedVote);
+	}
+	
+	public int[] results() 
+			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+		Message send = new Message(Operation.RESULTS);
+		Message response = prepareMessage(send, Operation.RESULTS_R);
+		return response.results;
+	}
 	
 	public void run() {
 		try {
@@ -101,11 +149,33 @@ public class Voter {
 				return;
 			}
 			System.out.println("Success! " + name + ". You are confirmed as voting in " + electionId);
+			System.out.println("Please enter your vote");
+			vote = 1;//Integer.parseInt(br.readLine());
+			vote();
+			Constants.VoteStatus status = voted();
+			if (status == Constants.VoteStatus.ID_COLLISION) {
+				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
+				return;
+			} else if(status == Constants.VoteStatus.NOT_RECORDED) {
+				System.out.println("At this time, your vote could not be recorded");
+				return;
+			} 
+			System.out.println("Success! Your vote has been recorded");
+			processVote();
+			if(!counted()) {
+				System.out.println("Error processing your vote");
+				return;
+			}
+			System.out.println("Success! Your vote has been processed");
+			System.out.println("The results from the election are: " + Arrays.toString(results()));
+				
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");
 		} catch (IOException ioe) {
 			System.out.println("Error communicating with server: ");
 			ioe.printStackTrace();
+		} catch (InvalidCheckSumException e) {
+			System.out.println("Invalid Check Sum");
 		}
 	}
 	

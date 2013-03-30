@@ -14,7 +14,7 @@ public final class Constants {
 	public static final String HOST = null;
 	public static final String TEMPLATE_FILENAME = "blah";
 	
-	public static enum VoteStatus {SUCCESS,ID_COLLISION, NOT_RECORDED, INVALID_ELECTION_STATE};
+	public static enum VoteStatus {NOT_RECORDED, SUCCESS,ID_COLLISION, INVALID_ELECTION_STATE};
 		
 	// Encryption Constants
 	public static final int RSA_KEY_SIZE = 2048; // bits

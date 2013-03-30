@@ -1,12 +1,10 @@
 package votingSystem.cTF;
 
 import java.nio.ByteBuffer;
+import java.security.PrivateKey;
 import java.util.*;
 
-import votingSystem.Constants;
-import votingSystem.Message;
-import votingSystem.Operation;
-import votingSystem.RSAEncryption;
+import votingSystem.*;
 
 /**
  * Contains all the state information for one election
@@ -24,9 +22,10 @@ public class Election {
 	
 	private Set<String> eligibleUsers = new HashSet<String>();
 	private Set<String> votingUsers = new HashSet<String>(); //made from willVote responses
-	private Set<byte[]> IdCollisions = new HashSet<byte[]>();
-	private Map<byte[],byte[]> encryptedVotes = new HashMap<byte[],byte[]>();
-	private Map<byte[], Integer> processedVotes = new HashMap<byte[], Integer>();
+	private HashMap<String, String> IdCollisions = new HashMap<String, String>();
+	private Map<String, String> IdToencryptedVotes = new HashMap<String, String>();
+	private Set<String> encryptedVotes = new HashSet<String>();
+	private Map<String, Integer> processedVotes = new HashMap<String, Integer>();
 	private int[] results;
 	
 	private ElectionState state;
@@ -90,6 +89,7 @@ public class Election {
 		 */
 		Message response = new Message(Operation.ISVOTING_R);
 		response.isVoting = votingUsers.contains(received.voter);
+		state = ElectionState.VOTE; //TODO: CHANGE!!!!!
 		return response;
 	}
 	
@@ -99,13 +99,15 @@ public class Election {
 		 * #5
 		 * {I, {I,v}K_v}K_CTF
 		 */
-		byte[] voterId = received.voterId;
+		String voterId = received.voterId;
+		String encryptedVote = received.encryptedVote;
 		if (state == ElectionState.VOTE) {
 			//if someone else has already voted with that voterId
-			if (encryptedVotes.containsKey(voterId)) {
-				IdCollisions.add(voterId);
+			if (IdToencryptedVotes.containsKey(voterId)) {
+				IdCollisions.put(encryptedVote, voterId);
 			} else {
-				encryptedVotes.put(voterId, received.encryptedVote);
+				IdToencryptedVotes.put(voterId, encryptedVote);
+				encryptedVotes.add(encryptedVote);
 			}
 		}
 	}
@@ -116,12 +118,14 @@ public class Election {
 		 * in: {{I,v}K_v}K_CTF
 		 * out: {{I,v}K_v, bool}k_CTF
 		 */
-		byte[] voterId = received.voterId;
+		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.VOTED_R);
-		if (encryptedVotes.containsKey(voterId)) {
+		if (encryptedVote != null && 
+				encryptedVotes.contains(encryptedVote)) {
 			response.voted = Constants.VoteStatus.SUCCESS;
 		}
-		else if (IdCollisions.contains(voterId)) {
+		else if (encryptedVote != null && 
+				IdCollisions.containsKey(encryptedVote)) {
 			response.voted = Constants.VoteStatus.ID_COLLISION;
 		} 
 		else {
@@ -135,32 +139,30 @@ public class Election {
 		 * #7
 		 * in: {I, k_v}K_CTF
 		 */
-		byte[] voterId = received.voterId;
-		byte[] encryptedVote = received.encryptedVote;
-		if(state != ElectionState.VOTE && !encryptedVotes.containsKey(voterId)) {
-			return; //voter calls "counted" to check if vote actually processed. 
+		String voterId = received.voterId;
+		PrivateKey voteKey = received.voteKey;
+		//voter calls "counted" to check if vote actually processed.
+		if(voterId == null 
+				|| voteKey == null 
+				|| state != ElectionState.VOTE 
+				|| !IdToencryptedVotes.containsKey(voterId)) {
+			return;
 		}
+		String encryptedVote = IdToencryptedVotes.get(voterId);
 		try {
-			byte[] voteArr = RSAEncryption.decrypt(encryptedVote, received.voteKey);
-			int vote = ByteBuffer.wrap(voteArr).getInt();
+			byte[] voteArr = AESEncryption.decrypt(Base64Coder.decodeLines(encryptedVote), received.voteKey);
+			VoteIdPair voteIdPair = (VoteIdPair) Tools.ByteArrayToObject(voteArr);
+			if (!voteIdPair.voterId.equals(voterId)) {
+				System.out.println("VoterId's not equal");
+			}
+			int vote = voteIdPair.vote;
 			processedVotes.put(encryptedVote, vote);
 			results[vote]++;
-		} catch (Exception e){}
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 	
-	public Message results() {
-		/**
-		 * #8
-		 * out: {(v1:count), (v2:count), ...}K_CTF
-		 */
-		Message response = new Message(Operation.RESULTS_R);
-		if (state == ElectionState.COMPLETED) {
-			response.results = results;
-		} else {
-			response.error = "Election not yet completed";
-		}
-		return response;
-	}
 	
 	public Message counted(Message received) {
 		/**
@@ -168,12 +170,28 @@ public class Election {
 		 * in: {{I,v}K_v}K_CTF
 		 * out: {{I,v}K_v, v}k_CTF
 		 */
-		byte[] encryptedVote = received.encryptedVote;
+		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.COUNTED_R);
 		if(processedVotes.containsKey(encryptedVote)) {
 			response.vote = processedVotes.get(encryptedVote);
+			response.encryptedVote = encryptedVote;
 		} else {
 			response.error = "Vote not processed";
+		}
+		return response;
+	}
+	
+	public Message results() {
+		/**
+		 * #8
+		 * out: {(v1:count), (v2:count), ...}K_CTF
+		 */
+		state = ElectionState.COMPLETED; //TODO: remove
+		Message response = new Message(Operation.RESULTS_R);
+		if (state == ElectionState.COMPLETED) {
+			response.results = results;
+		} else {
+			response.error = "Election not yet completed";
 		}
 		return response;
 	}
