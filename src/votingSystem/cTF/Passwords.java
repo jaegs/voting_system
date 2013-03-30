@@ -68,7 +68,7 @@ public class Passwords {
 		if (!passwords.containsKey(username))
 			return false;
 		
-		return password == passwords.get(username); 
+		return password.equals(passwords.get(username)); 
 	}
 	
 	public void backup() {

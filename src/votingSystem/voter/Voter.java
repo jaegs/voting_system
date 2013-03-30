@@ -26,6 +26,10 @@ public class Voter {
 	
 
 	private Message prepareMessage(Message send, Operation responseType) throws InvalidNonceException, UnknownHostException, IOException {
+		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
+	}
+	
+	public Message prepareMessage(Message send) throws InvalidNonceException, UnknownHostException, IOException  {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
@@ -43,10 +47,6 @@ public class Voter {
 		}
 		
 		return response;
-	}
-	
-	public Message prepareMessage(Message send) {
-		return null;
 	}
 
 	public boolean isEligible() throws UnknownHostException, InvalidNonceException, IOException {
@@ -70,7 +70,7 @@ public class Voter {
 		return response.isVoting;
 	}
 	
-	public void vote() {
+	public void vote() throws UnknownHostException, InvalidNonceException, IOException {
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
 		send.encryptedVote = encryptedVote;
@@ -98,6 +98,7 @@ public class Voter {
 			willVote();
 			if(!isVoting()) {
 				System.out.println("Sorry " + name + ", at this time we could not confirm your voting status");
+				return;
 			}
 			System.out.println("Success! " + name + ". You are confirmed as voting in " + electionId);
 		} catch (InvalidNonceException ine) {
