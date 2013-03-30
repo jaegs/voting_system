@@ -25,12 +25,12 @@ public class Voter {
 	
 
 	private Message prepareMessage(Message send, Operation responseType) 
-			throws InvalidNonceException, UnknownHostException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
 	}
 	
 	public Message prepareMessage(Message send) 
-			throws InvalidNonceException, UnknownHostException, IOException, InvalidCheckSumException  {
+			throws UnknownHostException, IOException, VotingSecurityException  {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
@@ -43,7 +43,7 @@ public class Voter {
 			e.printStackTrace();
 		} 
 		byte[] signedResponse = Client.send(encryptedMsg);
-		byte[] checkedResponse = signedResponse; //TODO: CHANGE THIS!
+		byte[] checkedResponse = DigitalSignature.verifySignature(signedResponse, Constants.CTF_PUBLIC_KEY);
 		byte[] responseArr = CheckSum.stripAndCheck(checkedResponse);
 		if(responseArr == null) {
 			throw new InvalidCheckSumException();
@@ -57,7 +57,7 @@ public class Voter {
 	}
 
 	public boolean isEligible() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.ISELIGIBLE);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISELIGIBLE_R);
@@ -65,7 +65,7 @@ public class Voter {
 	}
 	
 	public void willVote() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.WILLVOTE);
 		send.voter = name;
 		send.password = password;
@@ -73,7 +73,7 @@ public class Voter {
 	}
 	
 	public boolean isVoting() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.ISVOTING);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISVOTING_R);
@@ -81,7 +81,7 @@ public class Voter {
 	}
 	
 	public void vote() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
@@ -90,7 +90,6 @@ public class Voter {
 		try {
 			byte[] encryptedVoteArr = AESEncryption.encrypt(voteIdPairArr, voteKeys.getPublic());
 			encryptedVote = Base64Coder.encodeLines(encryptedVoteArr);
-			System.out.println("HI:" + Arrays.equals(encryptedVoteArr, Base64Coder.decodeLines(encryptedVote)));
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		}
@@ -99,7 +98,7 @@ public class Voter {
 	}
 	
 	public Constants.VoteStatus voted()
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.VOTED);
 		send.encryptedVote = encryptedVote;
 		Message response = prepareMessage(send, Operation.VOTED_R);
@@ -107,7 +106,7 @@ public class Voter {
 	}
 	
 	public void processVote() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.PROCESSVOTE);
 		send.voterId = voterId;
 		send.voteKey = voteKeys.getPrivate();
@@ -115,7 +114,7 @@ public class Voter {
 	}
 	
 	public boolean counted() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.COUNTED);
 		send.encryptedVote = encryptedVote;
 		Message response = prepareMessage(send, Operation.COUNTED_R);
@@ -123,7 +122,7 @@ public class Voter {
 	}
 	
 	public int[] results() 
-			throws UnknownHostException, InvalidNonceException, IOException, InvalidCheckSumException {
+			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.RESULTS);
 		Message response = prepareMessage(send, Operation.RESULTS_R);
 		return response.results;
@@ -176,6 +175,10 @@ public class Voter {
 			ioe.printStackTrace();
 		} catch (InvalidCheckSumException e) {
 			System.out.println("Invalid Check Sum");
+		} catch (InvalidSignatureException ise) {
+			System.out.println("Signature from Central Tabulating Facility is invalid");
+		} catch (VotingSecurityException e) {
+			e.printStackTrace();
 		}
 	}
 	

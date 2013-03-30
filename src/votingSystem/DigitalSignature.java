@@ -22,7 +22,7 @@ public class DigitalSignature {
 		return null;
 	}
 	
-	public static byte[] verifySignatrue(byte[] msg, PublicKey key) {
+	public static byte[] verifySignature(byte[] msg, PublicKey key) throws InvalidSignatureException {
 		try {
 			Signature sig = Signature.getInstance(Constants.SIG_ALG);
 			sig.initVerify(key);
@@ -34,12 +34,11 @@ public class DigitalSignature {
 			if (sig.verify(signature)) {
 				return message;
 			} else {
-				return null;
+				throw new InvalidSignatureException();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new InvalidSignatureException();
 		}		
-		return null;
 	}
 	
 }

@@ -1,5 +1,5 @@
 package votingSystem;
 
-public class InvalidCheckSumException extends Exception {
+public class InvalidCheckSumException extends VotingSecurityException {
 
 }

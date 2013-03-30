@@ -1,5 +1,5 @@
 package votingSystem.voter;
 
-public class InvalidNonceException extends Exception {
+public class InvalidNonceException extends SecurityException {
 
 }

@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 
 import votingSystem.AESEncryption;
 import votingSystem.CheckSum;
+import votingSystem.DigitalSignature;
 import votingSystem.Message;
 import votingSystem.Operation;
 import votingSystem.Tools;
@@ -105,7 +106,7 @@ public class Protocol {
 		}
 		byte[] responseArr =  Tools.ObjectToByteArray(response);
 		byte[] checkedResponse = CheckSum.appendCheckSum(responseArr);
-		byte[] signedResponse = checkedResponse; //CHANGE TO SIGNATURE
+		byte[] signedResponse = DigitalSignature.signMessage(checkedResponse, ctf.getPrivateKey()); //CHANGE TO SIGNATURE
 		return signedResponse;
 	}
 
