@@ -21,8 +21,10 @@ public final class Constants {
 	public static final int RSA_ENCRYPTED_SIZE = 256; // bytes
 	public static final int AES_KEY_SIZE = 128; // bits
 	public static final int AES_IV_SIZE = 16; // bytes
+	public static final int SIG_SIZE = 256; // bytes
 	public static final String RSA_ALG = "RSA";
 	public static final String AES_ALG = "AES/CBC/PKCS5PADDING";
+	public static final String SIG_ALG = "SHA1withRSA";
 	public static final String CTF_PUBLIC_KEY_FILE = "bin/votingSystem/ctfpubkey.ser";
 	public static PublicKey CTF_PUBLIC_KEY = (PublicKey) Tools.ReadObjectFromFile(CTF_PUBLIC_KEY_FILE);
 }
