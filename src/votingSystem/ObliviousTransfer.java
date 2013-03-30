@@ -1,6 +1,5 @@
 package votingSystem;
 
-import votingSystem.voter.*;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -8,7 +7,6 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.util.*;
 
 public class ObliviousTransfer {
 
@@ -88,15 +86,6 @@ public class ObliviousTransfer {
     }
     
     
-    private static void reverse(byte[] data) {
-    	
-        for (int left = 0, right = data.length - 1; left < right; left++, right--) {
-            // swap the values at the left and right indices
-            byte temp = data[left];
-            data[left]  = data[right];
-            data[right] = temp;
-        }
-    }
     /**
      * Calculates the V value for oblivious transfer (used client side)
      * @param x - the random message produced by the server, chosen by the client
@@ -109,7 +98,7 @@ public class ObliviousTransfer {
     public static BigInteger calculateV(BigInteger x, byte[] k, PublicKey pubk, PrivateKey privk) throws InvalidKeyException{// BigInteger k, int e, BigInteger n){
     	
     	//encrypt k then blind it with X
-    	byte[] encrypted = RSAEncryption.encrypt(k, pubk);	
+    	byte[] encrypted = RSAEncryption.encryptNoPadding(k, pubk);	
     	BigInteger k_encrypted = new BigInteger(encrypted);
     	return k_encrypted.add(x);
     }
@@ -132,7 +121,7 @@ public class ObliviousTransfer {
     		BigInteger to_decrypt = (v.subtract(randomMessages[i]));
     		byte[] to_dec = to_decrypt.toByteArray();    		
     		
-    		byte[] decrypted = RSAEncryption.decrypt(to_dec, privk);
+    		byte[] decrypted = RSAEncryption.decryptNoPadding(to_dec, privk);
     		
     		BigInteger bigI_decrypted = new BigInteger(decrypted);
     		
