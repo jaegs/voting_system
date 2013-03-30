@@ -1,19 +1,10 @@
 package votingSystem.cTF;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.util.*;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import votingSystem.Constants;
 import votingSystem.Message;
-import votingSystem.ObliviousTransfer;
 import votingSystem.Operation;
 import votingSystem.RSAEncryption;
 
@@ -49,6 +40,11 @@ public class Election {
 		this.id = id;
 		passwords = new Passwords("passwords.ser");
 		results = new int[numCandidates];
+		state = ElectionState.PREVOTE;
+		
+		eligibleUsers.add("a");
+		eligibleUsers.add("b");
+		eligibleUsers.add("c");
 	}
 	
 	public Passwords getPasswords() {
@@ -57,6 +53,10 @@ public class Election {
 	
 	public int getId() {
 		return id;
+	}
+	
+	public void setState(ElectionState state) {
+		this.state = state;
 	}
 
 	public Message isEligible(Message received) {

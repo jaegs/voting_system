@@ -2,6 +2,7 @@ package votingSystem.cTF;
 
 import votingSystem.Constants;
 import votingSystem.RSAEncryption;
+import votingSystem.Tools;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -14,23 +15,16 @@ import java.util.*;
  */
 public class CTF {
 	private Map<Integer, Election> elections;
-	private RSAEncryption rsa;
 	private PrivateKey privKey;
 	
 	public CTF() {
-		elections = new HashMap<Integer, Election>();
-		List<String> candidates = new ArrayList<String>();
-		candidates.add("Ben Jaeger");
-		candidates.add("Tim Lenardo");
-		candidates.add("Clover Bobker");
-		
-		Election testElection = new Election(1, candidates);
-		elections.put(1, testElection);
-		
-		rsa = new RSAEncryption();
-		KeyPair keys = rsa.genKeys();
-		Constants.CTF_PUBLIC_KEY = keys.getPublic();
+		KeyPair keys = RSAEncryption.genKeys();
+		Tools.WriteObjectToFile(keys.getPublic(), Constants.CTF_PUBLIC_KEY_FILE);
 		privKey = keys.getPrivate();
+		
+		elections = new HashMap<Integer, Election>();
+		Election testElection = new Election(1, 3);
+		elections.put(1, testElection);
 		
 		new Protocol(this);
 		

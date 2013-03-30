@@ -2,11 +2,16 @@ package votingSystem;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 
 public class Tools {
 
@@ -45,6 +50,41 @@ public class Tools {
 			e1.printStackTrace();
 		} catch(ClassNotFoundException e2) {
 			e2.printStackTrace();
+		}
+		return obj;
+	}
+	
+	public static void WriteObjectToFile(Object obj, String filename) {
+		try {
+			File file = new File(filename);
+			file.createNewFile();
+			ObjectOutputStream oos = new ObjectOutputStream(
+					new FileOutputStream(file));
+			oos.writeObject(obj);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public static Object ReadObjectFromFile(String filename) {
+		File file = new File(filename);
+		Object obj = null;
+		try {
+			if (file.exists()) {
+				ObjectInputStream ois = new ObjectInputStream(
+						new FileInputStream(file));
+				obj = ois.readObject();
+				ois.close();
+			}
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();			
 		}
 		return obj;
 	}
