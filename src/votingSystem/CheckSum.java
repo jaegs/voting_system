@@ -103,4 +103,33 @@ public class CheckSum {
 		}
 		
 	}
+	
+		/**
+	 * Main - Test cases for checkSum
+	 * @param args
+	 */
+	public static void main(String[] args){
+		
+		byte[] test = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
+		
+		byte[] fakeCheckSum = {'a', 'b'};
+		byte[] checkSum = getCheckSum(test);
+		
+		//check success for a valid checksum
+		if(checkCheckSum(checkSum, test)){
+			System.out.println("Success!");
+		}
+		else {
+			System.out.println("Failed!");
+		}
+		
+		//check failure for an invalid checksum
+		if(checkCheckSum(fakeCheckSum, test)){
+			System.out.println("Success!");
+		}
+		else {
+			System.out.println("Failed!");
+		}
+		
+	}
 }
