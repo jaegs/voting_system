@@ -1,7 +1,6 @@
-package votingSystem.cTF.test;
+package votingSystem.test;
 
 import java.io.File;
-import java.util.Arrays;
 
 import votingSystem.cTF.*;
 import static org.junit.Assert.*;
