@@ -25,7 +25,7 @@ public class CTF {
 		elections = new HashMap<Integer, Election>();
 		Election testElection = new Election(1, 3);
 		elections.put(1, testElection);
-		
+
 		new Protocol(this);
 		
 	}

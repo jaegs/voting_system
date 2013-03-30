@@ -1,6 +1,8 @@
 package votingSystem;
 
 import javax.crypto.Cipher;
+
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +28,7 @@ public class RSAEncryption {
 		return null;
 }
 	
-	public static byte[] encrypt(byte[] msg, PublicKey key) throws InvalidKeyException {
+	public static byte[] encrypt(byte[] msg, Key key) throws InvalidKeyException {
 		Cipher cipher;
 		try {
 			cipher = Cipher.getInstance("RSA");
@@ -38,7 +40,7 @@ public class RSAEncryption {
 		return null;
 	}
 	
-	public static byte[] decrypt(byte[] msg, PrivateKey key) throws InvalidKeyException {
+	public static byte[] decrypt(byte[] msg, Key key) throws InvalidKeyException {
 		Cipher cipher;
 		try {
 			cipher = Cipher.getInstance("RSA");
