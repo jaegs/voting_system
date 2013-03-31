@@ -1,7 +1,10 @@
 package votingSystem;
 
 public enum Operation {
-	//_R is response
+	/**
+	 * Enum representing the operation type of a client request or server response.
+	 * _R is response
+	 */
 	ISELIGIBLE,
 	ISELIGIBLE_R,
 	WILLVOTE, 

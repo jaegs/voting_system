@@ -10,13 +10,18 @@ import java.util.Map;
 
 public class Accounts{
 	/**
-	 * This class manages password verification for Protocol.willVote()
-	 * Use SHA-256
+	 * Generates username and passwords and stores them in a file.
+	 * Also used by the CTF to check whether a given password is valid for a given username.
 	 */
 	private final Map<String, String> passwords; //in memory because not using database. keys need to be Strings
 	private final String[] names;
 	private final SecureRandom random = new SecureRandom();
 	
+	/**
+	 * 
+	 * @param load - true reads user information from a file.
+	 * false generates users with random names and random passwords
+	 */
 	@SuppressWarnings("unchecked")
 	public Accounts(boolean load) {
 		if (load) {
@@ -37,15 +42,15 @@ public class Accounts{
 		}
 	}
 	
-	
+	/**
+	 * Verifies the given username and password.
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	public boolean verify(String username, String password) {
-		/**
-		 * Verifies that user -> h(pass) in map
-		 * 
-		 */
 		if (!passwords.containsKey(username))
-			return false;
-		
+			return false;		
 		return password.equals(passwords.get(username)); 
 	}
 	

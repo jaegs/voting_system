@@ -8,6 +8,12 @@ import java.util.Random;
 import votingSystem.*;
 import votingSystem.cTF.Election;
 
+/**
+ * This class controls a Voter class for the Simulation.
+ * A new VoterThread object is created for each election state and for each voter.
+ * @author benjamin
+ *
+ */
 public class VoterThread implements Runnable {
 	private static Random random = new Random();
 	private final Election.ElectionState electionState;
@@ -33,7 +39,7 @@ public class VoterThread implements Runnable {
 					System.out.println("not voting");
 				break;
 			case VOTE:
-				voter.vote(random.nextInt(5));
+				voter.vote(random.nextInt(5)); //Randomly chooses one of the 5 candidates
 				Constants.VoteStatus status = voter.voted();
 				if (status == Constants.VoteStatus.ID_COLLISION) {
 					System.out.println("id collision");

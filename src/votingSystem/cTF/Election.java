@@ -12,26 +12,49 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import votingSystem.*;
 
 /**
- * Contains all the state information for one election
+ * Contains all of the election state and methods for managing voters,
+ *  processing votes, and responding to voter queries concerning the voters’
+ *   eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
  */
 public class Election {
 
 	private final Accounts accounts;
-	private final int id; //identifies the election and is transmitted between voter and ctf
+	
+	//identifies the election and is transmitted between voter and ctf
+	private final int id;
+
+	private ObliviousTransfer OT;
 //	private Date prevoteStartTime; //users respond whether they are participating in election
 //	private Date votingStartTime;
 //	private Date endTime;
 	
-	private final Set<String> votingUsers = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>()); //made from willVote responses
-	private final Map<String, String> IdCollisions = new ConcurrentHashMap<String, String>();
-	private final Map<String, String> IdToencryptedVotes = new ConcurrentHashMap<String, String>();
-	private final Set<String> encryptedVotes = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
-	private final Map<String, Integer> processedVotes = new ConcurrentHashMap<String, Integer>();
+	//All of these concurrent sets and collections would normally be in a database.
+	//Since we're only using the standard library, we keep this collections in memory instead.
+	
+	//Set of voters who are eligible to vote in this election
 	private final Set<String> eligibleUsers;
+	
+	//Set of eligible voters who say they vote in the election
+	private final Set<String> votingUsers = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>()); //made from willVote responses
+	
+	//Map of encrypted votes->voterId of voterId's that collide
+	private final Map<String, String> IdCollisions = new ConcurrentHashMap<String, String>();
+	
+	//Map of voterId->encryptedVote for valid voterId's that don't collide
+	private final Map<String, String> IdToencryptedVotes = new ConcurrentHashMap<String, String>();
+	
+	//Value set of IdToencryptedVotes
+	private final Set<String> encryptedVotes = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
+	
+	//Map encryptedVote->vote for votes that are successfully decrypted
+	private final Map<String, Integer> processedVotes = new ConcurrentHashMap<String, Integer>();
+	
+	//vote tally for each candidate
 	private final AtomicIntegerArray results;
-	private ObliviousTransfer OT;
+	
+	
 	private final Set<String> receivedIDs = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
 	private ElectionState state;
@@ -45,11 +68,8 @@ public class Election {
 		this.id = id;
 		accounts = new Accounts(false);
 		results = new AtomicIntegerArray(numCandidates);
-		setState(ElectionState.PREVOTE);
+		setState(ElectionState.PREVOTE); //TODO election should start as pending
 		eligibleUsers = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(accounts.getNames())));
-//		eligibleUsers.add("a");
-//		eligibleUsers.add("b");
-//		eligibleUsers.add("c");
 	}
 	
 	public int getId() {
@@ -57,9 +77,10 @@ public class Election {
 	}
 	public Message isEligible(Message received) {
 		/** 
-		 * #1
-		 * in {name}K_CTF
-		 * out {name, bool}k_CTF
+		 * Step: #1
+		 * Input: name
+		 * Output: name, bool
+		 * Checks whether voter is eligible to vote in given election.
 		 */
 		Message response = new Message(Operation.ISELIGIBLE_R);
 		response.eligible = eligibleUsers.contains(received.voter);
@@ -68,9 +89,10 @@ public class Election {
 	
 	public void willVote(Message received) {
 		/**
-		 * #2
-		 * in: {name, password}K_CTF
-		 * SEE: PASSWORDS.JAVA
+		 * Step: #2
+		 * Input: name, password
+		 * If the election state is PREVOTE, the user is eligible for the election, 
+		 * and the user's password is verified, adds voter to list of voting users.
 		 */
 		String voter = received.voter;
 		if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
@@ -80,9 +102,10 @@ public class Election {
 	
 	public Message isVoting(Message received) {
 		/**
-		 * #3
-		 * in: {name}K_CTF
-		 * out: {name, bool}k_CTF
+		 * Step: #3
+		 * Input: name
+		 * Output: name, bool
+		 * Checks whether users is voting.
 		 */
 		Message response = new Message(Operation.ISVOTING_R);
 		response.isVoting = votingUsers.contains(received.voter);
@@ -93,9 +116,14 @@ public class Election {
 	
 	public void vote(Message received) {
 		/**
-		 * #5
-		 * {I, {I,v}K_v}K_CTF
-		 */
+		 * Step: #5
+		 * Input: I, {I,v}K_v
+		 * Each user generates a public/private key set (K_v and k_v). 
+		 * User sends identification number and encrypted voted. 
+		 * If election state is VOTE and the id is valid, the id is then checked for a collision.
+		 *  If there is a collision, the encrypted vote and id number are added to a collisions lists.
+		 *   Otherwise, the vote and id are added to a list of submitted votes.
+		 */   
 		String voterId = received.voterId;
 		String encryptedVote = received.encryptedVote;
 		//check
@@ -114,10 +142,12 @@ public class Election {
 
 	public Message voted(Message received) {
 		/**
-		 * #6
-		 * in: {{I,v}K_v}K_CTF
-		 * out: {{I,v}K_v, bool}k_CTF
-		 */
+		 * Step: #6
+		 * Input: {I,v}K_v
+		 * Output: {I,v}K_v, voteStatus
+		 * Users sends an encrpyted voted and CTF responds with a
+		 *  vote status - SUCCESS, ID_COLLISION, or NOT_RECORDED.
+		 */  
 		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.VOTED_R);
 		if (encryptedVote != null && 
@@ -136,8 +166,13 @@ public class Election {
 	
 	public void processVote(Message received) {
 		/**
-		 * #7
-		 * in: {I, k_v}K_CTF
+		 * Step: #7
+		 * Input: I, k_v
+		 * Voter sends identification number and the private key to their encrpyted vote.
+		 * If the election state is VOTE and an encrypted vote was submitted with the given id,
+		 * then the server retrieves that encrypted vote, and decrypts it.
+		 * if the id in the encrypted vote matches the input id,
+		 * the CTF adds the vote to the overall election tally.
 		 */
 		String voterId = received.voterId;
 		PrivateKey voteKey = received.voteKey;
@@ -166,9 +201,11 @@ public class Election {
 	
 	public Message counted(Message received) {
 		/**
-		 * #8
-		 * in: {{I,v}K_v}K_CTF
-		 * out: {{I,v}K_v, v}k_CTF
+		 * Step: #8
+		 * Input: {I,v}K_v
+		 * Output:	{I,v}K_v, v
+		 * A voter can check if his/her vote has been counted by sending their encrypted vote again.
+		 *  The CTF responds with the unencrypted vote.
 		 */
 		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.COUNTED_R);
@@ -183,10 +220,11 @@ public class Election {
 	
 	public Message results() {
 		/**
-		 * #8
-		 * out: {(v1:count), (v2:count), ...}K_CTF
+		 * Step #8
+		 * Output: (candidate1:count), (candidate1:count), ...
+		 * If election state is COMPLETED,
+		 *  the CTF will list the results for each candidate as an integer array.
 		 */
-		//state = ElectionState.COMPLETED; //TODO: remove
 		Message response = new Message(Operation.RESULTS_R);
 		if (getState() == ElectionState.COMPLETED) {
 			response.results = results.toString();
@@ -197,11 +235,22 @@ public class Election {
 	}
 	
 	public Message getElectionState() {
+		/**
+		 * Output: ElectionState
+		 * At any time, the voter can query the CTF for the current election state.
+		 *  States are PENDING, PREVOTE, VOTE, and COMPLETED
+		 */
 		Message response = new Message(Operation.STATE_R);
 		response.electionState = getState();
 		return response;
 	}
 	
+	/**
+	 * Input: ElectionState
+	 * Normally a voter would not be able to set the election state but for simulation purposes,
+	 * it's useful.
+	 * @param received
+	 */
 	public void setState(Message received) {
 		setState(received.electionState);
 	}

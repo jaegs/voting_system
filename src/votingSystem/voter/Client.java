@@ -12,7 +12,7 @@ public class Client {
 	
 	
 	/**
-	 * Each message will be sent with a new connection.
+	 * Each message is sent with a new connection.
 	 */
 	public static byte[] send(byte[] msg) throws UnknownHostException, IOException{
 		Socket soc = new Socket( InetAddress.getByName(Constants.HOST), Constants.PORT);

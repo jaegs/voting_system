@@ -11,7 +11,13 @@ import java.security.SecureRandom;
 import votingSystem.*;
 import votingSystem.cTF.Election;
 
-
+/**
+ * Implements election voting protocol on the client side.
+ * All byte arrays are converted to Strings using a Base64 encoder before they are sent 
+ * to the server. 
+ * @author Benjamin
+ *
+ */
 public class Voter {
 	private int electionId;
 	private String name;
@@ -22,7 +28,6 @@ public class Voter {
 	private KeyPair voteKeys;
 	private static SecureRandom random = new SecureRandom();
 	
-	public Voter() {}
 	
 	public Voter(int electionId, String name, String password) {
 		this.electionId = electionId;
@@ -35,6 +40,23 @@ public class Voter {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
 	}
 	
+	/**
+	 * All messages sent to CTF call this method
+	 * Adds electionId to message.
+	 * Adds a fresh randomly generated nonce.
+	 * Appends a checksum
+	 * Encrypts the message
+	 * Sends the message
+	 * Receives the response
+	 * Verifies the checksum
+	 * Checks that the nonce is incremented
+	 * Returns the response.
+	 * @param send
+	 * @return
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 * @throws VotingSecurityException
+	 */
 	public Message prepareMessage(Message send) 
 			throws UnknownHostException, IOException, VotingSecurityException  {
 		send.electionId = electionId;

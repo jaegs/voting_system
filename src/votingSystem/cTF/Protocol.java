@@ -10,9 +10,10 @@ import votingSystem.Message;
 import votingSystem.Operation;
 import votingSystem.Tools;
 /**
- * This class only has static methods, the CTF state will be in a different class.
- * @author test
- *
+ * @author Benjamin
+ * Decrypts incoming message and checks checksum.
+ * Analyzes incoming messages from clients and calls the correct method in the specified active Election.
+ * Computes nonce, appends a checksum, and signs outgoing message. 
  */
 public class Protocol {
 	private final CTF ctf;
@@ -22,13 +23,23 @@ public class Protocol {
 		this.ctf = ctf;
 	}
 
+	/**
+	 * This method is invoked by ServerThread.
+	 * 
+	 * Every message sent from the voter client to the CTF server:
+	 * - Contains the election ID
+	 * - Has a fresh randomly generate (SecureRandom.java) nonce
+	 * - Has a checksum (cryptographic hash)
+	 * - Is encrypted with the CTF’s public key
+	 * 
+	 * Every message sent from the CTF server to the voter client:
+	 * - Includes nonce + 
+	 * - Has a checksum
+	 * - Is signed with the CTF’s private key
+	 * @param msg
+	 * @return
+	 */
 	public byte[] processMessage(byte[] msg) {
-		/**
-		 * Processes every received message.
-		 * Calls one of the other methods based on operation type. 
-		 * This method is invoked by ServerThread.
-		 * #1 decrypt message
-		 */
 		Message response = null;
 		try {
 			msg = AESEncryption.decrypt(msg, ctf.getPrivateKey());
