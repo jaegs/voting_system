@@ -1,5 +1,7 @@
 package votingSystem.test;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -14,9 +16,9 @@ public class AccountsTest {
 	@SuppressWarnings("unchecked")
 	public void testVerifyTrue() {
 		Accounts acc = new Accounts(false);
-		List<String> names = (List<String>)Tools.ReadObjectFromFile(Constants.VOTERS_FILENAME);
-		Map<String, String> passwords = (Map<String, String>)Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
-		String name = names.get(0);
+		String[] names = (String[]) Tools.ReadObjectFromFile(Constants.VOTERS_FILENAME);
+		Map<String, String> passwords = (Map<String, String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
+		String name = names[0];
 		assertTrue(acc.verify(name, passwords.get(name)));
 	}
 	
@@ -24,9 +26,15 @@ public class AccountsTest {
 	@SuppressWarnings("unchecked")
 	public void testVerifyFalse() {
 		Accounts acc = new Accounts(false);
-		List<String> names = (List<String>)Tools.ReadObjectFromFile(Constants.VOTERS_FILENAME);
+		String[] names = (String[]) Tools.ReadObjectFromFile(Constants.VOTERS_FILENAME);
 		Map<String, String> passwords = (Map<String, String>)Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
-		String name = names.get(0);
-		assertTrue(!acc.verify(name, ""));
+		String name = names[0];
+		String password = passwords.get(name);
+		String p = "";
+		SecureRandom r = new SecureRandom();
+		while (p == password) {
+			p = new BigInteger(Constants.PASSWORD_LENGTH, r).toString(32);
+		}
+		assertTrue(!acc.verify(name, p));
 	}
 }
