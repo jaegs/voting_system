@@ -202,5 +202,55 @@ public class Election {
 		return response;
 	}
 
+		/**
+	 * OTGetRandomMessages
+	 * 
+	 * Gets the random messages required for ObliviousTransfer. 
+	 * If the ObliviousTransfer object does not exist, create it.
+	 * 
+	 * @return a Message with the random messages in it
+	 */	
+	public Message OTGetPublicKeyAndRandomMessages(){
+		
+		//On the first OT request, create the ObliviousTransferObject
+		if(OT == null){
+			OT = new ObliviousTransfer(votingUsers.size());
+		}
+		
+		//get the random messages
+		BigInteger[] randoms = OT.getRandomMessages();
+		KeyPair keys = OT.getKeyPair();
+		
+		//create a response Message with the random messages and return it
+		Message response = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES_R);
+		response.OTMessages = randoms;
+		response.OTKey = keys.getPublic();
+		return response;
+	}
 	
+	
+	/**
+	 * OTGetSecretes
+	 * 
+	 * @param received
+	 * @return
+	 */
+	public Message OTGetSecrets(Message received){
+		
+		//create response object
+		Message response = new Message(Operation.OTGETSECRETS_R);
+		
+		//if the received message is not appropriate, add the response
+		if(received.OTMessages == null || received.OTMessages[0] == null){
+			response.error = "Invalid V-value passed in!";
+			return response;
+		}
+		
+		//calculate the mValues based on v value passed in
+		BigInteger v = received.OTMessages[0];
+		BigInteger[] mValues = OT.calculateMs(v);
+		response.OTMessages = mValues;
+		return response;
+		
+	}
 }
