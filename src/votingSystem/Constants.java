@@ -5,14 +5,18 @@ import java.security.PublicKey;
 public final class Constants {
 
 	public static final Operation[] OPERATION_VALUES = Operation.values();
+	public static final int NUM_VOTERS = 3;
+	public static boolean DEBUG = false;
 
 	//Server Constants
 	public static final int PORT = 9001;
 	public static final int POOL_THREADS = 10;
 	public static final int MESSAGE_SIZE = 2048;
-	public static final int PASSWORD_LENGTH = 50; //Length of BigInteger
+	public static final int PASSWORD_LENGTH = 100; //Length of BigInteger
+	public static final int VOTER_NAME_LENGTH = 100; //Length of BigInteger
 	public static final String HOST = null;
-	public static final String TEMPLATE_FILENAME = "blah";
+	public static final String PASSWORDS_FILENAME = "bin/votingSystem/passwords.ser";
+	public static final String VOTERS_FILENAME = "bin/votingSystem/voters.ser";
 	
 	public static enum VoteStatus {NOT_RECORDED, SUCCESS,ID_COLLISION, INVALID_ELECTION_STATE};
 		
