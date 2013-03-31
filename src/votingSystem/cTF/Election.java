@@ -21,6 +21,7 @@ public class Election {
 	private Date prevoteStartTime; //users respond whether they are participating in election
 	private Date votingStartTime;
 	private Date endTime;
+	private ObliviousTransfer OT;
 	
 	private Set<String> eligibleUsers = new HashSet<String>();
 	private Set<String> votingUsers = new HashSet<String>(); //made from willVote responses
