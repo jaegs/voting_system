@@ -30,6 +30,22 @@ public class RSAEncryption {
 	}
 	
 	/**
+	 * Generates an RSA public-private key pair with a smaller number of bits!.
+	 * @return RSA public-private key pair
+	 */	
+	public static KeyPair genSmallKeys(){
+		try {
+			KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
+			keygen.initialize(Constants.RSA_SMALL_KEY);
+			return keygen.genKeyPair();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	/**
 	 * Encrypts a message using RSA.
 	 * @param msg, the message to be encrypted
 	 * @param key, the key to use for encryption
