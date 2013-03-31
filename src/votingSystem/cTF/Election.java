@@ -32,7 +32,7 @@ public class Election {
 	private final Set<String> eligibleUsers;
 	private final AtomicIntegerArray results;
 	private ObliviousTransfer OT;
-	private Set<String> receivedIDs = new HashSet<String>();
+	private final Set<String> receivedIDs = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
 	private ElectionState state;
 	
@@ -99,7 +99,7 @@ public class Election {
 		String voterId = received.voterId;
 		String encryptedVote = received.encryptedVote;
 		//check
-		if(getState() == ElectionState.VOTE
+		if(getState() != ElectionState.VOTE
 				|| !(OT.checkSecret(received.voterId))){
 			return;
 		}
@@ -212,8 +212,10 @@ public class Election {
 
 	public synchronized void setState(ElectionState state) {
 		this.state = state;
+		if (state == ElectionState.VOTE) {
+			OT = new ObliviousTransfer(votingUsers.size());
+		}
 	}
-	
 	
 	/**
 	 * OTGetRandomMessages
@@ -224,11 +226,6 @@ public class Election {
 	 * @return a Message with the random messages in it
 	 */	
 	public Message OTGetPublicKeyAndRandomMessages(){
-		
-		//On the first OT request, create the ObliviousTransferObject
-		if(OT == null){
-			OT = new ObliviousTransfer(votingUsers.size());
-		}
 		
 		//get the random messages
 		BigInteger[] randoms = OT.getRandomMessages();
