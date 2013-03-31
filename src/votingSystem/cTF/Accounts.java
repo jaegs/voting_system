@@ -52,5 +52,4 @@ public class Accounts{
 	public String[] getNames() {
 		return names;
 	}
-
 }
