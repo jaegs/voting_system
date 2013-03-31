@@ -9,14 +9,21 @@ import java.security.PrivateKey;
 import java.util.*;
 
 /**
- * Maintains all of the Elections
- * @author test
+ * Implementation of a Central Tabulating Facility. Keeps track of currently active elections.
+ * At the moment, we create just one sample election.
+ * @author Benjamin
  *
  */
 public class CTF {
 	private final Map<Integer, Election> elections;
 	private PrivateKey privKey;
 	
+	/**
+	 * Generates a new public / private key combination every time.
+	 * The public key is written to a file so that it is accessible to the voters
+	 * (which run in a different process). 
+	 * Creates on sample election with 5 candidates  
+	 */
 	public CTF() {
 		KeyPair keys = RSAEncryption.genKeys();
 		Tools.WriteObjectToFile(keys.getPublic(), Constants.CTF_PUBLIC_KEY_FILE);

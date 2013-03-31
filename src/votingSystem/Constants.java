@@ -3,10 +3,14 @@ package votingSystem;
 import java.security.PublicKey;
 
 public final class Constants {
+	/**
+	 * System-wide constants
+	 */
 
 	public static final Operation[] OPERATION_VALUES = Operation.values();
 	public static final int NUM_VOTERS = 1;
 	public static boolean DEBUG = false;
+	public static boolean VERBOSE = false;
 
 	//Server Constants
 	public static final int PORT = 9001;
@@ -14,7 +18,7 @@ public final class Constants {
 	public static final int MESSAGE_SIZE = 2048;
 	public static final int PASSWORD_LENGTH = 100; //Length of BigInteger
 	public static final int VOTER_NAME_LENGTH = 100; //Length of BigInteger
-	public static final String HOST = null;
+	public static final String HOST = null; //this is the localhost.
 	public static final String PASSWORDS_FILENAME = "bin/votingSystem/passwords.ser";
 	public static final String VOTERS_FILENAME = "bin/votingSystem/voters.ser";
 	

@@ -14,8 +14,18 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
+/**
+ * Utility class for converting byte arrays to/from objects and reading/writing from files.
+ * @author benjamin
+ *
+ */
 public class Tools {
 
+	/**
+	 * Takes a Serializable object and converts it to a byte array.
+	 * @param obj
+	 * @return
+	 */
 	public static byte[] ObjectToByteArray(Object obj) {
 		byte[] arr = null;
 		try {
@@ -35,6 +45,11 @@ public class Tools {
 		return arr;
 	}
 	
+	/**
+	 * Takes a byte array representing a serialized object and converts to an object
+	 * @param arr
+	 * @return
+	 */
 	public static Object ByteArrayToObject(byte[] arr){
 		Object obj = null;
 		try {
@@ -55,6 +70,11 @@ public class Tools {
 		return obj;
 	}
 	
+	/**
+	 * Takes an object that implements Serializable and writes it to a file.
+	 * @param obj
+	 * @param filename
+	 */
 	public static void WriteObjectToFile(Object obj, String filename) {
 		try {
 			File file = new File(filename);
@@ -70,6 +90,11 @@ public class Tools {
 		}		
 	}
 	
+	/**
+	 * Reads a file containing a serialized object and converts it to an object
+	 * @param filename
+	 * @return
+	 */
 	public static Object ReadObjectFromFile(String filename) {
 		File file = new File(filename);
 		Object obj = null;

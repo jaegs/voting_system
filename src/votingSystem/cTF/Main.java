@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 /**
  * @author Benjamin Jaeger
- * Starts up the CTF Server.
+ * Starts the CTF and socket server. Provides a terminal interface to change the election state.
  */
 public class Main {
 	public static void main(String [] args)
