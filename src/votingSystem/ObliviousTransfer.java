@@ -40,7 +40,9 @@ public class ObliviousTransfer {
    		 	BigInteger p = new BigInteger(128, 100, random);
    		 	
    		 	secrets[i] = p;
-   		 	stringSecrets.add(Base64Coder.encodeLines(p.toByteArray()));
+   		 	String toadd = Base64Coder.encodeLines(p.toByteArray());
+   		 	stringSecrets.add(toadd);
+   		 	System.out.println("Secret String # " + toadd);
    		 	//Alternatively, we might want to use RSA keys here here
     	}
 
@@ -54,7 +56,7 @@ public class ObliviousTransfer {
 		}
 		
 		//Initialize keyPairs!
-		keys = RSAEncryption.genKeys();
+		keys = RSAEncryption.genSmallKeys();
     }
     
     /**
@@ -143,6 +145,10 @@ public class ObliviousTransfer {
     		byte[] decrypted = RSAEncryption.decryptNoPadding(to_dec, privk);
     		
     		BigInteger bigI_decrypted = new BigInteger(decrypted);
+    		//System.out.println("K" + i + " " + bigI_decrypted);
+    		
+    		
+    		//System.out.println("M" + i + " " + M);
     		
     		toRet[i] = secrets[i].add(bigI_decrypted);
     	}
@@ -176,7 +182,9 @@ public class ObliviousTransfer {
     	return secrets[index];
     }
     
-    
+    public PublicKey getPublicKey(){
+    	return keys.getPublic();
+    }
 
 	public static void printByteArray(byte[] toPrint){
 		
@@ -194,7 +202,7 @@ public class ObliviousTransfer {
     	
     	ObliviousTransfer test = new ObliviousTransfer(10);
     	
-    	KeyPair keypair = RSAEncryption.genKeys();
+    	PublicKey pk = test.getPublicKey();
     	
     	//server side starting
     	BigInteger[] randomMessages = test.getRandomMessages();
@@ -207,7 +215,7 @@ public class ObliviousTransfer {
 
     	printByteArray(k);
     	
-    	BigInteger v = calculateV(randomMessages[b], k, keypair.getPublic());
+    	BigInteger v = calculateV(randomMessages[b], k, pk);
     	
     	//server side action
     	BigInteger[] ms = test.calculateMs(v);// rsa.getSecret(), rsa.getModulus());
