@@ -17,7 +17,7 @@ public class Main {
 		
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			ctf.getElections().get(1).setState(Election.ElectionState.PREVOTE); //TEMPORARY
+			//ctf.getElections().get(1).setState(Election.ElectionState.PREVOTE); //TODO
 			while(true) {
 				System.out.println("Press enter to stop server or an electionId and a state {PENDING, PREVOTE, VOTE, COMPLETED}");
 				String input = br.readLine();

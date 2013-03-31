@@ -25,5 +25,6 @@ public enum Operation {
 	OTGETSECRETS,
 	OTHER,
 	STATE,
-	STATE_R
+	STATE_R,
+	SET_STATE //For simulation purposes, not usually called by the voter
 }

@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 
 import votingSystem.*;
+import votingSystem.cTF.Election;
 
 
 public class Voter {
@@ -23,7 +24,15 @@ public class Voter {
 	private KeyPair voteKeys;
 	private static SecureRandom random = new SecureRandom();
 	
-
+	public Voter() {}
+	
+	public Voter(int electionId, String name, String password, String voterId) {
+		this.electionId = electionId;
+		this.name = name;
+		this.password = password;
+		this.voterId = voterId;
+	}
+	
 	private Message prepareMessage(Message send, Operation responseType) 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
@@ -80,6 +89,11 @@ public class Voter {
 		return response.isVoting;
 	}
 	
+	public void vote(int vote)
+			throws UnknownHostException, IOException, VotingSecurityException {
+		this.vote = vote;
+		vote();
+	}
 	public void vote() 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.VOTE);
@@ -121,11 +135,18 @@ public class Voter {
 		return response.vote == vote && response.encryptedVote.equals(encryptedVote);
 	}
 	
-	public int[] results() 
+	public String results() 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.RESULTS);
 		Message response = prepareMessage(send, Operation.RESULTS_R);
 		return response.results;
+	}
+	
+	public void setState(Election.ElectionState state)
+		throws UnknownHostException, IOException, VotingSecurityException {
+		Message send = new Message(Operation.SET_STATE);
+		send.electionState = state;
+		prepareMessage(send);
 	}
 	
 	public void run() {
@@ -166,7 +187,7 @@ public class Voter {
 				return;
 			}
 			System.out.println("Success! Your vote has been processed");
-			System.out.println("The results from the election are: " + Arrays.toString(results()));
+			System.out.println("The results from the election are: " + results());
 				
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");

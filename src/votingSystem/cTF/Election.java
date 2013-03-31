@@ -3,6 +3,8 @@ package votingSystem.cTF;
 import java.nio.ByteBuffer;
 import java.security.PrivateKey;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import votingSystem.*;
 
@@ -13,20 +15,19 @@ import votingSystem.*;
  */
 public class Election {
 
-	private String passwordsFilename;
-	private Accounts accounts;
-	private int id; //identifies the election and is transmitted between voter and ctf
-	private Date prevoteStartTime; //users respond whether they are participating in election
-	private Date votingStartTime;
-	private Date endTime;
+	private final Accounts accounts;
+	private final int id; //identifies the election and is transmitted between voter and ctf
+//	private Date prevoteStartTime; //users respond whether they are participating in election
+//	private Date votingStartTime;
+//	private Date endTime;
 	
-	private Set<String> eligibleUsers = new HashSet<String>();
-	private Set<String> votingUsers = new HashSet<String>(); //made from willVote responses
-	private HashMap<String, String> IdCollisions = new HashMap<String, String>();
-	private Map<String, String> IdToencryptedVotes = new HashMap<String, String>();
-	private Set<String> encryptedVotes = new HashSet<String>();
-	private Map<String, Integer> processedVotes = new HashMap<String, Integer>();
-	private int[] results;
+	private final Set<String> votingUsers = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>()); //made from willVote responses
+	private final Map<String, String> IdCollisions = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> IdToencryptedVotes = new ConcurrentHashMap<String, String>();
+	private final Set<String> encryptedVotes = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
+	private final Map<String, Integer> processedVotes = new ConcurrentHashMap<String, Integer>();
+	private final Set<String> eligibleUsers;
+	private final AtomicIntegerArray results;
 	
 	private ElectionState state;
 	
@@ -38,26 +39,17 @@ public class Election {
 	public Election(int id, int numCandidates) {
 		this.id = id;
 		accounts = new Accounts(false);
-		results = new int[numCandidates];
-		state = ElectionState.PREVOTE;
-		
-		eligibleUsers.add("a");
-		eligibleUsers.add("b");
-		eligibleUsers.add("c");
-	}
-	
-	public Accounts getAccounts() {
-		return accounts;
+		results = new AtomicIntegerArray(numCandidates);
+		setState(ElectionState.PREVOTE);
+		eligibleUsers = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(accounts.getNames())));
+//		eligibleUsers.add("a");
+//		eligibleUsers.add("b");
+//		eligibleUsers.add("c");
 	}
 	
 	public int getId() {
 		return id;
 	}
-	
-	public void setState(ElectionState state) {
-		this.state = state;
-	}
-
 	public Message isEligible(Message received) {
 		/** 
 		 * #1
@@ -76,7 +68,7 @@ public class Election {
 		 * SEE: PASSWORDS.JAVA
 		 */
 		String voter = received.voter;
-		if (state == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
+		if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
 			votingUsers.add(voter);
 		}
 	}
@@ -89,7 +81,7 @@ public class Election {
 		 */
 		Message response = new Message(Operation.ISVOTING_R);
 		response.isVoting = votingUsers.contains(received.voter);
-		state = ElectionState.VOTE; //TODO: CHANGE!!!!!
+		//state = ElectionState.VOTE; //TODO: CHANGE!!!!!
 		return response;
 	}
 	
@@ -101,7 +93,7 @@ public class Election {
 		 */
 		String voterId = received.voterId;
 		String encryptedVote = received.encryptedVote;
-		if (state == ElectionState.VOTE) {
+		if (getState() == ElectionState.VOTE) {
 			//if someone else has already voted with that voterId
 			if (IdToencryptedVotes.containsKey(voterId)) {
 				IdCollisions.put(encryptedVote, voterId);
@@ -144,7 +136,7 @@ public class Election {
 		//voter calls "counted" to check if vote actually processed.
 		if(voterId == null 
 				|| voteKey == null 
-				|| state != ElectionState.VOTE 
+				|| getState() != ElectionState.VOTE 
 				|| !IdToencryptedVotes.containsKey(voterId)) {
 			return;
 		}
@@ -157,7 +149,7 @@ public class Election {
 			}
 			int vote = voteIdPair.vote;
 			processedVotes.put(encryptedVote, vote);
-			results[vote]++;
+			results.incrementAndGet(vote);
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -186,21 +178,32 @@ public class Election {
 		 * #8
 		 * out: {(v1:count), (v2:count), ...}K_CTF
 		 */
-		state = ElectionState.COMPLETED; //TODO: remove
+		//state = ElectionState.COMPLETED; //TODO: remove
 		Message response = new Message(Operation.RESULTS_R);
-		if (state == ElectionState.COMPLETED) {
-			response.results = results;
+		if (getState() == ElectionState.COMPLETED) {
+			response.results = results.toString();
 		} else {
 			response.error = "Election not yet completed";
 		}
 		return response;
 	}
 	
-	public Message getState() {
+	public Message getElectionState() {
 		Message response = new Message(Operation.STATE_R);
-		response.electionState = state;
+		response.electionState = getState();
 		return response;
 	}
+	
+	public void setState(Message received) {
+		setState(received.electionState);
+	}
+	
+	public synchronized Election.ElectionState getState() {
+		return state;
+	}
 
+	public synchronized void setState(ElectionState state) {
+		this.state = state;
+	}
 	
 }
