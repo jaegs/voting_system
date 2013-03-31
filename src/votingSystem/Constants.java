@@ -23,6 +23,7 @@ public final class Constants {
 	// Encryption Constants
 	public static final int RSA_KEY_SIZE = 2048; // bits
 	public static final int RSA_SMALL_KEY = 512; //bits
+	public static final int RSA_ENCRYPTED_SIZE = 256; //bytes
 	public static final int AES_KEY_SIZE = 128; // bits
 	public static final int AES_IV_SIZE = 16; // bytes
 	public static final int SIG_SIZE = 256; // bytes
