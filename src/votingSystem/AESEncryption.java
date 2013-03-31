@@ -3,6 +3,8 @@ package votingSystem;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -58,8 +60,9 @@ public class AESEncryption {
 	 * @param pk, the private key corresponding to the public key used to encrypt the AES key
 	 * @return the non-encrypted message if successful, null otherwise
 	 * @throws InvalidKeyException
+	 * @throws BadPaddingException 
 	 */
-	public static byte[] decrypt(byte[] msg, PrivateKey pk) throws InvalidKeyException {
+	public static byte[] decrypt(byte[] msg, PrivateKey pk) throws InvalidKeyException, BadPaddingException {
 		try {
 			Cipher cipher = Cipher.getInstance(Constants.AES_ALG);
 		    int prepend = Constants.RSA_ENCRYPTED_SIZE + Constants.AES_IV_SIZE;
@@ -79,6 +82,10 @@ public class AESEncryption {
 		    cipher.init(Cipher.DECRYPT_MODE, k, ivspec);
 			
 			return cipher.doFinal(message);
+		} catch (InvalidKeyException e) {
+			throw new InvalidKeyException();
+		} catch (BadPaddingException e) {
+			throw new BadPaddingException();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
