@@ -112,9 +112,19 @@ public class Voter {
 			return;
 		}
 		
+		//Print out the OTMessages
+		//System.out.print("\nOTMessags:");
+		//for(int i = 0; i < response.OTMessages.length; i++){
+		//	System.out.print(response.OTMessages[i] + "  ");
+		//}
+		//System.out.println();
+		
 		//choose a b value
 		int b_val = ObliviousTransfer.chooseSecret(response.OTMessages);
+		//System.out.println("B" + b_val);
 		byte[] k = ObliviousTransfer.generateK();
+		BigInteger test = new BigInteger(k);
+		//System.out.println("K-> " + test);
 		BigInteger v;
 		
 		//try to calculate V
@@ -134,7 +144,7 @@ public class Voter {
 		OTRequest2.OTMessages[0] = v;
 		
 		
-		Message response2 = prepareMessage(OTRequest2, Operation.OTGETSECRETS);
+		Message response2 = prepareMessage(OTRequest2, Operation.OTGETSECRETS_R);
 		
 		//check for server error
 		if(response2.error != null){
@@ -143,14 +153,17 @@ public class Voter {
 		}
 	
 		//sanity check pt.2
-		if(response.OTMessages == null){
+		if(response2.OTMessages == null){
 			System.out.println("Error in the voting, please try again!");
 			return;
 		}
 		
+		//System.out.println("M-> " + response2.OTMessages[0]);
 		//calculate voterID
-		BigInteger vId = ObliviousTransfer.determineMessage(response.OTMessages, b_val, k); 
+		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
 		voterId = Base64Coder.encodeLines(vId.toByteArray());
+		
+		//System.out.println("VoterId: " + voterId);
 		
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
