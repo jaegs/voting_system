@@ -3,6 +3,7 @@ package votingSystem.voter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -82,6 +83,68 @@ public class Voter {
 	
 	public void vote() 
 			throws UnknownHostException, IOException, VotingSecurityException {
+				
+				
+		
+		//ObliviousTransfer Step1
+		Message OTRequest = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES);
+		OTRequest.voter = name;
+		OTRequest.password = password;
+		Message response = prepareMessage(OTRequest, Operation.OTGETPUBLICKEYANDRANDOMMESSAGES);
+		
+		//check for server error
+		if(response.error != null){
+			System.out.println(response.error);
+			return;
+		}
+		
+		//sanity check
+		if(response.OTMessages == null || response.OTKey == null){
+			System.out.println("Error in the voting, please try again!");
+			return;
+		}
+	
+		//choose a b value
+		int b_val = ObliviousTransfer.chooseSecret(response.OTMessages);
+		byte[] k = ObliviousTransfer.generateK();
+		BigInteger v;
+		
+		//try to calculate V
+		try {
+			v = ObliviousTransfer.calculateV(response.OTMessages[b_val], k, response.OTKey);
+		} catch (InvalidKeyException e1) {
+			System.out.println("Error in the voting, please try again!");
+			e1.printStackTrace();
+			return;
+		}
+		
+		//Create a second ObliviousTransfer Request
+		Message OTRequest2 = new Message(Operation.OTGETSECRETS);
+		OTRequest2.voter = name;
+		OTRequest2.password = password;
+		OTRequest2.OTMessages = new BigInteger[1];
+		OTRequest2.OTMessages[0] = v;
+		
+		
+		Message response2 = prepareMessage(OTRequest2, Operation.OTGETSECRETS);
+		
+		//check for server error
+		if(response2.error != null){
+			System.out.println(response2.error);
+			return;
+		}
+	
+		//sanity check pt.2
+		if(response.OTMessages == null){
+			System.out.println("Error in the voting, please try again!");
+			return;
+		}
+		
+		//calculate voterID
+		BigInteger vId = ObliviousTransfer.determineMessage(response.OTMessages, b_val, k); 
+		voterId = Base64Coder.encodeLines(vId.toByteArray());
+		
+		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);

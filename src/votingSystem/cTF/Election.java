@@ -1,6 +1,9 @@
 package votingSystem.cTF;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.*;
 
@@ -19,9 +22,11 @@ public class Election {
 	private Date prevoteStartTime; //users respond whether they are participating in election
 	private Date votingStartTime;
 	private Date endTime;
+	private ObliviousTransfer OT;
 	
 	private Set<String> eligibleUsers = new HashSet<String>();
 	private Set<String> votingUsers = new HashSet<String>(); //made from willVote responses
+	private Set<String> receivedIDs = new HashSet<String>();
 	private HashMap<String, String> IdCollisions = new HashMap<String, String>();
 	private Map<String, String> IdToencryptedVotes = new HashMap<String, String>();
 	private Set<String> encryptedVotes = new HashSet<String>();
@@ -101,6 +106,12 @@ public class Election {
 		 */
 		String voterId = received.voterId;
 		String encryptedVote = received.encryptedVote;
+		
+		//check
+		if(!(OT.checkSecret(received.voterId))){
+			return;
+		}
+		
 		if (state == ElectionState.VOTE) {
 			//if someone else has already voted with that voterId
 			if (IdToencryptedVotes.containsKey(voterId)) {
@@ -201,6 +212,82 @@ public class Election {
 		response.electionState = state;
 		return response;
 	}
-
 	
+	
+	/**
+	 * OTGetRandomMessages
+	 * 
+	 * Gets the random messages required for ObliviousTransfer. 
+	 * If the ObliviousTransfer object does not exist, create it.
+	 * 
+	 * @return a Message with the random messages in it
+	 */	
+	public Message OTGetPublicKeyAndRandomMessages(){
+		
+		//On the first OT request, create the ObliviousTransferObject
+		if(OT == null){
+			OT = new ObliviousTransfer(votingUsers.size());
+		}
+		
+		//get the random messages
+		BigInteger[] randoms = OT.getRandomMessages();
+		KeyPair keys = OT.getKeyPair();
+		
+		//create a response Message with the random messages and return it
+		Message response = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES_R);
+		response.OTMessages = randoms;
+		response.OTKey = keys.getPublic();
+		return response;
+	}
+	
+	
+	/**
+	 * OTGetSecretes
+	 * 
+	 * @param received
+	 * @return
+	 */
+	public Message OTGetSecrets(Message received){
+		
+		//create response object
+		Message response = new Message(Operation.OTGETSECRETS_R);
+		
+		//if the received message is not appropriate, add the response
+		if(received.OTMessages == null 
+				|| received.OTMessages[0] == null 
+				|| received.voter == null 
+				|| received.password == null){
+			response.error = "Invalid V-value passed in!";
+			return response;
+		}
+		
+		//if username/password is invalid
+		if(!accounts.verify(received.voter, received.password)){
+			response.error = "Invalid username and password!";
+			return response;
+		}
+		
+		//check if user has already gotten a secret!
+		if(receivedIDs.contains(received.voter)){
+			response.error = "User has already been issued a votingID!";
+			return response;
+		}
+		
+		//calculate the mValues based on v value passed in
+		BigInteger v = received.OTMessages[0];
+		BigInteger[] mValues;
+		try {
+			mValues = OT.calculateMs(v);
+		} catch (InvalidKeyException e) {
+			response.error = "Invalid Key exception thrown on server side!";
+			return response;
+		}
+		
+		response.OTMessages = mValues;
+		
+		//add the voter to the set of voters that has already been issued IDs!
+		receivedIDs.add(received.voter);
+		return response;
+		
+	}
 }
