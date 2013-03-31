@@ -14,7 +14,7 @@ import votingSystem.*;
 public class Election {
 
 	private String passwordsFilename;
-	private Passwords passwords;
+	private Accounts accounts;
 	private int id; //identifies the election and is transmitted between voter and ctf
 	private Date prevoteStartTime; //users respond whether they are participating in election
 	private Date votingStartTime;
@@ -37,7 +37,7 @@ public class Election {
 	
 	public Election(int id, int numCandidates) {
 		this.id = id;
-		passwords = new Passwords("passwords.ser");
+		accounts = new Accounts(false);
 		results = new int[numCandidates];
 		state = ElectionState.PREVOTE;
 		
@@ -46,8 +46,8 @@ public class Election {
 		eligibleUsers.add("c");
 	}
 	
-	public Passwords getPasswords() {
-		return passwords;
+	public Accounts getAccounts() {
+		return accounts;
 	}
 	
 	public int getId() {
@@ -76,7 +76,7 @@ public class Election {
 		 * SEE: PASSWORDS.JAVA
 		 */
 		String voter = received.voter;
-		if (state == ElectionState.PREVOTE && passwords.verify(voter, received.password)) {
+		if (state == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
 			votingUsers.add(voter);
 		}
 	}
