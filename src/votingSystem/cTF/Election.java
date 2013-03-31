@@ -213,7 +213,7 @@ public class Election {
 	public synchronized void setState(ElectionState state) {
 		this.state = state;
 		if (state == ElectionState.VOTE) {
-			OT = new ObliviousTransfer(votingUsers.size());
+			OT = new ObliviousTransfer(votingUsers.size() * 100);
 		}
 	}
 	
@@ -229,12 +229,21 @@ public class Election {
 		
 		//get the random messages
 		BigInteger[] randoms = OT.getRandomMessages();
-		KeyPair keys = OT.getKeyPair();
+		//KeyPair keys = OT.getKeyPair();
 		
 		//create a response Message with the random messages and return it
 		Message response = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES_R);
 		response.OTMessages = randoms;
-		response.OTKey = keys.getPublic();
+		
+		//Print out the OTMessages
+		//System.out.print("\nOTMessags:");
+		//for(int i = 0; i < response.OTMessages.length; i++){
+		//	System.out.print(response.OTMessages[i] + "  ");
+		//}
+		//System.out.println();
+		
+		
+		response.OTKey = OT.getPublicKey();
 		return response;
 	}
 	
@@ -281,6 +290,8 @@ public class Election {
 			return response;
 		}
 		
+		//System.out.println("M! " + mValues[0]);
+		//System.out.println("Length of M array: " + mValues.length);
 		response.OTMessages = mValues;
 		
 		//add the voter to the set of voters that has already been issued IDs!
