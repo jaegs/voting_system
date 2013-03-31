@@ -23,7 +23,7 @@ public class Message implements Serializable{
 	public String encryptedVote;
 	public Constants.VoteStatus voted;
 	public String error;
-	public int[] results;
+	public String results;
 	public Constants.VoteStatus counted;
 	public PrivateKey voteKey;
 	public int vote;

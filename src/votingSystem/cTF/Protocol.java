@@ -15,7 +15,7 @@ import votingSystem.Tools;
  *
  */
 public class Protocol {
-	private CTF ctf;
+	private final CTF ctf;
 	
 	
 	public Protocol(CTF ctf){
@@ -65,6 +65,7 @@ public class Protocol {
 						break;
 					case ISVOTING:
 						response = election.isVoting(received);
+						break;
 					case OTGETPUBLICKEYANDRANDOMMESSAGES:
 						response = election.OTGetPublicKeyAndRandomMessages();
 						break;
@@ -96,8 +97,10 @@ public class Protocol {
 	//					//election.willVote(received);
 	//					break;
 					case GETELECTIONSTATE:
-						election.getState();
+						election.getElectionState();
 						break;
+					case SET_STATE:
+						election.setState(received);
 				}
 			}
 			if (response == null) {

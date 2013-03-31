@@ -5,8 +5,8 @@ import java.util.Arrays;
 
 
 public class ServerThread implements Runnable {
-	private Socket soc;
-	private Protocol protocol;
+	private final Socket soc;
+	private final Protocol protocol;
 
 	public ServerThread(Socket clientSocket, CTF ctf) throws IOException {
 		soc = clientSocket;

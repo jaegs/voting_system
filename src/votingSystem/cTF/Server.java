@@ -18,8 +18,8 @@ public class Server implements Runnable{
     protected ServerSocket serverSocket = null;
     protected boolean      isStopped    = false;
     protected Thread       runningThread= null;
-    protected ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
-    private CTF ctf;
+    protected final ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
+    private final CTF ctf;
     
     public Server(CTF ctf) {
     	this.ctf = ctf;

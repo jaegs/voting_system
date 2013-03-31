@@ -14,7 +14,7 @@ import java.util.*;
  *
  */
 public class CTF {
-	private Map<Integer, Election> elections;
+	private final Map<Integer, Election> elections;
 	private PrivateKey privKey;
 	
 	public CTF() {
@@ -23,7 +23,7 @@ public class CTF {
 		privKey = keys.getPrivate();
 		
 		elections = new HashMap<Integer, Election>();
-		Election testElection = new Election(1, 3);
+		Election testElection = new Election(1, 5);
 		elections.put(1, testElection);
 
 		new Protocol(this);

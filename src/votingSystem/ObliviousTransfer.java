@@ -16,7 +16,7 @@ public class ObliviousTransfer {
     private BigInteger[] secrets;
     private BigInteger[] randomMessages;
     private KeyPair keys;
-    private static SecureRandom random;
+    private static SecureRandom random = new SecureRandom();
     
         
     private Set<String> stringSecrets = new HashSet<String>();
@@ -31,7 +31,6 @@ public class ObliviousTransfer {
     public ObliviousTransfer(int numKeys){
     	
     	//initialize instance variables. 
-		random = new SecureRandom();
 		secrets = new BigInteger[numKeys];//<BigInteger>();
     	
 		//generate random keys
