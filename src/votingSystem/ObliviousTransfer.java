@@ -12,6 +12,8 @@ public class ObliviousTransfer {
 
 	
     private BigInteger[] secrets;
+    private BigInteger[] randomMessages;
+    private KeyPair keys;
     //private byte[] takenKeys;
     private static SecureRandom random;
 
@@ -38,27 +40,39 @@ public class ObliviousTransfer {
    		 	//Alternatively, we might want to use RSA keys here here
     	}
 
+    	
+    	//generate the random messages
+		randomMessages = new BigInteger[numKeys];
+	
+		//create 128-bit random messages
+		for(int i = 0; i < numKeys; i++){
+			randomMessages[i] = new BigInteger(128, 100, random);
+		}
+		
+		//Initialize keyPairs!
+		keys = RSAEncryption.genKeys();
+    }
+    
+    /**
+     * Gets a the private/public keypair
+     * If this does not already exist, initialize it
+     * @return
+     */
+    public KeyPair getKeyPair(){
+    	
+    	return keys;
     }
 
     /**
      * randomMessages
-     * @return - a list of all of the secrets
+     * 
+     * @return - the list of random messages
      */
-    public BigInteger[] randomMessages(){
+    public BigInteger[] getRandomMessages(){
     	
-    	//the number of keys left available
-    	int size = secrets.length;
-
     	
-    	//a list of random messages corresponding to private keys
-    	BigInteger[] toRet = new BigInteger[size];
+    	return randomMessages;
     	
-    	//create 128-bit random messages
-    	for(int i = 0; i < size; i++){
-    		toRet[i] = new BigInteger(128, 100, random);
-    	}
-    
-    	return toRet;
     }
     
     
@@ -95,7 +109,7 @@ public class ObliviousTransfer {
      * @return the calculated V value
      * @throws InvalidKeyException 
      */
-    public static BigInteger calculateV(BigInteger x, byte[] k, PublicKey pubk, PrivateKey privk) throws InvalidKeyException{// BigInteger k, int e, BigInteger n){
+    public static BigInteger calculateV(BigInteger x, byte[] k, PublicKey pubk) throws InvalidKeyException{// BigInteger k, int e, BigInteger n){
     	
     	//encrypt k then blind it with X
     	byte[] encrypted = RSAEncryption.encryptNoPadding(k, pubk);	
@@ -112,9 +126,10 @@ public class ObliviousTransfer {
      * @return - the encrypted k values of the random mesages
      * @throws InvalidKeyException 
      */
-    public BigInteger[] calculateMs(BigInteger[] randomMessages, BigInteger v, PrivateKey privk) throws InvalidKeyException{// BigInteger d, BigInteger n){
+    public BigInteger[] calculateMs(BigInteger v) throws InvalidKeyException{// BigInteger d, BigInteger n){
     	
     	BigInteger[] toRet = new BigInteger[randomMessages.length];
+    	PrivateKey privk = keys.getPrivate();
     	
     	for(int i = 0; i < randomMessages.length; i++){
     		
@@ -179,7 +194,7 @@ public class ObliviousTransfer {
     	KeyPair keypair = RSAEncryption.genKeys();
     	
     	//server side starting
-    	BigInteger[] randomMessages = test.randomMessages();
+    	BigInteger[] randomMessages = test.getRandomMessages();
     
     	//client side action
     	int b = chooseSecret(randomMessages);
@@ -189,10 +204,10 @@ public class ObliviousTransfer {
 
     	printByteArray(k);
     	
-    	BigInteger v = calculateV(randomMessages[b], k, keypair.getPublic(), keypair.getPrivate());
+    	BigInteger v = calculateV(randomMessages[b], k, keypair.getPublic());
     	
     	//server side action
-    	BigInteger[] ms = test.calculateMs(randomMessages, v, keypair.getPrivate());// rsa.getSecret(), rsa.getModulus());
+    	BigInteger[] ms = test.calculateMs(v);// rsa.getSecret(), rsa.getModulus());
     	
     	//client side action
     	BigInteger message = determineMessage(ms, b, k);
