@@ -7,6 +7,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ObliviousTransfer {
 
@@ -14,8 +16,10 @@ public class ObliviousTransfer {
     private BigInteger[] secrets;
     private BigInteger[] randomMessages;
     private KeyPair keys;
-    //private byte[] takenKeys;
     private static SecureRandom random;
+    
+        
+    private Set<String> stringSecrets = new HashSet<String>();
 
     /**
      * Common constructor
@@ -37,6 +41,7 @@ public class ObliviousTransfer {
    		 	BigInteger p = new BigInteger(128, 100, random);
    		 	
    		 	secrets[i] = p;
+   		 	stringSecrets.add(Base64Coder.encodeLines(p.toByteArray()));
    		 	//Alternatively, we might want to use RSA keys here here
     	}
 
@@ -163,10 +168,9 @@ public class ObliviousTransfer {
      * @param toCheck - the integer to check
      * @return true or false based on the key's validity
      */
-    public boolean checkSecret(BigInteger toCheck){	
+    public boolean checkSecret(String toCheck){	
     	
-    	//TODO IMPLEMENT THISISISIS
-    	return false;//return takenKeys.contains(toCheck);
+    	return stringSecrets.contains(toCheck);
     }
     
     public BigInteger getSecret(int index){
