@@ -191,60 +191,21 @@ public class Voter {
 		return response.results;
 	}
 	
-	public void run() {
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Please enter the election ID for the election you would like to vote in");
-			electionId = 1;//Integer.parseInt(br.readLine());
-			System.out.println("Please enter you name");
-			name = "a";//br.readLine();
-			if (!isEligible()) {
-				System.out.println("Sorry " + name + ", at this time you are not eligible to vote in election " + electionId);
-				return;
-			}
-			System.out.println("Success! " + name + ". You are eligible to vote in " + electionId);
-			System.out.println("To vote, please enter your password");
-			password = "u9kvce864r"; //br.readLine();
-			willVote();
-			if(!isVoting()) {
-				System.out.println("Sorry " + name + ", at this time we could not confirm your voting status");
-				return;
-			}
-			System.out.println("Success! " + name + ". You are confirmed as voting in " + electionId);
-			System.out.println("Please enter your vote");
-			vote = 1;//Integer.parseInt(br.readLine());
-			vote();
-			Constants.VoteStatus status = voted();
-			if (status == Constants.VoteStatus.ID_COLLISION) {
-				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
-				return;
-			} else if(status == Constants.VoteStatus.NOT_RECORDED) {
-				System.out.println("At this time, your vote could not be recorded");
-				return;
-			} 
-			System.out.println("Success! Your vote has been recorded");
-			processVote();
-			if(!counted()) {
-				System.out.println("Error processing your vote");
-				return;
-			}
-			System.out.println("Success! Your vote has been processed");
-			System.out.println("The results from the election are: " + Arrays.toString(results()));
-				
-		} catch (InvalidNonceException ine) {
-			System.out.println("Error communication with server: invalid nonce");
-		} catch (IOException ioe) {
-			System.out.println("Error communicating with server: ");
-			ioe.printStackTrace();
-		} catch (InvalidCheckSumException e) {
-			System.out.println("Invalid Check Sum");
-		} catch (InvalidSignatureException ise) {
-			System.out.println("Signature from Central Tabulating Facility is invalid");
-		} catch (VotingSecurityException e) {
-			e.printStackTrace();
-		}
+	public void setName(String s) {
+		this.name = s;
 	}
 	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setPassword(String s) {
+		this.password = s;
+	}
+	
+	public void setVote(int i) {
+		this.vote = i;
+	}
 	
 //	/**
 //	 * Define the Client Interface!
@@ -489,11 +450,4 @@ public class Voter {
 //		
 //	}
 		
-	
-	public static void main(String[] args){
-		
-		Voter voter = new Voter();
-		voter.run();
-		
-	}
 }
