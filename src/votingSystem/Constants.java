@@ -16,6 +16,7 @@ public final class Constants {
 	public static final int PORT = 9001;
 	public static final int POOL_THREADS = 10;
 	public static final int MESSAGE_SIZE = 2048;
+	public static final int RSA_SMALL_KEY = 512; //bits
 	public static final int PASSWORD_LENGTH = 100; //Length of BigInteger
 	public static final int VOTER_NAME_LENGTH = 100; //Length of BigInteger
 	public static final String HOST = null; //this is the localhost.
