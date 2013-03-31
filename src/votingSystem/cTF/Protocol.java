@@ -63,12 +63,13 @@ public class Protocol {
 						break;
 					case ISVOTING:
 						response = election.isVoting(received);
-	//				case OTGETRANDOMMESSAGES:
-	//					response = OTgetRandomMessages(received);
-	//					break;
-	//				case OTGETSECRETS:
-	//					response = OTgetSecrets(received);
-	//					break;
+						break;
+					case OTGETPUBLICKEYANDRANDOMMESSAGES:
+						response = election.OTGetPublicKeyAndRandomMessages();
+						break;
+					case OTGETSECRETS:
+						response = election.OTGetSecrets(received);
+						break;
 					case VOTE:
 						election.vote(received);
 						break;

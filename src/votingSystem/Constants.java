@@ -5,7 +5,7 @@ import java.security.PublicKey;
 public final class Constants {
 
 	public static final Operation[] OPERATION_VALUES = Operation.values();
-	public static final int NUM_VOTERS = 20;
+	public static final int NUM_VOTERS = 1;
 	public static boolean DEBUG = false;
 
 	//Server Constants

@@ -1,7 +1,9 @@
 package votingSystem;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import votingSystem.cTF.Election;
 
@@ -26,6 +28,9 @@ public class Message implements Serializable{
 	public PrivateKey voteKey;
 	public int vote;
 	public Election.ElectionState electionState;
+	public PublicKey OTKey;
+	public BigInteger[] OTMessages;
+	
 	
 	public Message(Operation operation) {
 		this.operation = operation;

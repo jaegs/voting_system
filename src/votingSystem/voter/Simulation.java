@@ -30,8 +30,8 @@ public class Simulation {
 			Voter[] voters = new Voter[Constants.NUM_VOTERS];
 			int v = 0;
 			for(Map.Entry<String, String> entry : passwords.entrySet()) {
-				String voterId = Base64Coder.encodeLines(ByteBuffer.allocate(4).putInt(v).array());
-				voters[v] = new Voter(electionId, entry.getKey(), entry.getValue(), voterId);
+				//String voterId = Base64Coder.encodeLines(ByteBuffer.allocate(4).putInt(v).array());
+				voters[v] = new Voter(electionId, entry.getKey(), entry.getValue());
 				v++;
 			}
 			for (Election.ElectionState state : Election.ElectionState.values()) {
