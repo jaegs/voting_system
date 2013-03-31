@@ -212,10 +212,6 @@ public class Voter {
 		return response.results;
 	}
 	
-	public void setName(String s) {
-		this.name = s;
-	}
-
 	public void setState(Election.ElectionState state)
 		throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.SET_STATE);
@@ -224,15 +220,11 @@ public class Voter {
 	}
 	
 	public String getName() {
-		return this.name;
+		return name;
 	}
 	
-	public void setPassword(String s) {
-		this.password = s;
-	}
-	
-	public void setVote(int i) {
-		this.vote = i;
+	public String getPassword() {
+		return password;
 	}
 		
 }
