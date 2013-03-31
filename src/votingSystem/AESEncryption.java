@@ -12,12 +12,18 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * AES Encryption
  * @author Clover
- * Adapted from http://crypto.stackexchange.com/a/15. However, the RSA encrypted AES key and the AES encrypted message 
- * are sent as one message with the RSA encrypted AES key prepended to the AES encrypted message. In addition, the 
- * non-encrypted IV is prepended to the AES encrypted message as well.
+ * Adapted from http://crypto.stackexchange.com/a/15
  */
 public class AESEncryption {
 	
+	/**
+	 * Encrypts a message using an AES symmetric key. The AES key is encrypted using RSA with the provided public key. 
+	 * The encrypted AES key is prepended and the non-encrypted IV are prepended to the encrypted message.
+	 * @param msg, the message to be encrypted
+	 * @param pubk, the public key to use to encrypt the AES key
+	 * @return byte array of the form [RSA encrypted AES KEY | IV | AES encrypted message] if successful, null otherwise
+	 * @throws InvalidKeyException
+	 */
 	public static byte[] encrypt(byte[] msg, PublicKey pubk) throws InvalidKeyException {
 		try {
 			Cipher cipher = Cipher.getInstance(Constants.AES_ALG);
@@ -27,8 +33,8 @@ public class AESEncryption {
 			SecretKeySpec keyspec = new SecretKeySpec(key.getEncoded(), "AES");
 			cipher.init(Cipher.ENCRYPT_MODE, keyspec);
 			IvParameterSpec ivspec = cipher.getParameters().getParameterSpec(IvParameterSpec.class);		
+			
 			byte[] encMsg = cipher.doFinal(msg);
-
 			byte[] k = key.getEncoded();
 			byte[] encKey = RSAEncryption.encrypt(k, pubk);
 			byte[] iv = ivspec.getIV();
@@ -45,6 +51,14 @@ public class AESEncryption {
 	    return null;
 	}
 	
+	/**
+	 * Decrypts a message using RSA to decrypt the AES key needed to decrypt the AES encrypted message,
+	 * and decrypts the message with the AES key and IV.
+	 * @param msg, byte array of the form [RSA encrypted AES KEY | IV | AES encrypted message]
+	 * @param pk, the private key corresponding to the public key used to encrypt the AES key
+	 * @return the non-encrypted message if successful, null otherwise
+	 * @throws InvalidKeyException
+	 */
 	public static byte[] decrypt(byte[] msg, PrivateKey pk) throws InvalidKeyException {
 		try {
 			Cipher cipher = Cipher.getInstance(Constants.AES_ALG);

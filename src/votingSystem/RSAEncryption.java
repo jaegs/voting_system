@@ -7,15 +7,13 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 /**
  * RSA Encryption
  * @author Clover
  */
 public class RSAEncryption {
-		
+	
 	public static KeyPair genKeys() {
 		try {
 			KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
@@ -41,6 +39,28 @@ public class RSAEncryption {
 	public static byte[] decrypt(byte[] msg, Key key) throws InvalidKeyException {
 		try {
 			Cipher cipher = Cipher.getInstance(Constants.RSA_ALG);
+	        cipher.init(Cipher.DECRYPT_MODE, key);
+	        return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static byte[] encryptNoPadding(byte[] msg, Key key) throws InvalidKeyException {
+		try {
+			Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+		    cipher.init(Cipher.ENCRYPT_MODE, key);
+		    return cipher.doFinal(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return null;
+	}
+	
+	public static byte[] decryptNoPadding(byte[] msg, Key key) throws InvalidKeyException {
+		try {
+			Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
 	        cipher.init(Cipher.DECRYPT_MODE, key);
 	        return cipher.doFinal(msg);
 		} catch (Exception e) {
