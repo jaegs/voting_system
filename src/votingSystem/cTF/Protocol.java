@@ -35,6 +35,8 @@ public class Protocol {
 		} catch (InvalidKeyException e) {
 			response = new Message(Operation.OTHER);
 			response.error = "Cannot decrypt message";
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		msg = CheckSum.stripAndCheck(msg);
 		if (msg == null) {
