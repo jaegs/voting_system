@@ -1,4 +1,3 @@
-package votingSystem.cTF;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -13,7 +12,7 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the voters’
+ *  processing votes, and responding to voter queries concerning the votersâ€™
  *   eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
@@ -82,8 +81,14 @@ public class Election {
 		 * Output: name, bool
 		 * Checks whether voter is eligible to vote in given election.
 		 */
+		System.out.println("Checking Eligibility for voter: " + received.voter);
 		Message response = new Message(Operation.ISELIGIBLE_R);
 		response.eligible = eligibleUsers.contains(received.voter);
+		if(response.eligible){
+			System.out.println("Eligibility Confirmed\n");
+		}else{
+			System.out.println("Eligibility Denied\n");
+		}
 		return response;
 	}
 	
@@ -94,6 +99,7 @@ public class Election {
 		 * If the election state is PREVOTE, the user is eligible for the election, 
 		 * and the user's password is verified, adds voter to list of voting users.
 		 */
+		System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
 		String voter = received.voter;
 		if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
 			votingUsers.add(voter);
@@ -107,8 +113,14 @@ public class Election {
 		 * Output: name, bool
 		 * Checks whether users is voting.
 		 */
+		System.out.println("Checking if voter " + received.voter + " is planning to vote.");
 		Message response = new Message(Operation.ISVOTING_R);
 		response.isVoting = votingUsers.contains(received.voter);
+		if(response.isVoting){
+			System.out.println("Voting Confirmed\n");
+		}else{
+			System.out.println("Voting Denied\n");
+		}
 		//state = ElectionState.VOTE; //TODO: CHANGE!!!!!
 		return response;
 	}
@@ -148,18 +160,24 @@ public class Election {
 		 * Users sends an encrpyted voted and CTF responds with a
 		 *  vote status - SUCCESS, ID_COLLISION, or NOT_RECORDED.
 		 */  
+		
+		System.out.println("Confirming Vote cast...");
+		
 		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.VOTED_R);
 		if (encryptedVote != null && 
 				encryptedVotes.contains(encryptedVote)) {
 			response.voted = Constants.VoteStatus.SUCCESS;
+			System.out.println("Vote cast successfully!\n");
 		}
 		else if (encryptedVote != null && 
 				IdCollisions.containsKey(encryptedVote)) {
 			response.voted = Constants.VoteStatus.ID_COLLISION;
+			System.out.println("Voter ID collision!\n");
 		} 
 		else {
 			response.voted = Constants.VoteStatus.NOT_RECORDED;
+			System.out.println("Voter Not Recorded!\n");
 		}
 		return response;
 	}
@@ -174,6 +192,7 @@ public class Election {
 		 * if the id in the encrypted vote matches the input id,
 		 * the CTF adds the vote to the overall election tally.
 		 */
+		System.out.println("Processing vote...\n");
 		String voterId = received.voterId;
 		PrivateKey voteKey = received.voteKey;
 		//voter calls "counted" to check if vote actually processed.
@@ -207,12 +226,15 @@ public class Election {
 		 * A voter can check if his/her vote has been counted by sending their encrypted vote again.
 		 *  The CTF responds with the unencrypted vote.
 		 */
+		System.out.println("Confirming that vote has been counted...");
 		String encryptedVote = received.encryptedVote;
 		Message response = new Message(Operation.COUNTED_R);
 		if(processedVotes.containsKey(encryptedVote)) {
+			System.out.println("Vote Confirmed!\n");
 			response.vote = processedVotes.get(encryptedVote);
 			response.encryptedVote = encryptedVote;
 		} else {
+			System.out.println("Vote Not Counted!\n");
 			response.error = "Vote not processed";
 		}
 		return response;
@@ -225,10 +247,16 @@ public class Election {
 		 * If election state is COMPLETED,
 		 *  the CTF will list the results for each candidate as an integer array.
 		 */
+		System.out.println("Checking Results...");
 		Message response = new Message(Operation.RESULTS_R);
 		if (getState() == ElectionState.COMPLETED) {
 			response.results = results.toString();
+			for(int i = 0; i < results.length(); i++){
+				System.out.println("Candidate #" + i + " received " + results.get(i) + " votes.");
+			}
+			System.out.println();
 		} else {
+			System.out.println("Election not yet complete!\n");
 			response.error = "Election not yet completed";
 		}
 		return response;
@@ -276,6 +304,7 @@ public class Election {
 	 */	
 	public Message OTGetPublicKeyAndRandomMessages(){
 		
+		System.out.println("Starting Oblivious Transfer");
 		//get the random messages
 		BigInteger[] randoms = OT.getRandomMessages();
 		//KeyPair keys = OT.getKeyPair();
@@ -289,7 +318,7 @@ public class Election {
 		//for(int i = 0; i < response.OTMessages.length; i++){
 		//	System.out.print(response.OTMessages[i] + "  ");
 		//}
-		//System.out.println();
+		
 		
 		
 		response.OTKey = OT.getPublicKey();
@@ -305,6 +334,7 @@ public class Election {
 	 */
 	public Message OTGetSecrets(Message received){
 		
+		System.out.println("Finishing Oblivious Transfer for voter: " + received.voter);
 		//create response object
 		Message response = new Message(Operation.OTGETSECRETS_R);
 		
