@@ -35,11 +35,6 @@ public class Voter {
 		this.password = password;
 	}
 	
-	public Voter(int electionId) {
-		this.electionId = electionId;
-	}
-	
-	
 	private Message prepareMessage(Message send, Operation responseType) 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
@@ -91,20 +86,22 @@ public class Voter {
 
 	public boolean isEligible() 
 			throws UnknownHostException, IOException, VotingSecurityException {
+		
+		System.out.println("Voter " + name + " requesting eligibility check!");
 		Message send = new Message(Operation.ISELIGIBLE);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISELIGIBLE_R);
+		if(response.eligible){
+			System.out.println("Eligibility Confirmed.\n");
+		}else{
+			System.out.println("Eligibility Denied.\n");
+		}
 		return response.eligible;
 	}
 	
-	public void willVote(String username, String password) 
-			throws UnknownHostException, IOException, VotingSecurityException {
-		this.name = username;
-		this.password = password;
-		willVote();
-	}
 	public void willVote() 
 			throws UnknownHostException, IOException, VotingSecurityException {
+		System.out.println("Voter " + name + " is registering to vote!\n");
 		Message send = new Message(Operation.WILLVOTE);
 		send.voter = name;
 		send.password = password;
@@ -113,9 +110,15 @@ public class Voter {
 	
 	public boolean isVoting() 
 			throws UnknownHostException, IOException, VotingSecurityException {
+		System.out.println("Voter " + name + " checking successful registration!");
 		Message send = new Message(Operation.ISVOTING);
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISVOTING_R);
+		if(response.isVoting){
+			System.out.println("Registration Confirmed.\n");
+		}else{
+			System.out.println("Registration Denied.\n");
+		}
 		return response.isVoting;
 	}
 	
@@ -126,7 +129,9 @@ public class Voter {
 	}
 	public void vote() 
 			throws UnknownHostException, IOException, VotingSecurityException {
-				
+			
+		System.out.println("Starting voting process!");
+		System.out.println("Oblivious Transfer initiated.");
 		//ObliviousTransfer Step1
 		Message OTRequest = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES);
 		OTRequest.voter = name;
@@ -195,7 +200,7 @@ public class Voter {
 		//calculate voterID
 		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
 		voterId = Base64Coder.encodeLines(vId.toByteArray());
-		
+		System.out.println("Oblivious Transfer completed");
 		//System.out.println("VoterId: " + voterId);
 		
 		//create the VOTe to Send
@@ -212,13 +217,20 @@ public class Voter {
 		}
 		send.encryptedVote = encryptedVote;
 		prepareMessage(send);
+		System.out.println("Vote casted!\n");
 	}
 	
 	public Constants.VoteStatus voted()
 			throws UnknownHostException, IOException, VotingSecurityException {
+		System.out.println("Checking successful vote casted.");
 		Message send = new Message(Operation.VOTED);
 		send.encryptedVote = encryptedVote;
 		Message response = prepareMessage(send, Operation.VOTED_R);
+		if(response.voted == Constants.VoteStatus.SUCCESS){
+			System.out.println("Vote Confirmed!\n");
+		}else{
+			System.out.println("Vote Error!\n");
+		}
 		return response.voted;
 	}
 	
@@ -232,6 +244,7 @@ public class Voter {
 	
 	public boolean counted() 
 			throws UnknownHostException, IOException, VotingSecurityException {
+		System.out.println("Confirming vote counted...\n");
 		Message send = new Message(Operation.COUNTED);
 		send.encryptedVote = encryptedVote;
 		Message response = prepareMessage(send, Operation.COUNTED_R);
@@ -242,6 +255,7 @@ public class Voter {
 			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.RESULTS);
 		Message response = prepareMessage(send, Operation.RESULTS_R);
+		System.out.println("Results: ");
 		return response.results;
 	}
 	
@@ -258,10 +272,6 @@ public class Voter {
 	
 	public String getPassword() {
 		return password;
-	}
-	
-	public String getId() {
-		return voterId;
 	}
 		
 }
