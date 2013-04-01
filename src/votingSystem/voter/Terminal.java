@@ -3,6 +3,7 @@ package votingSystem.voter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,40 +15,44 @@ import votingSystem.InvalidSignatureException;
 import votingSystem.Tools;
 import votingSystem.VotingSecurityException;
 import votingSystem.cTF.Accounts;
+import votingSystem.cTF.Election;
 
 public class Terminal {
-	private int electionId;
-	private Voter v;
-	
-	public Terminal() {
-		electionId = 1;
-		Map<String,String> passwords = (Map<String,String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
-		Set<Map.Entry<String, String>> s = passwords.entrySet();
-		Iterator<Entry<String, String>> sIt = s.iterator();
-		Entry<String, String> e = sIt.next();
-		v = new Voter(electionId, e.getKey(), e.getValue());
-	}
 	
 	public void run() {
 		try {
+			int electionId = 1;
+			Map<String,String> passwords = (Map<String,String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
+			Map.Entry<String, String> entry = passwords.entrySet().iterator().next();
+			System.out.println("You knew apriori that your username is: " + entry.getKey());
+			System.out.println("You knew apriori that your password is: " + entry.getValue());
+			Voter v = new Voter(electionId);
+			System.out.println("Election state is PENDING.\nSince no one is operating the Central Tabulating Facility, we'll change the Election state for you");
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Your username is: " + v.getName());
-			System.out.println("Your password is: " + v.getPassword());
 			
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
 				System.out.println("Please enter 'vote' to vote.");	
 			}
-			v.willVote();
+			System.out.println("OK, Election state is PREVOTE");
+			System.out.println("Please enter your username");
+			String username = br.readLine();
+			System.out.println("Please enter your password");
+			String password = br.readLine();
+			v.willVote(username, password);
+			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
 				return;
 			}
-			System.out.println("Success! " + v.getName() + ". You are confirmed as voting in " + electionId + ".");
+			System.out.println("Success! " + v.getName() + ". You are confirmed as voting in election #" + electionId + ".");
 			
-			System.out.println("Please enter your vote.");
+			v.setState(Election.ElectionState.VOTE);
+			System.out.println("OK, Election state is VOTE");
+			System.out.println("Please enter your vote. Candidates are 0 through 4.");
 			int vote = Integer.parseInt(br.readLine());
 			v.vote(vote);
+			System.out.println("Your anonymous voter ID is " + v.getId() + ". Don't tell anyone or else you won't be anonymous!");
 			Constants.VoteStatus status = v.voted();
 			if (status == Constants.VoteStatus.ID_COLLISION) {
 				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
@@ -63,7 +68,10 @@ public class Terminal {
 				System.out.println("Error processing your vote.");
 				return;
 			}
-			System.out.println("Success! Your vote has been processed.");			
+			System.out.println("Success! Your vote has been processed.");
+			v.setState(Election.ElectionState.COMPLETED);
+			System.out.println("OK, Election state is COMPLETED");
+			System.out.println("Election results are: " + v.results());
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");
 		} catch (IOException ioe) {
@@ -79,7 +87,6 @@ public class Terminal {
 	}
 	
 	public static void main(String[] args) {
-		Terminal t = new Terminal();
-		t.run();
+		new Terminal().run();
 	}	
 }

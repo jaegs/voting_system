@@ -35,6 +35,11 @@ public class Voter {
 		this.password = password;
 	}
 	
+	public Voter(int electionId) {
+		this.electionId = electionId;
+	}
+	
+	
 	private Message prepareMessage(Message send, Operation responseType) 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		return prepareMessage(send); //TODO: CHECK RESPONSE TYPE
@@ -92,6 +97,12 @@ public class Voter {
 		return response.eligible;
 	}
 	
+	public void willVote(String username, String password) 
+			throws UnknownHostException, IOException, VotingSecurityException {
+		this.name = username;
+		this.password = password;
+		willVote();
+	}
 	public void willVote() 
 			throws UnknownHostException, IOException, VotingSecurityException {
 		Message send = new Message(Operation.WILLVOTE);
@@ -247,6 +258,10 @@ public class Voter {
 	
 	public String getPassword() {
 		return password;
+	}
+	
+	public String getId() {
+		return voterId;
 	}
 		
 }
