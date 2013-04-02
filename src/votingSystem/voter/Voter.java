@@ -28,6 +28,9 @@ public class Voter {
 	private KeyPair voteKeys;
 	private static SecureRandom random = new SecureRandom();
 	
+	public Voter(int electionId) {
+	   this.electionId = electionId;
+	}
 	
 	public Voter(int electionId, String name, String password) {
 		this.electionId = electionId;
@@ -106,6 +109,13 @@ public class Voter {
 		send.voter = name;
 		send.password = password;
 		prepareMessage(send);
+	}
+	
+	public void willVote(String username, String password) 
+	      throws UnknownHostException, IOException, VotingSecurityException {
+	    this.name = username;
+	    this.password = password;
+	    willVote();
 	}
 	
 	public boolean isVoting() 
@@ -272,6 +282,10 @@ public class Voter {
 	
 	public String getPassword() {
 		return password;
+	}
+	
+	public String getId() {
+	    return voterId;
 	}
 		
 }
