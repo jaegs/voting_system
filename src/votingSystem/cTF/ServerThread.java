@@ -1,8 +1,6 @@
 package votingSystem.cTF;
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
-
 
 public class ServerThread implements Runnable {
 	private final Socket soc;

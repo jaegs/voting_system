@@ -4,18 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import votingSystem.Constants;
 import votingSystem.InvalidCheckSumException;
 import votingSystem.InvalidSignatureException;
 import votingSystem.Tools;
-import votingSystem.VotingSecurityException;
-import votingSystem.cTF.Accounts;
 import votingSystem.cTF.Election;
 
 public class Terminal {
@@ -23,6 +16,7 @@ public class Terminal {
 	public void run() {
 		try {
 			int electionId = 1;
+			@SuppressWarnings("unchecked")
 			Map<String,String> passwords = (Map<String,String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
 			Map.Entry<String, String> entry = passwords.entrySet().iterator().next();
 			System.out.println("You knew apriori that your username is: " + entry.getKey());

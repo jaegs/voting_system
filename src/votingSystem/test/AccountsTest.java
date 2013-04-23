@@ -2,7 +2,6 @@ package votingSystem.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.Map;
 
 import votingSystem.Constants;

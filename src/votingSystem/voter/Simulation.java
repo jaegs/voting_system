@@ -1,20 +1,13 @@
 package votingSystem.voter;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import votingSystem.Base64Coder;
 import votingSystem.Constants;
-import votingSystem.InvalidCheckSumException;
-import votingSystem.InvalidSignatureException;
 import votingSystem.Tools;
 import votingSystem.VotingSecurityException;
 import votingSystem.cTF.Election;

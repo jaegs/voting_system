@@ -11,8 +11,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 
 /**
  * Utility class for converting byte arrays to/from objects and reading/writing from files.

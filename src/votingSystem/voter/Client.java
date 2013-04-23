@@ -4,7 +4,6 @@ import votingSystem.Constants;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.Console;
 import java.io.*;
 
 

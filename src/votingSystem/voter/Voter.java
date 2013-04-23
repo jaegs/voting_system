@@ -175,7 +175,7 @@ public class Voter {
 		int b_val = ObliviousTransfer.chooseSecret(response.OTMessages);
 		//System.out.println("B" + b_val);
 		byte[] k = ObliviousTransfer.generateK();
-		BigInteger test = new BigInteger(k);
+		// BigInteger test = new BigInteger(k);
 		//System.out.println("K-> " + test);
 		BigInteger v;
 		
