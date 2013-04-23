@@ -21,18 +21,22 @@ import votingSystem.cTF.Election;
 public class Voter {
 	private int electionId;
 	private String name;
-	private String password;
+	private byte[] password;
 	private String voterId = Base64Coder.encodeLines(new byte[] {1,2,3, 2});
 	private int vote;
 	private String encryptedVote;
 	private KeyPair voteKeys;
 	private static SecureRandom random = new SecureRandom();
 	
+	
+//TODO add methods to erase password and voter ID from system memory and then call them in the terminal program.
+// need to erase password/voter ID in all sent messages in memory too, would need methods in voter and would need to be called in terminal program.
+	
 	public Voter(int electionId) {
 	   this.electionId = electionId;
 	}
 	
-	public Voter(int electionId, String name, String password) {
+	public Voter(int electionId, String name, byte[] password) {
 		this.electionId = electionId;
 		this.name = name;
 		this.password = password;
@@ -111,7 +115,7 @@ public class Voter {
 		prepareMessage(send);
 	}
 	
-	public void willVote(String username, String password) 
+	public void willVote(String username, byte[] password) 
 	      throws UnknownHostException, IOException, VotingSecurityException {
 	    this.name = username;
 	    this.password = password;
@@ -279,11 +283,7 @@ public class Voter {
 	public String getName() {
 		return name;
 	}
-	
-	public String getPassword() {
-		return password;
-	}
-	
+		
 	public String getId() {
 	    return voterId;
 	}

@@ -108,7 +108,7 @@ public class Election {
 		scheduler.schedule(new Runnable() { public void run() {
 			System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
 			String voter = received.voter;
-			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
+			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password))) {
 				votingUsers.add(voter);
 		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
@@ -355,7 +355,7 @@ public class Election {
 		}
 		
 		//if username/password is invalid
-		if(!accounts.verify(received.voter, received.password)){
+		if(!accounts.verify(received.voter, new String(received.password))){
 			response.error = "Invalid username and password!";
 			return response;
 		}

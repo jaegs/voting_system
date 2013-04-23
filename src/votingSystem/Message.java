@@ -20,7 +20,7 @@ public class Message implements Serializable{
 	public int electionId;
 	public String voter;
 	public boolean eligible;
-	public String password;
+	public byte[] password;
 	public boolean isVoting;
 	public String voterId;
 	public String encryptedVote;

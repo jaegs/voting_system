@@ -42,7 +42,7 @@ public class Simulation {
 			Voter[] voters = new Voter[Constants.NUM_VOTERS];
 			int v = 0;
 			for(Map.Entry<String, String> entry : passwords.entrySet()) {
-				voters[v] = new Voter(electionId, entry.getKey(), entry.getValue());
+				voters[v] = new Voter(electionId, entry.getKey(), entry.getValue().getBytes());
 				v++;
 			}
 			for (Election.ElectionState state : Election.ElectionState.values()) {
