@@ -3,6 +3,7 @@ package votingSystem.voter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,9 +39,16 @@ public class Terminal {
 			System.out.println("Please enter your username");
 			String username = br.readLine();
 			System.out.println("Please enter your password");
-			String password = br.readLine();
-			v.willVote(username, password);
+
+			byte[] password = br.readLine().getBytes();
+			System.out.println("Entered Password: " + new String(password));
+			v.willVote(username, new String(password));
 			Thread.sleep(Constants.PASSWORD_DELAY * 2);
+			
+			// "Erase" password by overwriting stored password with random bytes
+			SecureRandom sr = new SecureRandom();
+			sr.nextBytes(password);
+			System.out.println("Erased Password: " + new String(password));
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
