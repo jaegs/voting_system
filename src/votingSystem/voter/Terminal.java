@@ -40,6 +40,7 @@ public class Terminal {
 			System.out.println("Please enter your password");
 			String password = br.readLine();
 			v.willVote(username, password);
+			Thread.sleep(Constants.PASSWORD_DELAY * 2);
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
@@ -81,7 +82,7 @@ public class Terminal {
 			System.out.println("Invalid Check Sum");
 		} catch (InvalidSignatureException ise) {
 			System.out.println("Signature from Central Tabulating Facility is invalid");
-		} catch (VotingSecurityException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
