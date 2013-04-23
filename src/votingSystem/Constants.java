@@ -8,7 +8,7 @@ public final class Constants {
 	 */
 
 	public static final Operation[] OPERATION_VALUES = Operation.values();
-	public static final int NUM_VOTERS = 1;
+	public static final int NUM_VOTERS = 10;
 	public static boolean DEBUG = false;
 	public static boolean VERBOSE = false;
 
@@ -17,11 +17,12 @@ public final class Constants {
 	public static final int POOL_THREADS = 10;
 	public static final int MESSAGE_SIZE = 2048;
 	public static final int RSA_SMALL_KEY = 512; //bits
-	public static final int PASSWORD_LENGTH = 100; //Length of BigInteger
+	public static final int PASSWORD_LENGTH = 60; //Length of BigInteger
 	public static final int VOTER_NAME_LENGTH = 100; //Length of BigInteger
 	public static final String HOST = null; //this is the localhost.
 	public static final String PASSWORDS_FILENAME = "bin/votingSystem/passwords.ser";
 	public static final String VOTERS_FILENAME = "bin/votingSystem/voters.ser";
+	public static final int PASSWORD_DELAY = 2000;
 	
 	public static enum VoteStatus {NOT_RECORDED, SUCCESS,ID_COLLISION, INVALID_ELECTION_STATE};
 		

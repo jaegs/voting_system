@@ -7,6 +7,9 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import votingSystem.*;
@@ -21,6 +24,7 @@ import votingSystem.*;
 public class Election {
 
 	private final Accounts accounts;
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	//identifies the election and is transmitted between voter and ctf
 	private final int id;
@@ -93,18 +97,20 @@ public class Election {
 		return response;
 	}
 	
-	public void willVote(Message received) {
+	public void willVote(final Message received) {
 		/**
 		 * Step: #2
 		 * Input: name, password
 		 * If the election state is PREVOTE, the user is eligible for the election, 
 		 * and the user's password is verified, adds voter to list of voting users.
 		 */
-		System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
-		String voter = received.voter;
-		if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
-			votingUsers.add(voter);
-		}
+		
+		scheduler.schedule(new Runnable() { public void run() {
+			System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
+			String voter = received.voter;
+			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, received.password)) {
+				votingUsers.add(voter);
+		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public Message isVoting(Message received) {

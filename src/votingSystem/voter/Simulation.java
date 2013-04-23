@@ -60,6 +60,9 @@ public class Simulation {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				if (state == Election.ElectionState.PREVOTE) {
+					Thread.sleep(Constants.PASSWORD_DELAY*2);
+				}
 			}
 			System.out.println(voters[0].results());
 			threadPool.shutdown();
@@ -68,6 +71,8 @@ public class Simulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (VotingSecurityException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

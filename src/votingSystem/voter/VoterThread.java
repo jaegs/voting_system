@@ -35,10 +35,10 @@ public class VoterThread implements Runnable {
 					System.out.println("not eligible");
 				}
 				voter.willVote();
-				if(!voter.isVoting())
-					System.out.println("not voting");
 				break;
 			case VOTE:
+				if(!voter.isVoting())
+					System.out.println("not voting");
 				voter.vote(random.nextInt(5)); //Randomly chooses one of the 5 candidates
 				Constants.VoteStatus status = voter.voted();
 				if (status == Constants.VoteStatus.ID_COLLISION) {
