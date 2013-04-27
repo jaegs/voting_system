@@ -25,6 +25,25 @@ public class Terminal {
 			System.out.println("Election state is PENDING.\nSince no one is operating the Central Tabulating Facility, we'll change the Election state for you");
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			
+			//TIM
+			//PASSWORD CHANGING
+			boolean passwordChanged = false;
+			while(!passwordChanged){
+				System.out.print("Please change your password!");
+				System.out.print("\nEnter old password: ");
+				String oldPassword = br.readLine();
+				System.out.print("\nEnter new password: ");
+				String newPassword = br.readLine();
+				System.out.print("\nEnter confirm password: ");
+				String confirmPassword = br.readLine();
+				passwordChanged = v.changePassword(oldPassword, newPassword, confirmPassword);
+				if(!passwordChanged){
+					
+					System.out.println("Password change failed. Please try again.");
+				}
+			}
+			
+			
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
 				System.out.println("Please enter 'vote' to vote.");	
