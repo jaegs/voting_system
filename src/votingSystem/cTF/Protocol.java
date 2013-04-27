@@ -101,6 +101,9 @@ public class Protocol {
 					case COUNTED:
 						response = election.counted(received);
 						break;
+					case CHANGE_PASSWORD:
+						response = election.changePassword(received);
+						break;
 	//				case PROTEST:
 	//					protest(received);
 	//					break;
