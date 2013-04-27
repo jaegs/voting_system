@@ -21,6 +21,8 @@ public class Message implements Serializable{
 	public String voter;
 	public boolean eligible;
 	public byte[] password;
+	public byte[] newPassword;
+	public byte[] confirmPassword;
 	public boolean isVoting;
 	public String voterId;
 	public String encryptedVote;
