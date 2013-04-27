@@ -234,6 +234,38 @@ public class Voter {
 		System.out.println("Vote casted!\n");
 	}
 	
+	/**
+	 * Handles changing the password for a user. 
+	 * User's are forced to do this on their first login
+	 * 
+	 * @param oldPassword - old password
+	 * @param newPassword - the user's new password
+	 * @param confirmPassword - the user enters their passwrod a second time
+	 * @return
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 * @throws VotingSecurityException
+	 */
+	public boolean changePassword(String oldPassword, String newPassword, String confirmPassword)
+		throws UnknownHostException, IOException, VotingSecurityException {
+		
+		//Client-side checks
+		if(!newPassword.equals(confirmPassword)){
+			return false;
+		}
+		
+		//
+		Message send = new Message(Operation.CHANGE_PASSWORD);
+		send.password = oldPassword.getBytes();
+		send.newPassword = newPassword.getBytes();
+		send.confirmPassword = confirmPassword.getBytes();
+		send.voter = name;
+		
+		Message response = prepareMessage(send);
+		
+		return response.passwordChanged;
+	}
+	
 	public Constants.VoteStatus voted()
 			throws UnknownHostException, IOException, VotingSecurityException {
 		System.out.println("Checking successful vote casted.");
