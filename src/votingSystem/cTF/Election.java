@@ -131,6 +131,36 @@ public class Election {
 	}
 	
 	
+	/**
+	 * 
+	 * @param received
+	 * @return
+	 */
+	public Message changePassword(Message received){
+		Message response = new Message(Operation.CHANGE_PASSWORD_R);
+		
+		//if username/password is invalid
+		if(!accounts.verify(received.voter, new String(received.password))){
+				response.error = "Invalid username and password!";
+				response.passwordChanged = false;
+				return response;
+		}
+		//if password do not match
+		else if(!Arrays.equals(received.newPassword, received.confirmPassword)){
+			response.error = "Password do not match!";
+			response.passwordChanged = false;
+			return response;
+		}
+		//otherwise change the password
+		else{
+			accounts.changePassword(received.voter, received.newPassword.toString());
+			response.passwordChanged = true;
+			return response;
+		}
+		
+		
+	}
+	
 	public void vote(Message received) {
 		/**
 		 * Step: #5
