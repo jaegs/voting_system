@@ -32,13 +32,28 @@ public class Terminal {
 				System.out.println("Please change your password!");
 				System.out.print("Enter your username: ");
 				String username = br.readLine();
-				System.out.print("Enter old password: ");
-				String oldPassword = br.readLine();
+				System.out.print("Enter old password: ");				
+				char[] oldpass = new char[Constants.MAX_PASS_LENGTH];
+				int oldpasslen = br.read(oldpass) - 1;
+				byte[] oldpassword = new byte[oldpasslen];
+				for (int i = 0; i < oldpasslen; i++) {
+					oldpassword[i] = (byte) oldpass[i];
+				}
 				System.out.print("Enter new password: ");
-				String newPassword = br.readLine();
+				char[] newpass = new char[Constants.MAX_PASS_LENGTH];
+				int newpasslen = br.read(newpass) - 1;
+				byte[] newpassword = new byte[newpasslen];
+				for (int i = 0; i < newpasslen; i++) {
+					newpassword[i] = (byte) newpass[i];
+				}				
 				System.out.print("Enter confirm password: ");
-				String confirmPassword = br.readLine();
-				passwordChanged = v.changePassword(username, oldPassword, newPassword, confirmPassword);
+				char[] confpass = new char[Constants.MAX_PASS_LENGTH];
+				int confpasslen = br.read(confpass) - 1;
+				byte[] confpassword = new byte[confpasslen];
+				for (int i = 0; i < confpasslen; i++) {
+					confpassword[i] = (byte) confpass[i];
+				}				
+				passwordChanged = v.changePassword(username, oldpassword, newpassword, confpassword);
 				if(!passwordChanged){
 					
 					System.out.println("Password change failed. Please try again.");
@@ -62,7 +77,7 @@ public class Terminal {
 				password[i] = (byte) pass[i];
 			}
 			
-			System.out.println("Entered pass: " + new String(password));
+			//System.out.println("Entered pass: " + new String(password));
 			
 			v.willVote(username, password);
 			Thread.sleep(Constants.PASSWORD_DELAY * 4);
