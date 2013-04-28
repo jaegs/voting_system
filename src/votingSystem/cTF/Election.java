@@ -187,9 +187,15 @@ public class Election {
 		}
 		//otherwise change the password
 		else{
-			accounts.changePassword(received.voter, new String(received.newPassword));
-			response.passwordChanged = true;
-			return response;
+			if(accounts.changePassword(received.voter, new String(received.newPassword))){
+				response.passwordChanged = true;
+				return response;
+			}
+			else{
+				response.error = "Password must be at least 10 characters long, and must contain at least one of each: number, lowercase letter, uppercase letter, symbol";
+				response.passwordChanged = false;
+				return response;
+			}
 		}
 		
 		
