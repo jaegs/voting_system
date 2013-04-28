@@ -56,7 +56,7 @@ public class Terminal {
 
 			// TODO: Verify this actually works, remove print at end
 			int passlen = 0;
-			byte[] inpass = new byte[Integer.MAX_VALUE];
+			byte[] inpass = new byte[Constants.MAX_PASS_LENGTH];
 			ByteArrayInputStream in = new ByteArrayInputStream(inpass);
 			while (passlen == 0) {
 				System.out.println("Please enter your password");
