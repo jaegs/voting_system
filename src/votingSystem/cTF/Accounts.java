@@ -6,7 +6,6 @@ import votingSystem.Tools;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,7 @@ public class Accounts{
 	private final SecureRandom random = new SecureRandom();
 	private Map<String, Set<Group>> userToGroups;
 	private Set<Group> activeGroups = Collections.newSetFromMap(new ConcurrentHashMap<Group,Boolean>());
+	private Set<Group> selectedGroups = Collections.newSetFromMap(new ConcurrentHashMap<Group,Boolean>());
 	
 	/**
 	 * 
@@ -35,14 +35,15 @@ public class Accounts{
 		} else {
 			userToPass = new ConcurrentHashMap<String, String>();
 			userToGroups = new ConcurrentHashMap<String, Set<Group>>();
-			//Add the create a new group
-			Set<Group> userGroups = new HashSet<Group>();
-			
+			//Create a default group
+			Group all = new Group("all");
 			
 			for(int i = 0; i < Constants.NUM_VOTERS; i++) {
 				String username = new BigInteger(Constants.VOTER_NAME_LENGTH, random).toString(32);
 				String pass = new BigInteger(Constants.PASSWORD_LENGTH, random).toString(32);
-				userToGroups.put(username, userGroups);
+				Set<Group> userGroup = new HashSet<Group>();
+				userGroup.add(all);
+				userToGroups.put(username, userGroup);
 				userToPass.put(username, pass);	
 				if(Constants.DEBUG) System.out.println("USER: " + username +  " PASS: " + pass);
 			}
@@ -56,6 +57,13 @@ public class Accounts{
 	public Accounts() {
 		userToPass = new ConcurrentHashMap<String, String>();
 		userToGroups = new ConcurrentHashMap<String, Set<Group>>();
+	}
+	
+	//For demonstration purposes only
+	protected void printUsers() {
+		for(Map.Entry<String, String> entry: userToPass.entrySet()) {
+			System.out.println("Username: " + entry.getKey() + " Password: " + entry.getValue());
+		}
 	}
 	
 	private void writeUsersToFile() {
@@ -182,7 +190,7 @@ public class Accounts{
 	}
 	
 	public String[] getNames() {
-		return (String []) userToPass.keySet().toArray();
+		return (String []) userToPass.keySet().toArray(new String[userToPass.size()]);
 	}
 	
 	public void deleteGroupsFromUser(String username, Set<Group> groups) {
@@ -238,5 +246,14 @@ public class Accounts{
 			}
 		}
 		return eligibleUsers;
+	}
+	
+	public void setSelectedGroup(Set<Group> selected) {
+		selectedGroups.clear();
+		selectedGroups.addAll(selected);
+	}
+	
+	public Set<Group> getSelectedGroup() {
+		return (Set<Group>) Collections.unmodifiableCollection(selectedGroups);
 	}
 }

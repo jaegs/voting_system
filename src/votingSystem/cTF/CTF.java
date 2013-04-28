@@ -20,6 +20,7 @@ public class CTF {
 	private final Map<Integer, Election> elections;
 	private PrivateKey privKey;
 	protected final ExecutorService threadPool = Executors.newFixedThreadPool(Constants.CTF_POOL_THREADS);
+	private final Accounts acc;
     
 	
 	/**
@@ -28,26 +29,29 @@ public class CTF {
 	 * (which run in a different process). 
 	 * Creates on sample election with 5 candidates  
 	 */
-	public CTF() {
+	public CTF(Accounts acc) {
+		this.acc = acc;
 		KeyPair keys = RSAEncryption.genKeys();
 		Tools.WriteObjectToFile(keys.getPublic(), Constants.CTF_PUBLIC_KEY_FILE);
 		privKey = keys.getPrivate();
 		
-		
-		//Add the create a new group
-		Group all = new Group("All");
-		Set<Group> eligibleGroups = new HashSet<Group>();
-		eligibleGroups.add(all);
-		
-		
-		
+		if (acc.getSelectedGroup().size() == 0) {
+			Set<Group> groups = new HashSet<Group>();
+			groups.add(new Group("all"));
+			acc.setSelectedGroup(groups);
+		}
+		Set<String> eligibleUsers = acc.getUsersInGroups(acc.getSelectedGroup());
 		elections = new HashMap<Integer, Election>();
-		Election testElection = new Election(1, 5, eligibleGroups);
+		Election testElection = new Election(1, 5, acc, acc.getSelectedGroup());
 		elections.put(1, testElection);
 
 		new Protocol(this);
-		
 	}
+	
+	public CTF() {
+		this(new Accounts(false));
+	}
+	
 	public PrivateKey getPrivateKey() {
 		return privKey;
 	}

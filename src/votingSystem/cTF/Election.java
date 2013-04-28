@@ -37,7 +37,6 @@ public class Election {
 	//Since we're only using the standard library, we keep this collections in memory instead.
 	
 	//Set of voters who are eligible to vote in this election
-	private final Set<String> eligibleUsers;
 	
 	private final Set<Group> eligibleGroups;
 	
@@ -75,15 +74,12 @@ public class Election {
 		PENDING, PREVOTE, VOTE, COMPLETED
 	}
 	
-	public Election(int id, int numCandidates, Set<Group> groups) {
+	public Election(int id, int numCandidates, Accounts accounts, Set<Group> groups) {
 		this.id = id;
-		accounts = new Accounts(false);
+		this.accounts = accounts;
 		results = new AtomicIntegerArray(numCandidates);
 		setState(ElectionState.PREVOTE); //TODO election should start as pending
-		
-		
 		eligibleGroups = groups;
-		eligibleUsers = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(accounts.getNames())));
 	}
 	
 	public int getId() {
@@ -98,7 +94,7 @@ public class Election {
 		 */
 		System.out.println("Checking Eligibility for voter: " + received.voter);
 		Message response = new Message(Operation.ISELIGIBLE_R);
-		response.eligible = (eligibleUsers.contains(received.voter)/*TODO*/ && accounts.verifyGroups(received.voter, eligibleGroups));
+		response.eligible = accounts.verifyGroups(received.voter, eligibleGroups);
 		
 		if(response.eligible){
 			System.out.println("Eligibility Confirmed\n");
