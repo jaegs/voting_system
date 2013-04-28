@@ -15,7 +15,6 @@ import java.security.PublicKey;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 import votingSystem.AESEncryption;
 import votingSystem.Constants;
@@ -29,7 +28,6 @@ public class Client extends Thread{
 	 * For a response its A, 1, 2, ..., N, N-1, X
 	 */
 	private SecretKey[] responseKeys = new SecretKey[Constants.MIXES_PER_MSG];
-	private IvParameterSpec[] responseIvSpecs = new IvParameterSpec[Constants.MIXES_PER_MSG];
 	private PrivateKey privKey;
 	private int[] mixIDs = new int[Constants.NUM_MIXES];
 	private int port;
