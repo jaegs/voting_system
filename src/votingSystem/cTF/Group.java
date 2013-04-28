@@ -12,4 +12,9 @@ public class Group {
 	public String getName(){
 		return groupName;
 	}
+	
+	public boolean equals(Group other){
+		
+		return other.getName().equals(groupName);
+	}
 }
