@@ -33,6 +33,7 @@ public class Accounts{
 			groups = (Map<String, Set<Group>>) Tools.ReadObjectFromFile(Constants.GROUPS_FILENAME);
 		} else {
 			passwords = new HashMap<String, String>();
+			groups = new HashMap<String, Set<Group>>();
 			names = new String[Constants.NUM_VOTERS];
 			//Add the create a new group
 			Group all = new Group("All");
@@ -127,6 +128,10 @@ public class Accounts{
 		
 		//if the password does not have at least one of the subsets, don't allow the change
 		if(numbers == 0 || uppercase == 0 || lowercase == 0 || symbols == 0){
+			System.out.println(numbers);
+			System.out.println(uppercase);
+			System.out.println(lowercase);
+			System.out.println(symbols);
 			return false;
 		}
 		passwords.put(username, password);
