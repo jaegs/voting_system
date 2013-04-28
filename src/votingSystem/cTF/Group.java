@@ -17,4 +17,8 @@ public class Group {
 		
 		return other.getName().equals(groupName);
 	}
+	
+	public int hashCode() {
+		return groupName.hashCode();
+	}
 }

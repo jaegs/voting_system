@@ -21,7 +21,6 @@ public final class Constants {
 	public static final int VOTER_NAME_LENGTH = 100; //Length of BigInteger
 	public static final String HOST = null; //this is the localhost.
 	public static final String PASSWORDS_FILENAME = "bin/votingSystem/passwords.ser";
-	public static final String VOTERS_FILENAME = "bin/votingSystem/voters.ser";
 	public static final String GROUPS_FILENAME = "bin/votingSystem/groups.ser";
 	public static final int PASSWORD_DELAY = 2000;
 	

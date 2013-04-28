@@ -98,7 +98,7 @@ public class Election {
 		 */
 		System.out.println("Checking Eligibility for voter: " + received.voter);
 		Message response = new Message(Operation.ISELIGIBLE_R);
-		response.eligible = (eligibleUsers.contains(received.voter)/*TODO*/ && accounts.verifyGroup(received.voter, eligibleGroups));
+		response.eligible = (eligibleUsers.contains(received.voter)/*TODO*/ && accounts.verifyGroups(received.voter, eligibleGroups));
 		
 		if(response.eligible){
 			System.out.println("Eligibility Confirmed\n");
@@ -119,7 +119,7 @@ public class Election {
 		scheduler.schedule(new Runnable() { public void run() {
 			System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
 			String voter = received.voter;
-			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroup(received.voter, eligibleGroups)) {
+			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroups(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
 		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
@@ -152,7 +152,7 @@ public class Election {
 		Message response = new Message(Operation.REQUEST_NONCE_R);
 		
 		//check to make sure the requestor is a valid voter
-		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroup(received.voter, eligibleGroups))){
+		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroups(received.voter, eligibleGroups))){
 			response.error = "Invalid username and password!";
 			return response;
 		}
@@ -449,7 +449,7 @@ public class Election {
 		}
 		
 		//if username/password is invalid
-		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroup(received.voter, eligibleGroups))){
+		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroups(received.voter, eligibleGroups))){
 			response.error = "Invalid username and password!";
 			return response;
 		}
@@ -457,7 +457,7 @@ public class Election {
 		//check if user has already gotten a secret!
 		if(receivedIDs.contains(received.voter)){
 			response.error = "User has already been issued a votingID!";
-			return response;
+			return response; 
 		}
 		
 		//calculate the mValues based on v value passed in

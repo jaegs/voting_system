@@ -5,20 +5,22 @@ import votingSystem.Tools;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Accounts{
 /**
 	 * Generates username and passwords and stores them in a file.
 	 * Also used by the CTF to check whether a given password is valid for a given username.
 	 */
-	private final Map<String, String> passwords; //in memory because not using database. keys need to be Strings
-	private final String[] names;
+	private final Map<String, String> userToPass; //in memory because not using database. keys need to be Strings
 	private final SecureRandom random = new SecureRandom();
-	private Map<String, Set<Group>> groups;
+	private Map<String, Set<Group>> userToGroups;
+	private Set<Group> activeGroups = Collections.newSetFromMap(new ConcurrentHashMap<Group,Boolean>());
 	
 	/**
 	 * 
@@ -28,31 +30,56 @@ public class Accounts{
 	@SuppressWarnings("unchecked")
 	public Accounts(boolean load) {
 		if (load) {
-			names = (String[]) Tools.ReadObjectFromFile(Constants.VOTERS_FILENAME);
-			passwords = (Map<String, String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
-			groups = (Map<String, Set<Group>>) Tools.ReadObjectFromFile(Constants.GROUPS_FILENAME);
+			userToPass = (Map<String, String>) Tools.ReadObjectFromFile(Constants.PASSWORDS_FILENAME);
+			userToGroups = (Map<String, Set<Group>>) Tools.ReadObjectFromFile(Constants.GROUPS_FILENAME);
 		} else {
-			passwords = new HashMap<String, String>();
-			groups = new HashMap<String, Set<Group>>();
-			names = new String[Constants.NUM_VOTERS];
+			userToPass = new ConcurrentHashMap<String, String>();
+			userToGroups = new ConcurrentHashMap<String, Set<Group>>();
 			//Add the create a new group
-			Group all = new Group("All");
 			Set<Group> userGroups = new HashSet<Group>();
-			userGroups.add(all);
 			
 			
 			for(int i = 0; i < Constants.NUM_VOTERS; i++) {
 				String username = new BigInteger(Constants.VOTER_NAME_LENGTH, random).toString(32);
 				String pass = new BigInteger(Constants.PASSWORD_LENGTH, random).toString(32);
-				groups.put(username, userGroups);
-				passwords.put(username, pass);	
-				names[i] = username;
+				userToGroups.put(username, userGroups);
+				userToPass.put(username, pass);	
 				if(Constants.DEBUG) System.out.println("USER: " + username +  " PASS: " + pass);
 			}
-			Tools.WriteObjectToFile(names, Constants.VOTERS_FILENAME);
-			Tools.WriteObjectToFile(passwords, Constants.PASSWORDS_FILENAME);
-			Tools.WriteObjectToFile(passwords, Constants.GROUPS_FILENAME);
+			writeUsersToFile();
 		}
+	}
+	
+	/**
+	 * Creates Accounts object with no users or groups.
+	 */
+	public Accounts() {
+		userToPass = new ConcurrentHashMap<String, String>();
+		userToGroups = new ConcurrentHashMap<String, Set<Group>>();
+	}
+	
+	private void writeUsersToFile() {
+		Tools.WriteObjectToFile(userToPass, Constants.PASSWORDS_FILENAME);
+		Tools.WriteObjectToFile(userToPass, Constants.GROUPS_FILENAME);
+	}
+	
+	public boolean createUser(String user, Set<Group> groups, boolean writeToFile) {
+		//Don't create duplicate users
+		if (this.userToGroups.keySet().contains(user)) {
+			return false;
+		}
+		String pass = new BigInteger(Constants.PASSWORD_LENGTH, random).toString(32);
+		userToPass.put(user, pass);
+		
+		//only add active groups
+		groups.retainAll(activeGroups); 
+		Set<Group> groupsConcurrent = Collections.newSetFromMap(new ConcurrentHashMap<Group,Boolean>());
+		groupsConcurrent.addAll(groups);
+		userToGroups.put(user, groupsConcurrent);
+		if (writeToFile) {
+			writeUsersToFile();
+		}
+		return true;
 	}
 	
 	/**
@@ -62,25 +89,24 @@ public class Accounts{
 	 * @return
 	 */
 	public boolean verify(String username, String password) {
-		if (!passwords.containsKey(username))
+		if (!userToPass.containsKey(username))
 			return false;		
-		return password.equals(passwords.get(username)); 
+		return password.equals(userToPass.get(username)); 
 	}
 	
 	
 // NEW STUFF TIM TIM TIM TIM
-	public boolean verifyGroup(String username, Set<Group> eligibleGroups){
-		
-		Set<Group> user_groups = groups.get(username);
-		Set<Group> intersection= new HashSet<Group>(user_groups);
+	public boolean verifyGroups(String username, Set<Group> eligibleGroups){
+		Set<Group> user_groups = userToGroups.get(username);
+		Set<Group> intersection = new HashSet<Group>(user_groups);
 		intersection.retainAll(eligibleGroups);
-		
 		return (intersection.size() > 0);
-		
-		
 	}
 	
-	
+	public boolean verifyGroup(String user, Group group) {
+		return userToGroups.keySet().contains(user) 
+				&&userToGroups.get(user).contains(group);
+	}
 	
 	public boolean changePassword(String username, String password){
 		
@@ -130,7 +156,7 @@ public class Accounts{
 		if(numbers == 0 || uppercase == 0 || lowercase == 0 || symbols == 0){
 			return false;
 		}
-		passwords.put(username, password);
+		userToPass.put(username, password);
 		return true;
 	}
 	
@@ -140,8 +166,7 @@ public class Accounts{
 	 * @return
 	 */
 	public Set<Group> getGroups(String username){
-		
-		return groups.get(username);
+		return userToGroups.get(username);
 	}
 	
 	/**
@@ -149,14 +174,63 @@ public class Accounts{
 	 * @param username
 	 * @param group
 	 */
-	public void addGroup(String username, Group group){
-		
-		Set<Group> username_groups = groups.get(username);
-		username_groups.add(group);
-		groups.put(username, username_groups);
+	public void addGroupsToUser(String username, Set<Group> groups){
+		groups.retainAll(activeGroups);
+		userToGroups.get(username).addAll(groups);
 	}
 	
 	public String[] getNames() {
-		return names;
+		return (String []) userToPass.keySet().toArray();
+	}
+	
+	public void deleteGroupsFromUser(String username, Set<Group> groups) {
+		groups.retainAll(activeGroups);
+		userToGroups.get(username).removeAll(groups);
+	}
+	
+	
+	public void addGroup(Group group, Set<String> usernames) {
+		activeGroups.add(group);
+		usernames.retainAll(userToPass.keySet());
+		for(String user : usernames) {
+			userToGroups.get(user).add(group);
+		}
+	}
+	
+	public void deleteGroupAll(Group g) {
+		for(Map.Entry<String, Set<Group>> entry: userToGroups.entrySet()) {
+			entry.getValue().remove(g);
+		}
+		activeGroups.remove(g);
+	}
+	
+	public void deleteGroupFromUsers(Set<String> users, Group g) {
+		users.retainAll(userToGroups.entrySet());
+		for (String u: users) {
+			userToGroups.get(u).remove(g);
+		}
+	}
+	
+	
+	public Set<Group> getActiveGroups() {
+		return Collections.unmodifiableSet(activeGroups);
+	}
+
+	public void deleteUser(String user) {
+		userToPass.remove(user);
+		userToGroups.remove(user);
+	}
+	
+	public Set<String> getUsersInGroups(Set<Group> groups) {
+		groups.retainAll(activeGroups);
+		Set<String> eligibleUsers = new HashSet<String>();
+		for (Map.Entry<String, Set<Group>> entry: userToGroups.entrySet()) {
+			Set<Group> interX = new HashSet<Group>(groups);
+			interX.retainAll(entry.getValue());
+			if (interX.size() > 0) {
+				eligibleUsers.add(entry.getKey());
+			}
+		}
+		return eligibleUsers;
 	}
 }
