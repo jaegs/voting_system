@@ -276,6 +276,11 @@ public class Voter {
 		//System.out.println("VoterId: " + voterId);
 		
 		System.out.println("FOURTH RESPONSE");
+		
+		String voterIdString = new String(voterId);
+		nonceRequest.voter = voterIdString;
+		
+		
 		//send the message and check the response for errors
 		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
 		if(response.error != null){
@@ -288,7 +293,7 @@ public class Voter {
 		
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
-		send.voter = name;
+		send.voter = voterIdString;
 		send.voterId = voterId;
 		send.ctfNonce = (response.ctfNonce + 1);
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
