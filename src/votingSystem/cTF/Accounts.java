@@ -97,10 +97,11 @@ public class Accounts{
 	
 // NEW STUFF TIM TIM TIM TIM
 	public boolean verifyGroups(String username, Set<Group> eligibleGroups){
-		Set<Group> user_groups = userToGroups.get(username);
-		Set<Group> intersection = new HashSet<Group>(user_groups);
-		intersection.retainAll(eligibleGroups);
-		return (intersection.size() > 0);
+		eligibleGroups = new HashSet<Group>(eligibleGroups);
+		eligibleGroups.retainAll(activeGroups);
+		if (!userToGroups.containsKey(username)) return false;
+		eligibleGroups.retainAll(userToGroups.get(username));
+		return (eligibleGroups.size() > 0);
 	}
 	
 	public boolean verifyGroup(String user, Group group) {
@@ -175,6 +176,7 @@ public class Accounts{
 	 * @param group
 	 */
 	public void addGroupsToUser(String username, Set<Group> groups){
+		groups = new HashSet<Group>(groups);
 		groups.retainAll(activeGroups);
 		userToGroups.get(username).addAll(groups);
 	}
@@ -184,6 +186,7 @@ public class Accounts{
 	}
 	
 	public void deleteGroupsFromUser(String username, Set<Group> groups) {
+		groups = new HashSet<Group>(groups);
 		groups.retainAll(activeGroups);
 		userToGroups.get(username).removeAll(groups);
 	}
@@ -191,6 +194,7 @@ public class Accounts{
 	
 	public void addGroup(Group group, Set<String> usernames) {
 		activeGroups.add(group);
+		usernames = new HashSet<String>(usernames);
 		usernames.retainAll(userToPass.keySet());
 		for(String user : usernames) {
 			userToGroups.get(user).add(group);
@@ -205,6 +209,7 @@ public class Accounts{
 	}
 	
 	public void deleteGroupFromUsers(Set<String> users, Group g) {
+		users = new HashSet<String>(users);
 		users.retainAll(userToGroups.entrySet());
 		for (String u: users) {
 			userToGroups.get(u).remove(g);
@@ -222,6 +227,7 @@ public class Accounts{
 	}
 	
 	public Set<String> getUsersInGroups(Set<Group> groups) {
+		groups = new HashSet<Group>(groups);
 		groups.retainAll(activeGroups);
 		Set<String> eligibleUsers = new HashSet<String>();
 		for (Map.Entry<String, Set<Group>> entry: userToGroups.entrySet()) {
