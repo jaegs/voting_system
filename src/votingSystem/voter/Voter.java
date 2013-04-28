@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 
 import votingSystem.*;
@@ -102,9 +103,9 @@ public class Voter {
 		return prepareMessage(send, false);
 	}
 
-	public boolean isEligible() 
+	public boolean isEligible(String username) 
 			throws UnknownHostException, IOException, VotingSecurityException {
-		
+		this.name = username;
 		System.out.println("Voter " + name + " requesting eligibility check!");
 		Message send = new Message(Operation.ISELIGIBLE);
 		send.voter = name;
@@ -317,20 +318,20 @@ public class Voter {
 	 * @throws IOException
 	 * @throws VotingSecurityException
 	 */
-	public boolean changePassword(String username, String oldPassword, String newPassword, String confirmPassword)
+	public boolean changePassword(String username, byte[] oldPassword, byte[] newPassword, byte[] confirmPassword)
 		throws UnknownHostException, IOException, VotingSecurityException {
 		
 		//Client-side checks
-		if(!newPassword.equals(confirmPassword)){
+		if(!Arrays.equals(newPassword,confirmPassword)){
 			System.out.println("Passwords do not match!");
 			return false;
 		}
 		
 		//
 		Message send = new Message(Operation.CHANGE_PASSWORD);
-		send.password = oldPassword.getBytes();
-		send.newPassword = newPassword.getBytes();
-		send.confirmPassword = confirmPassword.getBytes();
+		send.password = oldPassword;
+		send.newPassword = newPassword;
+		send.confirmPassword = confirmPassword;
 		send.voter = username;
 		
 		Message response = prepareMessage(send);

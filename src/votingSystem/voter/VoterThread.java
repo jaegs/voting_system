@@ -31,7 +31,7 @@ public class VoterThread implements Runnable {
 			case PENDING:
 				break;
 			case PREVOTE:
-				if (!voter.isEligible()) {
+				if (!voter.isEligible(voter.getName())) {
 					System.out.println("not eligible");
 				}
 				voter.willVote();
