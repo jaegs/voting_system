@@ -98,6 +98,8 @@ public class Accounts{
 	 * @return
 	 */
 	public boolean verify(String username, String password) {
+		//System.out.println("sent pass: " + password);
+		//System.out.println("exp pass: " + userToPass.get(username));
 		if (!userToPass.containsKey(username))
 			return false;		
 		return password.equals(userToPass.get(username)); 

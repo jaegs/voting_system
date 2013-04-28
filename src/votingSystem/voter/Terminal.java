@@ -27,7 +27,7 @@ public class Terminal {
 			
 			//TIM
 			//PASSWORD CHANGING
-			boolean passwordChanged = false;
+			boolean passwordChanged = true;
 			while(!passwordChanged){
 				System.out.println("Please change your password!");
 				System.out.print("Enter your username: ");
@@ -47,12 +47,12 @@ public class Terminal {
 			
 			
 			System.out.println("Please enter 'vote' to vote.");	
-			while (!br.readLine().equals("vote")) {
-				System.out.println("Please enter 'vote' to vote.");	
-			}
+//			while (!br.readLine().equals("vote")) {
+//				System.out.println("Please enter 'vote' to vote.");	
+//			}
 			System.out.println("OK, Election state is PREVOTE");
 			System.out.println("Please enter your username");
-			String username = br.readLine();
+			String username = entry.getKey();//br.readLine();
 			System.out.println("Please enter your password");
 
 			char[] pass = new char[Constants.MAX_PASS_LENGTH];
@@ -65,7 +65,7 @@ public class Terminal {
 			System.out.println("Entered pass: " + new String(password));
 			
 			v.willVote(username, password);
-			Thread.sleep(Constants.PASSWORD_DELAY * 2);
+			Thread.sleep(Constants.PASSWORD_DELAY * 4);
 			
 			
 			
