@@ -55,13 +55,14 @@ public class Terminal {
 			String username = br.readLine();
 			System.out.println("Please enter your password");
 
-			// TODO: change to char array, can't use br.readLine()
-			byte[] password = br.readLine().getBytes();
+			char[] pass = new char[Constants.MAX_PASS_LENGTH];
+			int passlen = br.read(pass);
+			byte[] password = new byte[passlen];
+			for (int i = 0; i < passlen; i++) {
+				password[i] = (byte) pass[i];
+			}
 			
-			
-			String passwordString = new String(password);
-			System.out.println("**********Password: " + passwordString);
-			
+			System.out.println("Entered pass: " + new String(password));
 			
 			v.willVote(username, password);
 			Thread.sleep(Constants.PASSWORD_DELAY * 2);
@@ -82,7 +83,6 @@ public class Terminal {
 			v.setVoteAnonymous(true);
 			
 			v.vote(vote);
-			System.out.println("Your anonymous voter ID is " + v.getId() + ". Don't tell anyone or else you won't be anonymous!");
 			Constants.VoteStatus status = v.voted();
 			if (status == Constants.VoteStatus.ID_COLLISION) {
 				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
@@ -107,6 +107,7 @@ public class Terminal {
 			// "Erase" password in memory by overwriting stored password with random bytes
 			SecureRandom sr = new SecureRandom();
 			sr.nextBytes(password);
+			v.eraseInfo();
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");
 		} catch (IOException ioe) {
