@@ -32,9 +32,16 @@ public class Accounts{
 		} else {
 			passwords = new HashMap<String, String>();
 			names = new String[Constants.NUM_VOTERS];
+			//Add the create a new group
+			Group all = new Group("All");
+			Set<Group> userGroups = new HashSet<Group>();
+			userGroups.add(all);
+			
+			
 			for(int i = 0; i < Constants.NUM_VOTERS; i++) {
 				String username = new BigInteger(Constants.VOTER_NAME_LENGTH, random).toString(32);
 				String pass = new BigInteger(Constants.PASSWORD_LENGTH, random).toString(32);
+				groups.put(username, userGroups);
 				passwords.put(username, pass);	
 				names[i] = username;
 				if(Constants.DEBUG) System.out.println("USER: " + username +  " PASS: " + pass);
