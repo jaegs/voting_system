@@ -3,6 +3,7 @@ package votingSystem.cTF;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -14,7 +15,7 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the votersâ€™
+ *  processing votes, and responding to voter queries concerning the votersÃ¢â‚¬â„¢
  *   eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
@@ -47,6 +48,8 @@ public class Election {
 	//Map of voterId->encryptedVote for valid voterId's that don't collide
 	private final Map<String, String> IdToencryptedVotes = new ConcurrentHashMap<String, String>();
 	
+	private final Map<String, Integer> OutstandingNonces = new ConcurrentHashMap<String, Integer>();
+	
 	//Value set of IdToencryptedVotes
 	private final Set<String> encryptedVotes = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 	
@@ -59,6 +62,9 @@ public class Election {
 	
 	private final Set<String> receivedIDs = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
+	
+	private static SecureRandom random = new SecureRandom();
+	
 	private ElectionState state;
 	
 	
@@ -130,6 +136,27 @@ public class Election {
 		return response;
 	}
 	
+	/**
+	 * Gets a nonce from the server to protect against replay
+	 * @param received
+	 * @return
+	 */
+	public Message getNonce(Message received){
+		Message response = new Message(Operation.REQUEST_NONCE_R);
+		
+		//check to make sure the requestor is a valid voter
+		if(!accounts.verify(received.voter, new String(received.password))){
+			response.error = "Invalid username and password!";
+			return response;
+		}
+		
+		//generate a nonce, add this to the outstanding nonce map
+		int nonce = random.nextInt();
+		response.nonce = nonce;
+		OutstandingNonces.put(received.voter, nonce);
+		
+		return response;
+	}
 	
 	/**
 	 * 
@@ -153,7 +180,7 @@ public class Election {
 		}
 		//otherwise change the password
 		else{
-			accounts.changePassword(received.voter, received.newPassword.toString());
+			accounts.changePassword(received.voter, new String(received.newPassword));
 			response.passwordChanged = true;
 			return response;
 		}
@@ -161,7 +188,7 @@ public class Election {
 		
 	}
 	
-	public void vote(Message received) {
+	public Message vote(Message received) {
 		/**
 		 * Step: #5
 		 * Input: I, {I,v}K_v
@@ -171,13 +198,27 @@ public class Election {
 		 *  If there is a collision, the encrypted vote and id number are added to a collisions lists.
 		 *   Otherwise, the vote and id are added to a list of submitted votes.
 		 */   
+		Message response = new Message(Operation.VOTE_R);
 		String voterId = received.voterId;
 		String encryptedVote = received.encryptedVote;
 		//check
 		if(getState() != ElectionState.VOTE
 				|| !(OT.checkSecret(received.voterId))){
-			return;
+			response.error = "Invalid request!";
+			return response;
 		}
+		
+		
+		//check the nonce!
+		Integer nonce = new Integer(received.nonce);
+		Integer savedNonce = OutstandingNonces.get(received.voter);
+		savedNonce++;
+		if(!savedNonce.equals(nonce)){
+			response.error = "Nonce's do not match!";
+			return response;
+		}
+		
+		
 		//if someone else has already voted with that voterId
 		if (IdToencryptedVotes.containsKey(voterId)) {
 			IdCollisions.put(encryptedVote, voterId);
@@ -185,6 +226,8 @@ public class Election {
 			IdToencryptedVotes.put(voterId, encryptedVote);
 			encryptedVotes.add(encryptedVote);
 		}
+		
+		return response;
 	}
 
 	public Message voted(Message received) {
@@ -377,8 +420,18 @@ public class Election {
 		if(received.OTMessages == null 
 				|| received.OTMessages[0] == null 
 				|| received.voter == null 
-				|| received.password == null){
-			response.error = "Invalid V-value passed in!";
+				|| received.password == null
+				|| received.nonce == null){
+			response.error = "Invalid request!";
+			return response;
+		}
+		
+		//check the nonce!
+		Integer nonce = new Integer(received.nonce);
+		Integer savedNonce = OutstandingNonces.get(received.voter);
+		savedNonce++;
+		if(!savedNonce.equals(nonce)){
+			response.error = "Nonce's do not match!";
 			return response;
 		}
 		
