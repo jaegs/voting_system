@@ -74,6 +74,9 @@ public class Terminal {
 			System.out.println("OK, Election state is VOTE");
 			System.out.println("Please enter your vote. Candidates are 0 through 4.");
 			int vote = Integer.parseInt(br.readLine());
+			System.out.println("Sending your vote through an anonymous mixnet so the Goverment won't know how you voted :)");
+			v.setVoteAnonymous(true);
+			
 			v.vote(vote);
 			System.out.println("Your anonymous voter ID is " + v.getId() + ". Don't tell anyone or else you won't be anonymous!");
 			Constants.VoteStatus status = v.voted();

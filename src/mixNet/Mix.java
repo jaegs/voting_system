@@ -60,6 +60,7 @@ public abstract class Mix extends Thread {
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.print("Mixnet error");
 		}
 	}

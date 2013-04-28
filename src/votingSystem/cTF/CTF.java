@@ -7,6 +7,8 @@ import votingSystem.Tools;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Implementation of a Central Tabulating Facility. Keeps track of currently active elections.
@@ -17,6 +19,8 @@ import java.util.*;
 public class CTF {
 	private final Map<Integer, Election> elections;
 	private PrivateKey privKey;
+	protected final ExecutorService threadPool = Executors.newFixedThreadPool(Constants.CTF_POOL_THREADS);
+    
 	
 	/**
 	 * Generates a new public / private key combination every time.
@@ -49,5 +53,9 @@ public class CTF {
 	
 	public boolean isActiveElection(int electionId) {
 		return elections.containsKey(electionId);
+	}
+	
+	public ExecutorService getThreadPool() {
+		return threadPool;
 	}
 }

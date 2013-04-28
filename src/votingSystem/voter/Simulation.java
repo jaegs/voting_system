@@ -19,7 +19,7 @@ import votingSystem.cTF.Election;
  *
  */
 public class Simulation {
-	protected ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
+	protected ExecutorService threadPool = Executors.newFixedThreadPool(Constants.SIMULATION_POOL_THREADS);
 
 	/**
 	 * Creates v voters, reads password and username from file

@@ -39,6 +39,9 @@ public class Election {
 	//Set of voters who are eligible to vote in this election
 	private final Set<String> eligibleUsers;
 	
+	private final Set<Group> eligibleGroups;
+	
+	
 	//Set of eligible voters who say they vote in the election
 	private final Set<String> votingUsers = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>()); //made from willVote responses
 	
@@ -72,11 +75,14 @@ public class Election {
 		PENDING, PREVOTE, VOTE, COMPLETED
 	}
 	
-	public Election(int id, int numCandidates) {
+	public Election(int id, int numCandidates, Set<Group> groups) {
 		this.id = id;
 		accounts = new Accounts(false);
 		results = new AtomicIntegerArray(numCandidates);
 		setState(ElectionState.PREVOTE); //TODO election should start as pending
+		
+		
+		eligibleGroups = groups;
 		eligibleUsers = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(accounts.getNames())));
 	}
 	
@@ -92,7 +98,8 @@ public class Election {
 		 */
 		System.out.println("Checking Eligibility for voter: " + received.voter);
 		Message response = new Message(Operation.ISELIGIBLE_R);
-		response.eligible = eligibleUsers.contains(received.voter);
+		response.eligible = (eligibleUsers.contains(received.voter)/*TODO*/ && accounts.verifyGroup(received.voter, eligibleGroups));
+		
 		if(response.eligible){
 			System.out.println("Eligibility Confirmed\n");
 		}else{
@@ -112,7 +119,7 @@ public class Election {
 		scheduler.schedule(new Runnable() { public void run() {
 			System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
 			String voter = received.voter;
-			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password))) {
+			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroup(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
 		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
@@ -145,7 +152,7 @@ public class Election {
 		Message response = new Message(Operation.REQUEST_NONCE_R);
 		
 		//check to make sure the requestor is a valid voter
-		if(!accounts.verify(received.voter, new String(received.password))){
+		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroup(received.voter, eligibleGroups))){
 			response.error = "Invalid username and password!";
 			return response;
 		}
@@ -436,7 +443,7 @@ public class Election {
 		}
 		
 		//if username/password is invalid
-		if(!accounts.verify(received.voter, new String(received.password))){
+		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroup(received.voter, eligibleGroups))){
 			response.error = "Invalid username and password!";
 			return response;
 		}
