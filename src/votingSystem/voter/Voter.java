@@ -188,8 +188,21 @@ public class Voter {
 			return;
 		}
 		
-		//Create a second ObliviousTransfer Request
+		//request the a nonce from the server
+		Message nonceRequest = new Message(Operation.REQUEST_NONCE);
+		nonceRequest.voter = name;
+		nonceRequest.password = password;
+		
+		//send the message and check the response for errors
+		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
+		if(response.error != null){
+			System.out.println(response.error);
+			return;
+		}
+		
+		//Create a second ObliviousTransfer Request, with the nonce from the server
 		Message OTRequest2 = new Message(Operation.OTGETSECRETS);
+		OTRequest2.nonce = (response.nonce + 1);
 		OTRequest2.voter = name;
 		OTRequest2.password = password;
 		OTRequest2.OTMessages = new BigInteger[1];
@@ -217,9 +230,20 @@ public class Voter {
 		System.out.println("Oblivious Transfer completed");
 		//System.out.println("VoterId: " + voterId);
 		
+		
+		//send the message and check the response for errors
+		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
+		if(response.error != null){
+			System.out.println(response.error);
+			return;
+		}
+		
+		
+		
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
+		send.nonce = (response.nonce + 1);
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
 		byte[] voteIdPairArr = Tools.ObjectToByteArray(voteIdPair);
 		voteKeys = RSAEncryption.genKeys();
@@ -246,11 +270,12 @@ public class Voter {
 	 * @throws IOException
 	 * @throws VotingSecurityException
 	 */
-	public boolean changePassword(String oldPassword, String newPassword, String confirmPassword)
+	public boolean changePassword(String username, String oldPassword, String newPassword, String confirmPassword)
 		throws UnknownHostException, IOException, VotingSecurityException {
 		
 		//Client-side checks
 		if(!newPassword.equals(confirmPassword)){
+			System.out.println("Failing here");
 			return false;
 		}
 		
@@ -259,10 +284,11 @@ public class Voter {
 		send.password = oldPassword.getBytes();
 		send.newPassword = newPassword.getBytes();
 		send.confirmPassword = confirmPassword.getBytes();
-		send.voter = name;
+		send.voter = username;
 		
 		Message response = prepareMessage(send);
 		
+		System.out.println("Failing here 2" + response.error);
 		return response.passwordChanged;
 	}
 	
