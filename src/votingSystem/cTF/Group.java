@@ -13,9 +13,15 @@ public class Group {
 		return groupName;
 	}
 	
-	public boolean equals(Group other){
-		
-		return other.getName().equals(groupName);
+	@Override
+	public boolean equals(Object obj){
+		if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (!(obj instanceof Group))
+            return false;
+		return ((Group)obj).getName().equals(groupName);
 	}
 	
 	public int hashCode() {
