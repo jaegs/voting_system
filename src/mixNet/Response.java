@@ -3,8 +3,6 @@ package mixNet;
 import java.io.Serializable;
 import java.security.Key;
 
-import javax.crypto.spec.IvParameterSpec;
-
 public class Response implements Serializable{
 	/**
 	 * 

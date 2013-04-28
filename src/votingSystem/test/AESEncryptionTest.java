@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import votingSystem.AESEncryption;
 import votingSystem.RSAEncryption;
-import votingSystem.Tools;
 
 public class AESEncryptionTest {
 	@Test	

@@ -8,18 +8,12 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-
-import votingSystem.AESEncryption;
 import votingSystem.Constants;
 import votingSystem.RSAEncryption;
-import votingSystem.Tools;
 
 public abstract class Mix extends Thread {
 	protected PrivateKey privKey;

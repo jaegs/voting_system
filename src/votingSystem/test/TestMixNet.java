@@ -2,8 +2,6 @@ package votingSystem.test;
 
 import static org.junit.Assert.*;
 
-import java.util.Arrays;
-
 import mixNet.Client;
 import mixNet.MixNet;
 import mixNet.Server;

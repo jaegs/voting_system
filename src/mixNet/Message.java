@@ -1,7 +1,6 @@
 package mixNet;
 
 import java.io.Serializable;
-import java.security.Key;
 import java.security.PublicKey;
 
 

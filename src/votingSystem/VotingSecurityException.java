@@ -7,4 +7,9 @@ package votingSystem;
  */
 public class VotingSecurityException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7097713727611072688L;
+
 }

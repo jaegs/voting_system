@@ -1,15 +1,11 @@
 package mixNet;
 
 import java.security.InvalidKeyException;
-import java.security.PublicKey;
-
 import javax.crypto.BadPaddingException;
 
 import votingSystem.AESEncryption;
 import votingSystem.Constants;
 import votingSystem.Tools;
-import votingSystem.cTF.CTF;
-import votingSystem.cTF.Protocol;
 
 public abstract class Server extends Mix{
 	public Server() {
