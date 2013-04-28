@@ -55,19 +55,23 @@ public class Terminal {
 				}				
 				passwordChanged = v.changePassword(username, oldpassword, newpassword, confpassword);
 				if(!passwordChanged){
-					
 					System.out.println("Password change failed. Please try again.");
 				}
 			}
 			
-			
+			System.out.println("Checking eligibility to vote.");
+			if (!v.isEligible())  {
+				System.out.println("User is not eligible to vote.");
+				return;
+			}
+				
 			System.out.println("Please enter 'vote' to vote.");	
-//			while (!br.readLine().equals("vote")) {
-//				System.out.println("Please enter 'vote' to vote.");	
-//			}
+			while (!br.readLine().equals("vote")) {
+				System.out.println("Please enter 'vote' to vote.");	
+			}
 			System.out.println("OK, Election state is PREVOTE");
 			System.out.println("Please enter your username");
-			String username = entry.getKey();//br.readLine();
+			String username = br.readLine();
 			System.out.println("Please enter your password");
 
 			char[] pass = new char[Constants.MAX_PASS_LENGTH];
@@ -77,12 +81,8 @@ public class Terminal {
 				password[i] = (byte) pass[i];
 			}
 			
-			//System.out.println("Entered pass: " + new String(password));
-			
 			v.willVote(username, password);
 			Thread.sleep(Constants.PASSWORD_DELAY * 4);
-			
-			
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
@@ -117,7 +117,6 @@ public class Terminal {
 			v.setState(Election.ElectionState.COMPLETED);
 			System.out.println("OK, Election state is COMPLETED");
 			System.out.println("Election results are: " + v.results());
-			
 			
 			// "Erase" password in memory by overwriting stored password with random bytes
 			SecureRandom sr = new SecureRandom();
