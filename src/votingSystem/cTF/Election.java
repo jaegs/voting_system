@@ -228,11 +228,11 @@ public class Election {
 		 *   Otherwise, the vote and id are added to a list of submitted votes.
 		 */   
 		Message response = new Message(Operation.VOTE_R);
-		byte[] voterId = Base64Coder.decodeLines(received.voterId);
+		String voterId = new String(received.voterId);
 		String encryptedVote = received.encryptedVote;
 		//check
 		if(getState() != ElectionState.VOTE
-				|| !(OT.checkSecret(voterId))){
+				|| !(OT.checkSecret(received.voterId))){
 			response.error = "Invalid request!";
 			return response;
 		}
@@ -250,9 +250,9 @@ public class Election {
 		
 		//if someone else has already voted with that voterId
 		if (IdToencryptedVotes.containsKey(received.voterId)) {
-			IdCollisions.put(encryptedVote, received.voterId);
+			IdCollisions.put(encryptedVote, voterId);
 		} else {
-			IdToencryptedVotes.put(received.voterId, encryptedVote);
+			IdToencryptedVotes.put(voterId, encryptedVote);
 			encryptedVotes.add(encryptedVote);
 		}
 		
@@ -300,7 +300,7 @@ public class Election {
 		 * the CTF adds the vote to the overall election tally.
 		 */
 		System.out.println("Processing vote...\n");
-		String voterId = received.voterId;
+		String voterId = new String(received.voterId);
 		PrivateKey voteKey = received.voteKey;
 		//voter calls "counted" to check if vote actually processed.
 		if(voterId == null 

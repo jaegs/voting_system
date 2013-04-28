@@ -29,10 +29,7 @@ public class Voter {
 	private mixNet.Client mixClient = null;
 	private boolean voteAnonymous = false;
 	private static SecureRandom random = new SecureRandom();
-	
-	
-//TODO add methods to erase password and voter ID from system memory and then call them at the end of the terminal program.
-	
+		
 	public Voter(int electionId) {
 	   this.electionId = electionId;
 	}
@@ -70,12 +67,11 @@ public class Voter {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
-		// TODO clear all byte arrays in this message
-		byte[] msg = Tools.ObjectToByteArray(send);
-		byte[] checkedMsg = CheckSum.appendCheckSum(msg);
+		byte[] checkedMsg = CheckSum.appendCheckSum(Tools.ObjectToByteArray(send));
 		byte[] encryptedMsg = null;
 		try {
 			encryptedMsg = AESEncryption.encrypt(checkedMsg, Constants.CTF_PUBLIC_KEY);
+			random.nextBytes(checkedMsg);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		} 
@@ -274,7 +270,7 @@ public class Voter {
 		//System.out.println("M-> " + response2.OTMessages[0]);
 		//calculate voterID
 		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
-		voterId =vId.toByteArray();
+		voterId = vId.toByteArray();
 		System.out.println("Oblivious Transfer completed");
 		//System.out.println("VoterId: " + voterId);
 		
@@ -390,6 +386,12 @@ public class Voter {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void eraseInfo() {
+		random.nextBytes(password);
+		random.nextBytes(voterId);
+		vote = random.nextInt();
 	}
 		
 }
