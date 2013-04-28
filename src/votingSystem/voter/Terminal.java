@@ -80,7 +80,7 @@ public class Terminal {
 			System.out.println("Please enter your vote. Candidates are 0 through 4.");
 			int vote = Integer.parseInt(br.readLine());
 			System.out.println("Sending your vote through an anonymous mixnet so the Goverment won't know how you voted :)");
-			v.setVoteAnonymous(true);
+			v.setVoteAnonymous(false);
 			
 			v.vote(vote);
 			Constants.VoteStatus status = v.voted();

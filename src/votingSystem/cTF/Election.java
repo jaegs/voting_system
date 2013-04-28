@@ -232,7 +232,9 @@ public class Election {
 		 */   
 		Message response = new Message(Operation.VOTE_R);
 		String voterId = new String(received.voterId);
+		System.out.println("VOTE: "+voterId);
 		String encryptedVote = received.encryptedVote;
+		System.out.println("VOTE encvote: "+encryptedVote);
 		//check
 		if(getState() != ElectionState.VOTE
 				|| !(OT.checkSecret(received.voterId))){
@@ -274,6 +276,7 @@ public class Election {
 		System.out.println("Confirming Vote cast...");
 		
 		String encryptedVote = received.encryptedVote;
+		System.out.println("VOTE: "+encryptedVote);
 		Message response = new Message(Operation.VOTED_R);
 		if (encryptedVote != null && 
 				encryptedVotes.contains(encryptedVote)) {

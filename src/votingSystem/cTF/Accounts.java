@@ -98,8 +98,6 @@ public class Accounts{
 	 * @return
 	 */
 	public boolean verify(String username, String password) {
-		System.out.println("sent pass: " + password);
-		System.out.println("exp pass: " + userToPass.get(username));
 		if (!userToPass.containsKey(username))
 			return false;		
 		boolean result = password.equals(userToPass.get(username));
@@ -109,23 +107,9 @@ public class Accounts{
 	
 // NEW STUFF TIM TIM TIM TIM
 	public boolean verifyGroups(String username, Set<Group> eligibleGroups){
-		System.out.println("INTI");
-		for (Group g: eligibleGroups){
-			System.out.println(g.toString()); 
-		}
-		System.out.println("Username: " + username);
 		eligibleGroups = new HashSet<Group>(eligibleGroups);
 		eligibleGroups.retainAll(activeGroups);
-		System.out.println("ACTIVE");
-		for (Group g: activeGroups){
-			System.out.println(g.toString()); 
-		}
-		System.out.println("ELIGBIBEL NOW");
-		for (Group g: eligibleGroups){
-			System.out.println(g.toString()); 
-		}
 		if (!userToGroups.containsKey(username)) return false;
-		System.out.println("HIMOM");
 		eligibleGroups.retainAll(userToGroups.get(username));
 		return (eligibleGroups.size() > 0);
 	}

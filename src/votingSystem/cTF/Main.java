@@ -87,7 +87,7 @@ public class Main {
 				new HashSet<Group>(Arrays.asList(new Group[] {national, local}));
 		acc.createUser(userE, userEGroups, true);
 		try {
-			print("enter \"1\" if you would like to use set accounts yourself, \"0\" for random");
+			print("enter \"1\" if you would like to set eligible groups yourself, \"0\" for random");
 			String input = "1";//br.readLine();
 			if (!input.equals("1")) return null;
 			
@@ -111,8 +111,8 @@ public class Main {
 			acc.setSelectedGroup(selected);
 			Set<String> eligibleVoters = acc.getUsersInGroups(selected);
 			print(Arrays.toString(eligibleVoters.toArray()));
-		//		} catch (IOException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally{}
 		return acc;
 	}

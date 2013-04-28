@@ -127,8 +127,8 @@ public class Client extends Thread{
 			for(int i = Constants.MIXES_PER_MSG - 1; i >= 0; i--) {
 				payload = AESEncryption.decrypt(payload, responseKeys[i]);
 			}
-			System.out.println("at client");
-			Tools.printByteArray(payload);
+			//System.out.println("at client");
+			//Tools.printByteArray(payload);
 			return AESEncryption.decrypt(payload, privKey);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();

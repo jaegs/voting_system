@@ -29,7 +29,7 @@ public abstract class Server extends Mix{
 			byte[] respMsg = processMessage(msg.payload);
 			//==> Kx(R0,M')
 			byte[] payload = AESEncryption.encrypt(respMsg, msg.senderKey);
-			Tools.printByteArray(payload);
+			//Tools.printByteArray(payload);
 			Message toSend = new Message(payload, msg.response);
 			//K1(R1,A2,K2(R2,A3,...,Kn-1(Rn-1,An,Kn(Rn,Ax))...))), Kx(R0,M') to A1
 			send(Tools.ObjectToByteArray(toSend), msg.sendAddr);
