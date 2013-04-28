@@ -180,7 +180,7 @@ public class Accounts{
 	}
 	
 	public String[] getNames() {
-		return (String []) userToPass.keySet().toArray();
+		return (String []) userToPass.keySet().toArray(new String[userToPass.size()]);
 	}
 	
 	public void deleteGroupsFromUser(String username, Set<Group> groups) {
