@@ -29,10 +29,10 @@ public class Terminal {
 			//TIM
 			//PASSWORD CHANGING
 			boolean passwordChanged = false;
+			System.out.print("Enter your username: ");
+			String username = br.readLine();
+			System.out.println("Please change your password!");
 			while(!passwordChanged){
-				System.out.println("Please change your password!");
-				System.out.print("Enter your username: ");
-				String username = br.readLine();
 				System.out.print("Enter old password: ");
 				String oldPassword = br.readLine();
 				System.out.print("Enter new password: ");
@@ -44,15 +44,13 @@ public class Terminal {
 					System.out.println("Password change failed. Please try again.");
 				}
 			}
-			
+			System.out.println("Password changed.");
 			
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
 				System.out.println("Please enter 'vote' to vote.");	
 			}
 			System.out.println("OK, Election state is PREVOTE");
-			System.out.println("Please enter your username");
-			String username = br.readLine();
 
 			// TODO: Verify this actually works, remove print at end
 			int passlen = 0;
@@ -63,17 +61,19 @@ public class Terminal {
 				while (in.read() != -1) {
 					passlen++;
 				}
+				
+				byte[] password = new byte[passlen];
+				System.arraycopy(inpass, 0, password, 0, passlen);
+				System.out.println("Entered password: " + new String(password));
+				
+				v.willVote(username, password);
+				Thread.sleep(Constants.PASSWORD_DELAY * 2);
+				
+				// "Erase" password in memory by overwriting stored password with random bytes
+				SecureRandom sr = new SecureRandom();
+				sr.nextBytes(password);
 			}
-			byte[] password = new byte[passlen];
-			System.arraycopy(inpass, 0, password, 0, passlen);
-			System.out.println(new String(password));
-			
-			v.willVote(username, password);
-			Thread.sleep(Constants.PASSWORD_DELAY * 2);
-			
-			// "Erase" password in memory by overwriting stored password with random bytes
-			SecureRandom sr = new SecureRandom();
-			sr.nextBytes(password);
+
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");

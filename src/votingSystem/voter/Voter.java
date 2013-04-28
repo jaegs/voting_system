@@ -364,6 +364,6 @@ public class Voter {
 	public void eraseInfo() {
 		random.nextBytes(password);
 		random.nextBytes(voterId);
-		random.nextInt(vote);
+		vote = random.nextInt();
 	}	
 }
