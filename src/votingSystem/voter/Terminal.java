@@ -28,10 +28,10 @@ public class Terminal {
 			//TIM
 			//PASSWORD CHANGING
 			boolean passwordChanged = false;
-			System.out.print("Enter your username: ");
-			String username = br.readLine();
-			System.out.println("Please change your password!");
 			while(!passwordChanged){
+				System.out.println("Please change your password!");
+				System.out.print("Enter your username: ");
+				String username = br.readLine();
 				System.out.print("Enter old password: ");
 				String oldPassword = br.readLine();
 				System.out.print("Enter new password: ");
@@ -39,37 +39,37 @@ public class Terminal {
 				System.out.print("Enter confirm password: ");
 				String confirmPassword = br.readLine();
 				passwordChanged = v.changePassword(username, oldPassword, newPassword, confirmPassword);
-				if(!passwordChanged){					
+				if(!passwordChanged){
+					
 					System.out.println("Password change failed. Please try again.");
 				}
 			}
-			System.out.println("Password changed.");
+			
 			
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
 				System.out.println("Please enter 'vote' to vote.");	
 			}
 			System.out.println("OK, Election state is PREVOTE");
-
+			System.out.println("Please enter your username");
+			String username = br.readLine();
 			System.out.println("Please enter your password");
-			char[] pass = new char[Constants.MAX_PASS_LENGTH];
-			while (br.read(pass, 0, Constants.MAX_PASS_LENGTH) == 0) {
-			}
-			byte[] password = new byte[pass.length];
-			for (int i = 0; i < password.length; i++) {
-				password[i] = (byte) pass[i];
-			}
+
+			// TODO: change to char array, can't use br.readLine()
+			byte[] password = br.readLine().getBytes();
+			
+			
+			String passwordString = new String(password);
+			System.out.println("**********Password: " + passwordString);
+			
 			
 			v.willVote(username, password);
-			Thread.sleep(Constants.PASSWORD_DELAY * 3);
-
-			// "Erase" password in memory by overwriting stored password with random bytes
-			SecureRandom sr = new SecureRandom();
-			sr.nextBytes(password);
+			Thread.sleep(Constants.PASSWORD_DELAY * 2);
+			
+			
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
-				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! " + v.getName() + ". You are confirmed as voting in election #" + electionId + ".");
@@ -82,14 +82,13 @@ public class Terminal {
 			v.setVoteAnonymous(true);
 			
 			v.vote(vote);
+			System.out.println("Your anonymous voter ID is " + v.getId() + ". Don't tell anyone or else you won't be anonymous!");
 			Constants.VoteStatus status = v.voted();
 			if (status == Constants.VoteStatus.ID_COLLISION) {
 				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
-				v.eraseInfo();
 				return;
 			} else if(status == Constants.VoteStatus.NOT_RECORDED) {
 				System.out.println("At this time, your vote could not be recorded.");
-				v.eraseInfo();
 				return;
 			} 
 			System.out.println("Success! Your vote has been recorded.");
@@ -97,14 +96,17 @@ public class Terminal {
 			v.processVote();
 			if(!v.counted()) {
 				System.out.println("Error processing your vote.");
-				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! Your vote has been processed.");
 			v.setState(Election.ElectionState.COMPLETED);
 			System.out.println("OK, Election state is COMPLETED");
 			System.out.println("Election results are: " + v.results());
-			v.eraseInfo();
+			
+			
+			// "Erase" password in memory by overwriting stored password with random bytes
+			SecureRandom sr = new SecureRandom();
+			sr.nextBytes(password);
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");
 		} catch (IOException ioe) {
