@@ -74,7 +74,54 @@ public class Accounts{
 	
 	public void changePassword(String username, String password){
 		
+		//33-47 Symbols
+		//48-57 Numbers
+		//58-64 More symbols
+		//65-90 Upper case
+		//91-96 More symbols
+		//97-122 Lower case
+		//122-126 Final symbols
+		
+		int symbols = 0;
+		int lowercase = 0;
+		int uppercase = 0;
+		int numbers = 0;
+		
+		//if the string is too short
+		if(password.length() < 10){
+			return false;
+		}
+		
+		//run through all of the password characters, and count the number of uppercase vs lowercase vs numbers vs symbols
+		for(int i = 0; i < password.length(); i++){
+			int current = (int) password.charAt(i);
+			
+			//if not a legal character, return false
+			if(i < 33 || i > 126){
+				return false;
+			}
+			
+			if(48 <= i && i <= 57){
+				numbers++;
+			}
+			else if(i >=65 && i <=90){
+				uppercase++;
+			}
+			else if(i >= 97 && i <= 122){
+				lowercase++;
+			}
+			else{
+				symbols++;
+			}
+			
+		}
+		
+		//if the password does not have at least one of the subsets, don't allow the change
+		if(numbers == 0 || uppercase == 0 || lowercase == 0 || symbols == 0){
+			return false;
+		}
 		passwords.put(username, password);
+		return true;
 	}
 	
 	/**
