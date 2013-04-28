@@ -23,6 +23,7 @@ public class Message implements Serializable{
 	public byte[] password;
 	public byte[] newPassword;
 	public byte[] confirmPassword;
+	public boolean passwordChanged;
 	public boolean isVoting;
 	public String voterId;
 	public String encryptedVote;
