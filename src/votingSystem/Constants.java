@@ -25,6 +25,10 @@ public final class Constants {
 	public static final String GROUPS_FILENAME = "bin/votingSystem/groups.ser";
 	public static final int PASSWORD_DELAY = 2000;
 	
+	
+	public static final int MIN_PASS_LENGTH = 10;
+	public static final int MAX_PASS_LENGTH = 30;
+	
 	public static enum VoteStatus {NOT_RECORDED, SUCCESS,ID_COLLISION, INVALID_ELECTION_STATE};
 		
 	// Encryption Constants
