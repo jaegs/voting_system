@@ -27,11 +27,11 @@ public class Terminal {
 			
 			//TIM
 			//PASSWORD CHANGING
-			boolean passwordChanged = true;
+			boolean passwordChanged = false;
+			System.out.print("Enter your username: ");
+			String username = br.readLine();
+			System.out.println("Please change your password!");
 			while(!passwordChanged){
-				System.out.println("Please change your password!");
-				System.out.print("Enter your username: ");
-				String username = br.readLine();
 				System.out.print("Enter old password: ");				
 				char[] oldpass = new char[Constants.MAX_PASS_LENGTH];
 				int oldpasslen = br.read(oldpass) - 1;
@@ -60,7 +60,7 @@ public class Terminal {
 			}
 			
 			System.out.println("Checking eligibility to vote.");
-			if (!v.isEligible())  {
+			if (!v.isEligible(username))  {
 				System.out.println("User is not eligible to vote.");
 				return;
 			}
@@ -70,8 +70,6 @@ public class Terminal {
 				System.out.println("Please enter 'vote' to vote.");	
 			}
 			System.out.println("OK, Election state is PREVOTE");
-			System.out.println("Please enter your username");
-			String username = br.readLine();
 			System.out.println("Please enter your password");
 
 			char[] pass = new char[Constants.MAX_PASS_LENGTH];

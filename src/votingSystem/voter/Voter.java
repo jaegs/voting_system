@@ -103,9 +103,9 @@ public class Voter {
 		return prepareMessage(send, false);
 	}
 
-	public boolean isEligible() 
+	public boolean isEligible(String username) 
 			throws UnknownHostException, IOException, VotingSecurityException {
-		
+		this.name = username;
 		System.out.println("Voter " + name + " requesting eligibility check!");
 		Message send = new Message(Operation.ISELIGIBLE);
 		send.voter = name;
