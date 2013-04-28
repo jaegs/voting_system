@@ -15,8 +15,8 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the votersÃ¢â‚¬â„¢
- *   eligibility and vote status. This class is thread safe.
+ *  processing votes, and responding to voter queries concerning the voters
+ *  eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
  */
@@ -121,7 +121,8 @@ public class Election {
 			String voter = received.voter;
 			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroups(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
-		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
+				System.out.println("User added.");
+		} else {System.out.println("User not added.");} }}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public Message isVoting(Message received) {

@@ -292,7 +292,7 @@ public class Voter {
 		
 		//Client-side checks
 		if(!newPassword.equals(confirmPassword)){
-			System.out.println("Failing here");
+			System.out.println("New password and confirmed password do not match.");
 			return false;
 		}
 		
@@ -304,8 +304,9 @@ public class Voter {
 		send.voter = username;
 		
 		Message response = prepareMessage(send);
-		
-		System.out.println("Failing here 2" + response.error);
+		if (response.error != null) {
+			System.out.println("Failure: " + response.error);			
+		}
 		return response.passwordChanged;
 	}
 	
@@ -363,6 +364,6 @@ public class Voter {
 	public void eraseInfo() {
 		random.nextBytes(password);
 		random.nextBytes(voterId);
-		random.nextInt(vote);
+		vote = random.nextInt();
 	}	
 }

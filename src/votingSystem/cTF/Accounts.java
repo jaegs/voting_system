@@ -133,17 +133,17 @@ public class Accounts{
 			int current = (int) password.charAt(i);
 			
 			//if not a legal character, return false
-			if(i < 33 || i > 126){
+			if(current < 33 || current > 126){
 				return false;
 			}
 			
-			if(48 <= i && i <= 57){
+			if(48 >= current && current <= 57){
 				numbers++;
 			}
-			else if(i >=65 && i <=90){
+			else if(current >=65 && current <=90){
 				uppercase++;
 			}
-			else if(i >= 97 && i <= 122){
+			else if(current >= 97 && current <= 122){
 				lowercase++;
 			}
 			else{

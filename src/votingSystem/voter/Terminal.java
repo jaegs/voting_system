@@ -1,7 +1,6 @@
 package votingSystem.voter;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.SecureRandom;
@@ -29,10 +28,10 @@ public class Terminal {
 			//TIM
 			//PASSWORD CHANGING
 			boolean passwordChanged = false;
+			System.out.print("Enter your username: ");
+			String username = br.readLine();
+			System.out.println("Please change your password!");
 			while(!passwordChanged){
-				System.out.println("Please change your password!");
-				System.out.print("Enter your username: ");
-				String username = br.readLine();
 				System.out.print("Enter old password: ");
 				String oldPassword = br.readLine();
 				System.out.print("Enter new password: ");
@@ -44,33 +43,26 @@ public class Terminal {
 					System.out.println("Password change failed. Please try again.");
 				}
 			}
-			
+			System.out.println("Password changed.");
 			
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
 				System.out.println("Please enter 'vote' to vote.");	
 			}
 			System.out.println("OK, Election state is PREVOTE");
-			System.out.println("Please enter your username");
-			String username = br.readLine();
 
-			// TODO: Verify this actually works, remove print at end
-			int passlen = 0;
-			byte[] inpass = new byte[Constants.MAX_PASS_LENGTH];
-			ByteArrayInputStream in = new ByteArrayInputStream(inpass);
-			while (passlen == 0) {
-				System.out.println("Please enter your password");
-				while (in.read() != -1) {
-					passlen++;
-				}
+			System.out.println("Please enter your password");
+			char[] pass = new char[Constants.MAX_PASS_LENGTH];
+			while (br.read(pass, 0, Constants.MAX_PASS_LENGTH) == 0) {
 			}
-			byte[] password = new byte[passlen];
-			System.arraycopy(inpass, 0, password, 0, passlen);
-			System.out.println(new String(password));
+			byte[] password = new byte[pass.length];
+			for (int i = 0; i < password.length; i++) {
+				password[i] = (byte) pass[i];
+			}
 			
 			v.willVote(username, password);
-			Thread.sleep(Constants.PASSWORD_DELAY * 2);
-			
+			Thread.sleep(Constants.PASSWORD_DELAY * 3);
+
 			// "Erase" password in memory by overwriting stored password with random bytes
 			SecureRandom sr = new SecureRandom();
 			sr.nextBytes(password);
