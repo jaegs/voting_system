@@ -29,14 +29,16 @@ public class Terminal {
 			//PASSWORD CHANGING
 			boolean passwordChanged = false;
 			while(!passwordChanged){
-				System.out.print("Please change your password!");
-				System.out.print("\nEnter old password: ");
+				System.out.println("Please change your password!");
+				System.out.print("Enter your username: ");
+				String username = br.readLine();
+				System.out.print("Enter old password: ");
 				String oldPassword = br.readLine();
-				System.out.print("\nEnter new password: ");
+				System.out.print("Enter new password: ");
 				String newPassword = br.readLine();
-				System.out.print("\nEnter confirm password: ");
+				System.out.print("Enter confirm password: ");
 				String confirmPassword = br.readLine();
-				passwordChanged = v.changePassword(oldPassword, newPassword, confirmPassword);
+				passwordChanged = v.changePassword(username, oldPassword, newPassword, confirmPassword);
 				if(!passwordChanged){
 					
 					System.out.println("Password change failed. Please try again.");
