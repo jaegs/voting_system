@@ -1,6 +1,7 @@
 package votingSystem.voter;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.SecureRandom;
@@ -39,8 +40,7 @@ public class Terminal {
 				System.out.print("Enter confirm password: ");
 				String confirmPassword = br.readLine();
 				passwordChanged = v.changePassword(username, oldPassword, newPassword, confirmPassword);
-				if(!passwordChanged){
-					
+				if(!passwordChanged){					
 					System.out.println("Password change failed. Please try again.");
 				}
 			}
@@ -53,10 +53,21 @@ public class Terminal {
 			System.out.println("OK, Election state is PREVOTE");
 			System.out.println("Please enter your username");
 			String username = br.readLine();
-			System.out.println("Please enter your password");
 
-			// TODO: change to char array, can't use br.readLine()
-			byte[] password = br.readLine().getBytes();
+			// TODO: Verify this actually works, remove print at end
+			int passlen = 0;
+			byte[] inpass = new byte[Integer.MAX_VALUE];
+			ByteArrayInputStream in = new ByteArrayInputStream(inpass);
+			while (passlen == 0) {
+				System.out.println("Please enter your password");
+				while (in.read() != -1) {
+					passlen++;
+				}
+			}
+			byte[] password = new byte[passlen];
+			System.arraycopy(inpass, 0, password, 0, passlen);
+			System.out.println(new String(password));
+			
 			v.willVote(username, password);
 			Thread.sleep(Constants.PASSWORD_DELAY * 2);
 			
@@ -66,6 +77,7 @@ public class Terminal {
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
+				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! " + v.getName() + ". You are confirmed as voting in election #" + electionId + ".");
@@ -78,13 +90,14 @@ public class Terminal {
 			v.setVoteAnonymous(true);
 			
 			v.vote(vote);
-			System.out.println("Your anonymous voter ID is " + v.getId() + ". Don't tell anyone or else you won't be anonymous!");
 			Constants.VoteStatus status = v.voted();
 			if (status == Constants.VoteStatus.ID_COLLISION) {
 				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
+				v.eraseInfo();
 				return;
 			} else if(status == Constants.VoteStatus.NOT_RECORDED) {
 				System.out.println("At this time, your vote could not be recorded.");
+				v.eraseInfo();
 				return;
 			} 
 			System.out.println("Success! Your vote has been recorded.");
@@ -92,12 +105,14 @@ public class Terminal {
 			v.processVote();
 			if(!v.counted()) {
 				System.out.println("Error processing your vote.");
+				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! Your vote has been processed.");
 			v.setState(Election.ElectionState.COMPLETED);
 			System.out.println("OK, Election state is COMPLETED");
 			System.out.println("Election results are: " + v.results());
+			v.eraseInfo();
 		} catch (InvalidNonceException ine) {
 			System.out.println("Error communication with server: invalid nonce");
 		} catch (IOException ioe) {
