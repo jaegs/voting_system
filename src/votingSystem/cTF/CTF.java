@@ -33,12 +33,10 @@ public class CTF {
 		Tools.WriteObjectToFile(keys.getPublic(), Constants.CTF_PUBLIC_KEY_FILE);
 		privKey = keys.getPrivate();
 		
-		
 		//Add the create a new group
 		Group all = new Group("All");
 		Set<Group> eligibleGroups = new HashSet<Group>();
 		eligibleGroups.add(all);
-		
 		
 		
 		elections = new HashMap<Integer, Election>();

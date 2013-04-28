@@ -6,7 +6,6 @@ import votingSystem.Tools;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +35,10 @@ public class Accounts{
 			userToPass = new ConcurrentHashMap<String, String>();
 			userToGroups = new ConcurrentHashMap<String, Set<Group>>();
 			//Add the create a new group
+			Group all = new Group("All");
 			Set<Group> userGroups = new HashSet<Group>();
+			userGroups.add(all);
+
 			
 			
 			for(int i = 0; i < Constants.NUM_VOTERS; i++) {
@@ -95,12 +97,31 @@ public class Accounts{
 	}
 	
 	
-// NEW STUFF TIM TIM TIM TIM
-	public boolean verifyGroups(String username, Set<Group> eligibleGroups){
+
+	public boolean verifyGroup(String username, Set<Group> eligibleGroups){
+		System.out.println("Username: " + username);
+		
+		
 		Set<Group> user_groups = userToGroups.get(username);
-		Set<Group> intersection = new HashSet<Group>(user_groups);
-		intersection.retainAll(eligibleGroups);
-		return (intersection.size() > 0);
+		
+		System.out.println("Eligible Group Size: " + eligibleGroups.size());
+		System.out.println("User Group Size: " + user_groups.size());
+		
+		int counter = 0;
+		for(Group g1: eligibleGroups){
+			for(Group g2: user_groups){
+				
+				if(g1.equals(g2)){
+					counter++;
+				}
+			}
+		}
+		
+		System.out.println("Intersection Size: " + counter);
+		
+		return (counter > 0);
+		
+
 	}
 	
 	public boolean verifyGroup(String user, Group group) {

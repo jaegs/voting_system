@@ -17,6 +17,7 @@ public class Message implements Serializable{
 	private static final long serialVersionUID = -17866676568921223L;
 	public final Operation operation;
 	public Integer nonce;
+	public Integer ctfNonce;
 	public int electionId;
 	public String voter;
 	public boolean eligible;

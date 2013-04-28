@@ -22,13 +22,16 @@ public class Voter {
 	private int electionId;
 	private String name;
 	private byte[] password;
-	private byte[] voterId = new byte[] {1,2,3,2};
+	private String voterId = Base64Coder.encodeLines(new byte[] {1,2,3, 2});
 	private int vote;
 	private String encryptedVote;
 	private KeyPair voteKeys;
 	private mixNet.Client mixClient = null;
 	private boolean voteAnonymous = false;
 	private static SecureRandom random = new SecureRandom();
+	
+	
+//TODO add methods to erase password and voter ID from system memory and then call them at the end of the terminal program.
 	
 	public Voter(int electionId) {
 	   this.electionId = electionId;
@@ -67,12 +70,12 @@ public class Voter {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
-		byte[] checkedMsg = CheckSum.appendCheckSum(Tools.ObjectToByteArray(send));
+		// TODO clear all byte arrays in this message
+		byte[] msg = Tools.ObjectToByteArray(send);
+		byte[] checkedMsg = CheckSum.appendCheckSum(msg);
 		byte[] encryptedMsg = null;
 		try {
 			encryptedMsg = AESEncryption.encrypt(checkedMsg, Constants.CTF_PUBLIC_KEY);
-			// "Erase" unecrypted message in memory by overwriting with random bytes
-			random.nextBytes(checkedMsg);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		} 
@@ -131,6 +134,11 @@ public class Voter {
 	      throws UnknownHostException, IOException, VotingSecurityException {
 	    this.name = username;
 	    this.password = password;
+	    
+	    String passwordString = new String(this.password);
+		System.out.println("STORE NAME: " + this.name);
+		System.out.println("STORE PASSWORD: " + passwordString);
+		
 	    willVote();
 	}
 	
@@ -138,6 +146,11 @@ public class Voter {
 			throws UnknownHostException, IOException, VotingSecurityException {
 		System.out.println("Voter " + name + " checking successful registration!");
 		Message send = new Message(Operation.ISVOTING);
+		
+		String passwordString = new String(this.password);
+		System.out.println("STORE NAME: " + this.name);
+		System.out.println("STORE PASSWORD: " + passwordString);
+		
 		send.voter = name;
 		Message response = prepareMessage(send, Operation.ISVOTING_R);
 		if(response.isVoting){
@@ -162,17 +175,26 @@ public class Voter {
 			
 		System.out.println("Starting voting process!");
 		System.out.println("Oblivious Transfer initiated.");
+		
+		String passwordString = new String(this.password);
+		System.out.println("STORE NAME: " + this.name);
+		System.out.println("STORE PASSWORD: " + passwordString);
+		
 		//ObliviousTransfer Step1
 		Message OTRequest = new Message(Operation.OTGETPUBLICKEYANDRANDOMMESSAGES);
 		OTRequest.voter = name;
 		OTRequest.password = password;
 		Message response = prepareMessage(OTRequest, Operation.OTGETPUBLICKEYANDRANDOMMESSAGES_R);
 		
+
+		System.out.println("FIRST RESPONSE");
+		
 		//check for server error
 		if(response.error != null){
 			System.out.println(response.error);
 			return;
 		}
+		
 		
 		//sanity check
 		if(response.OTMessages == null || response.OTKey == null){
@@ -208,7 +230,12 @@ public class Voter {
 		Message nonceRequest = new Message(Operation.REQUEST_NONCE);
 		nonceRequest.voter = name;
 		nonceRequest.password = password;
+
 		
+		
+		
+
+		System.out.println("SECOND RESPONSE");
 		//send the message and check the response for errors
 		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
 		if(response.error != null){
@@ -216,9 +243,12 @@ public class Voter {
 			return;
 		}
 		
+
+		System.out.println("NONCE: " + response.ctfNonce);
+		
 		//Create a second ObliviousTransfer Request, with the nonce from the server
 		Message OTRequest2 = new Message(Operation.OTGETSECRETS);
-		OTRequest2.nonce = (response.nonce + 1);
+		OTRequest2.ctfNonce = (response.ctfNonce + 1);
 		OTRequest2.voter = name;
 		OTRequest2.password = password;
 		OTRequest2.OTMessages = new BigInteger[1];
@@ -226,12 +256,14 @@ public class Voter {
 		
 		
 		Message response2 = prepareMessage(OTRequest2, Operation.OTGETSECRETS_R);
-		
+		System.out.println("THIRD RESPONSE");
 		//check for server error
 		if(response2.error != null){
 			System.out.println(response2.error);
 			return;
 		}
+	
+
 	
 		//sanity check pt.2
 		if(response2.OTMessages == null){
@@ -242,24 +274,26 @@ public class Voter {
 		//System.out.println("M-> " + response2.OTMessages[0]);
 		//calculate voterID
 		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
-		voterId = vId.toByteArray();
+		voterId = Base64Coder.encodeLines(vId.toByteArray());
 		System.out.println("Oblivious Transfer completed");
 		//System.out.println("VoterId: " + voterId);
 		
-		
+		System.out.println("FOURTH RESPONSE");
 		//send the message and check the response for errors
 		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
 		if(response.error != null){
 			System.out.println(response.error);
 			return;
 		}
-		
+
+		System.out.println("FOURTH RESPONSE");
 		
 		
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
+		send.voter = name;
 		send.voterId = voterId;
-		send.nonce = (response.nonce + 1);
+		send.ctfNonce = (response.ctfNonce + 1);
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
 		byte[] voteIdPairArr = Tools.ObjectToByteArray(voteIdPair);
 		voteKeys = RSAEncryption.genKeys();
@@ -292,7 +326,7 @@ public class Voter {
 		
 		//Client-side checks
 		if(!newPassword.equals(confirmPassword)){
-			System.out.println("New password and confirmed password do not match.");
+			System.out.println("Passwords do not match!");
 			return false;
 		}
 		
@@ -304,9 +338,7 @@ public class Voter {
 		send.voter = username;
 		
 		Message response = prepareMessage(send);
-		if (response.error != null) {
-			System.out.println("Failure: " + response.error);			
-		}
+		
 		return response.passwordChanged;
 	}
 	
@@ -359,11 +391,9 @@ public class Voter {
 	public String getName() {
 		return name;
 	}
-	
-	// Erases password, voterID and vote from system memory
-	public void eraseInfo() {
-		random.nextBytes(password);
-		random.nextBytes(voterId);
-		vote = random.nextInt();
-	}	
+		
+	public String getId() {
+	    return voterId;
+	}
+		
 }
