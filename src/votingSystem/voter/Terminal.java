@@ -52,28 +52,21 @@ public class Terminal {
 			}
 			System.out.println("OK, Election state is PREVOTE");
 
-			// TODO: Verify this actually works, remove print at end
-			int passlen = 0;
-			byte[] inpass = new byte[Constants.MAX_PASS_LENGTH];
-			ByteArrayInputStream in = new ByteArrayInputStream(inpass);
-			while (passlen == 0) {
-				System.out.println("Please enter your password");
-				while (in.read() != -1) {
-					passlen++;
-				}
-				
-				byte[] password = new byte[passlen];
-				System.arraycopy(inpass, 0, password, 0, passlen);
-				System.out.println("Entered password: " + new String(password));
-				
-				v.willVote(username, password);
-				Thread.sleep(Constants.PASSWORD_DELAY * 2);
-				
-				// "Erase" password in memory by overwriting stored password with random bytes
-				SecureRandom sr = new SecureRandom();
-				sr.nextBytes(password);
+			System.out.println("Please enter your password");
+			char[] pass = new char[Constants.MAX_PASS_LENGTH];
+			while (br.read(pass, 0, Constants.MAX_PASS_LENGTH) == 0) {
 			}
+			byte[] password = new byte[pass.length];
+			for (int i = 0; i < password.length; i++) {
+				password[i] = (byte) pass[i];
+			}
+			
+			v.willVote(username, password);
+			Thread.sleep(Constants.PASSWORD_DELAY * 2);
 
+			// "Erase" password in memory by overwriting stored password with random bytes
+			SecureRandom sr = new SecureRandom();
+			sr.nextBytes(password);
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
