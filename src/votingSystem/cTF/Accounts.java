@@ -54,6 +54,11 @@ public class Accounts{
 		return password.equals(passwords.get(username)); 
 	}
 	
+	public void changePassword(String username, String password){
+		
+		passwords.put(username, password);
+	}
+	
 	public String[] getNames() {
 		return names;
 	}

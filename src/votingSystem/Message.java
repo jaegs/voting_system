@@ -16,11 +16,14 @@ public class Message implements Serializable{
 	 */
 	private static final long serialVersionUID = -17866676568921223L;
 	public final Operation operation;
-	public int nonce;
+	public Integer nonce;
 	public int electionId;
 	public String voter;
 	public boolean eligible;
 	public byte[] password;
+	public byte[] newPassword;
+	public byte[] confirmPassword;
+	public boolean passwordChanged;
 	public boolean isVoting;
 	public String voterId;
 	public String encryptedVote;
