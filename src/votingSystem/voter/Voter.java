@@ -29,8 +29,7 @@ public class Voter {
 	private static SecureRandom random = new SecureRandom();
 	
 	
-//TODO add methods to erase password and voter ID from system memory and then call them in the terminal program.
-// need to erase password/voter ID in all sent messages in memory too, would need methods in voter and would need to be called in terminal program.
+//TODO add methods to erase password and voter ID from system memory and then call them at the end of the terminal program.
 	
 	public Voter(int electionId) {
 	   this.electionId = electionId;
@@ -69,6 +68,7 @@ public class Voter {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
 		send.nonce = nonce;
+		// TODO clear all byte arrays in this message
 		byte[] msg = Tools.ObjectToByteArray(send);
 		byte[] checkedMsg = CheckSum.appendCheckSum(msg);
 		byte[] encryptedMsg = null;
