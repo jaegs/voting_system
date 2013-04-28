@@ -33,6 +33,7 @@ public class Accounts{
 			groups = (Map<String, Set<Group>>) Tools.ReadObjectFromFile(Constants.GROUPS_FILENAME);
 		} else {
 			passwords = new HashMap<String, String>();
+			groups = new HashMap<String, Set<Group>>();
 			names = new String[Constants.NUM_VOTERS];
 			//Add the create a new group
 			Group all = new Group("All");
