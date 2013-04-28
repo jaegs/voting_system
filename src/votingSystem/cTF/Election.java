@@ -121,7 +121,8 @@ public class Election {
 			String voter = received.voter;
 			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroup(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
-		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
+				System.out.println("User added.");
+		} else {System.out.println("User not added.");} }}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public Message isVoting(Message received) {

@@ -62,7 +62,7 @@ public class Terminal {
 			}
 			
 			v.willVote(username, password);
-			Thread.sleep(Constants.PASSWORD_DELAY * 2);
+			Thread.sleep(Constants.PASSWORD_DELAY * 3);
 
 			// "Erase" password in memory by overwriting stored password with random bytes
 			SecureRandom sr = new SecureRandom();
