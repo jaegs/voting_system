@@ -170,12 +170,12 @@ public class ObliviousTransfer {
     
     /**
      * checkSecret - checks the validity of a secret
-     * @param toCheck - the integer to check
+     * @param voterId - the integer to check
      * @return true or false based on the key's validity
      */
-    public boolean checkSecret(String toCheck){	
+    public boolean checkSecret(byte[] voterId){	
     	
-    	return stringSecrets.contains(toCheck);
+    	return stringSecrets.contains(new String(voterId));
     }
     
     public BigInteger getSecret(int index){

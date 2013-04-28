@@ -6,7 +6,9 @@ import votingSystem.Tools;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Accounts{
 /**
@@ -72,7 +74,7 @@ public class Accounts{
 	
 	
 	
-	public void changePassword(String username, String password){
+	public boolean changePassword(String username, String password){
 		
 		//33-47 Symbols
 		//48-57 Numbers

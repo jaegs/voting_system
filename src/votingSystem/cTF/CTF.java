@@ -34,7 +34,7 @@ public class CTF {
 		privKey = keys.getPrivate();
 		
 		
-		/Add the create a new group
+		//Add the create a new group
 		Group all = new Group("All");
 		Set<Group> eligibleGroups = new HashSet<Group>();
 		eligibleGroups.add(all);
