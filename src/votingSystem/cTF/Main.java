@@ -88,32 +88,32 @@ public class Main {
 		acc.createUser(userE, userEGroups, true);
 		try {
 			print("enter \"1\" if you would like to use set accounts yourself, \"0\" for random");
-			String input = br.readLine();
+			String input = "1";//br.readLine();
 			if (!input.equals("1")) return null;
 			
 			print("For testing purposes only, these are the passwords for every user");
 			acc.printUsers();
 			
 			print("Please enter the election type: \n\"1\" National\n\"2\" State\n\"3\" Local. You can enter more than one, ie. \"12\"");
-			input = br.readLine();
+			input = "123";//br.readLine();
 			Set<Group> selected = new HashSet<Group>();
 			acc.setSelectedGroup(selected);
 			if(input.contains("1")) {
 				selected.add(national);
-			} else if(input.contains("2")) {
+			}
+			if(input.contains("2")) {
 				selected.add(state);
-			} else if(input.contains("3")) {
+			}
+			if(input.contains("3")) {
 				selected.add(local);
-			} else {
-				print("error: unknown selection.");
-				return null;
 			}
 			print("Voters eligible for this election are:");
+			acc.setSelectedGroup(selected);
 			Set<String> eligibleVoters = acc.getUsersInGroups(selected);
 			print(Arrays.toString(eligibleVoters.toArray()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//		} catch (IOException e) {
+//			e.printStackTrace();
+		} finally{}
 		return acc;
 	}
 }

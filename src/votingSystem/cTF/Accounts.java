@@ -5,6 +5,7 @@ import votingSystem.Tools;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -105,9 +106,23 @@ public class Accounts{
 	
 // NEW STUFF TIM TIM TIM TIM
 	public boolean verifyGroups(String username, Set<Group> eligibleGroups){
+		System.out.println("INTI");
+		for (Group g: eligibleGroups){
+			System.out.println(g.toString()); 
+		}
+		System.out.println("Username: " + username);
 		eligibleGroups = new HashSet<Group>(eligibleGroups);
 		eligibleGroups.retainAll(activeGroups);
+		System.out.println("ACTIVE");
+		for (Group g: activeGroups){
+			System.out.println(g.toString()); 
+		}
+		System.out.println("ELIGBIBEL NOW");
+		for (Group g: eligibleGroups){
+			System.out.println(g.toString()); 
+		}
 		if (!userToGroups.containsKey(username)) return false;
+		System.out.println("HIMOM");
 		eligibleGroups.retainAll(userToGroups.get(username));
 		return (eligibleGroups.size() > 0);
 	}
@@ -254,6 +269,6 @@ public class Accounts{
 	}
 	
 	public Set<Group> getSelectedGroup() {
-		return (Set<Group>) Collections.unmodifiableCollection(selectedGroups);
+		return selectedGroups;
 	}
 }

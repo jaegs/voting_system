@@ -41,6 +41,7 @@ public class CTF {
 			acc.setSelectedGroup(groups);
 		}
 		Set<String> eligibleUsers = acc.getUsersInGroups(acc.getSelectedGroup());
+
 		elections = new HashMap<Integer, Election>();
 		Election testElection = new Election(1, 5, acc, acc.getSelectedGroup());
 		elections.put(1, testElection);

@@ -15,8 +15,8 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the voters
- *  eligibility and vote status. This class is thread safe.
+ *  processing votes, and responding to voter queries concerning the votersÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
+ *   eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
  */
@@ -117,8 +117,7 @@ public class Election {
 			String voter = received.voter;
 			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroups(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
-				System.out.println("User added.");
-		} else {System.out.println("User not added.");} }}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
+		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public Message isVoting(Message received) {
@@ -136,7 +135,6 @@ public class Election {
 		}else{
 			System.out.println("Voting Denied\n");
 		}
-		//state = ElectionState.VOTE; //TODO: CHANGE!!!!!
 		return response;
 	}
 	
@@ -148,15 +146,26 @@ public class Election {
 	public Message getNonce(Message received){
 		Message response = new Message(Operation.REQUEST_NONCE_R);
 		
+		
+		
 		//check to make sure the requestor is a valid voter
-		if(!accounts.verify(received.voter, new String(received.password)) || (!accounts.verifyGroups(received.voter, eligibleGroups))){
+		if(!accounts.verify(received.voter, new String(received.password))){
+			System.out.println("password");
+			response.error = "Invalid username and password!";
+			return response;
+		}
+		if((!accounts.verifyGroups(received.voter, eligibleGroups))){
+			System.out.println("groups");
 			response.error = "Invalid username and password!";
 			return response;
 		}
 		
 		//generate a nonce, add this to the outstanding nonce map
 		int nonce = random.nextInt();
-		response.nonce = nonce;
+		response.ctfNonce = nonce;
+		
+		System.out.println("CTF NONCE: " + nonce);
+		
 		OutstandingNonces.put(received.voter, nonce);
 		
 		return response;
@@ -173,22 +182,32 @@ public class Election {
 		//if username/password is invalid
 		if(!accounts.verify(received.voter, new String(received.password))){
 				response.error = "Invalid username and password!";
+				System.out.println("Invalid User");
 				response.passwordChanged = false;
 				return response;
 		}
 		//if password do not match
 		else if(!Arrays.equals(received.newPassword, received.confirmPassword)){
 			response.error = "Password do not match!";
+			System.out.println("Pass match");
 			response.passwordChanged = false;
 			return response;
 		}
 		//otherwise change the password
 		else{
-			if(accounts.changePassword(received.voter, new String(received.newPassword))){
+			
+			//password
+			String password = new String(received.newPassword);
+			System.out.println("Password: " + password);
+			
+			
+			if(accounts.changePassword(received.voter, password)){
+				System.out.println("Change success");
 				response.passwordChanged = true;
 				return response;
 			}
 			else{
+				System.out.println("Type violation");
 				response.error = "Password must be at least 10 characters long, and must contain at least one of each: number, lowercase letter, uppercase letter, symbol";
 				response.passwordChanged = false;
 				return response;
@@ -209,18 +228,18 @@ public class Election {
 		 *   Otherwise, the vote and id are added to a list of submitted votes.
 		 */   
 		Message response = new Message(Operation.VOTE_R);
-		byte[] voterId = received.voterId;
+		byte[] voterId = Base64Coder.decodeLines(received.voterId);
 		String encryptedVote = received.encryptedVote;
 		//check
 		if(getState() != ElectionState.VOTE
-				|| !(OT.checkSecret(received.voterId))){
+				|| !(OT.checkSecret(voterId))){
 			response.error = "Invalid request!";
 			return response;
 		}
 		
 		
 		//check the nonce!
-		Integer nonce = new Integer(received.nonce);
+		Integer nonce = new Integer(received.ctfNonce);
 		Integer savedNonce = OutstandingNonces.get(received.voter);
 		savedNonce++;
 		if(!savedNonce.equals(nonce)){
@@ -230,10 +249,10 @@ public class Election {
 		
 		
 		//if someone else has already voted with that voterId
-		if (IdToencryptedVotes.containsKey(new String(voterId))) {
-			IdCollisions.put(encryptedVote, new String(voterId));
+		if (IdToencryptedVotes.containsKey(received.voterId)) {
+			IdCollisions.put(encryptedVote, received.voterId);
 		} else {
-			IdToencryptedVotes.put(new String(voterId), encryptedVote);
+			IdToencryptedVotes.put(received.voterId, encryptedVote);
 			encryptedVotes.add(encryptedVote);
 		}
 		
@@ -281,7 +300,7 @@ public class Election {
 		 * the CTF adds the vote to the overall election tally.
 		 */
 		System.out.println("Processing vote...\n");
-		byte[] voterId = received.voterId;
+		String voterId = received.voterId;
 		PrivateKey voteKey = received.voteKey;
 		//voter calls "counted" to check if vote actually processed.
 		if(voterId == null 
@@ -437,7 +456,7 @@ public class Election {
 		}
 		
 		//check the nonce!
-		Integer nonce = new Integer(received.nonce);
+		Integer nonce = new Integer(received.ctfNonce);
 		Integer savedNonce = OutstandingNonces.get(received.voter);
 		savedNonce++;
 		if(!savedNonce.equals(nonce)){
@@ -454,7 +473,7 @@ public class Election {
 		//check if user has already gotten a secret!
 		if(receivedIDs.contains(received.voter)){
 			response.error = "User has already been issued a votingID!";
-			return response; 
+			return response;
 		}
 		
 		//calculate the mValues based on v value passed in
