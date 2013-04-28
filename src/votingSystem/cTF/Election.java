@@ -15,8 +15,8 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the votersÃ¢â‚¬â„¢
- *   eligibility and vote status. This class is thread safe.
+ *  processing votes, and responding to voter queries concerning the voters
+ *  eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
  */
