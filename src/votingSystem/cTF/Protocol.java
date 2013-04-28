@@ -30,12 +30,12 @@ public class Protocol {
 	 * - Contains the election ID
 	 * - Has a fresh randomly generate (SecureRandom.java) nonce
 	 * - Has a checksum (cryptographic hash)
-	 * - Is encrypted with the CTF’s public key
+	 * - Is encrypted with the CTFâ€™s public key
 	 * 
 	 * Every message sent from the CTF server to the voter client:
 	 * - Includes nonce + 
 	 * - Has a checksum
-	 * - Is signed with the CTF’s private key
+	 * - Is signed with the CTFâ€™s private key
 	 * @param msg
 	 * @return
 	 */
@@ -101,12 +101,18 @@ public class Protocol {
 					case COUNTED:
 						response = election.counted(received);
 						break;
+					case CHANGE_PASSWORD:
+						response = election.changePassword(received);
+						break;
 	//				case PROTEST:
 	//					protest(received);
 	//					break;
 	//				case CHANGE:
 	//					//election.willVote(received);
 	//					break;
+					case REQUEST_NONCE:
+						response = election.getNonce(received);
+						break;
 					case GETELECTIONSTATE:
 						election.getElectionState();
 						break;
