@@ -34,6 +34,7 @@ public class Terminal {
 			String username = br.readLine();
 			System.out.println("Please enter your password");
 
+			// TODO: change to char array, can't use br.readLine()
 			byte[] password = br.readLine().getBytes();
 			v.willVote(username, password);
 			Thread.sleep(Constants.PASSWORD_DELAY * 2);
