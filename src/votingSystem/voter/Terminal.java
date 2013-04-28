@@ -56,7 +56,7 @@ public class Terminal {
 			System.out.println("Please enter your password");
 
 			char[] pass = new char[Constants.MAX_PASS_LENGTH];
-			int passlen = br.read(pass);
+			int passlen = br.read(pass) - 1;
 			byte[] password = new byte[passlen];
 			for (int i = 0; i < passlen; i++) {
 				password[i] = (byte) pass[i];

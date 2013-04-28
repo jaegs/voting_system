@@ -30,7 +30,6 @@ public class MixNet {
 	}
 	
 	public static void main(String [] args) {
-
-		
+		new MixNet();
 	}
 }

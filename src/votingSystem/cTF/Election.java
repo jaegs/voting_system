@@ -115,6 +115,9 @@ public class Election {
 		scheduler.schedule(new Runnable() { public void run() {
 			System.out.println("Adding voter " + received.voter + " to the list of voting users!\n");
 			String voter = received.voter;
+			//System.out.println(getState() == ElectionState.PREVOTE);
+			//System.out.println(accounts.verify(voter, new String(received.password)));
+			//System.out.println(accounts.verifyGroups(received.voter, eligibleGroups));
 			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroups(received.voter, eligibleGroups)) {
 				votingUsers.add(voter);
 		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
