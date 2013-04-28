@@ -13,6 +13,8 @@ import votingSystem.cTF.Election;
 
 public class Terminal {
 	
+	private SecureRandom sr = new SecureRandom();
+	
 	public void run() {
 		try {
 			int electionId = 1;
@@ -57,6 +59,9 @@ public class Terminal {
 				if(!passwordChanged){
 					System.out.println("Password change failed. Please try again.");
 				}
+				sr.nextBytes(oldpassword);
+				sr.nextBytes(newpassword);
+				sr.nextBytes(confpassword);	
 			}
 			
 			System.out.println("Checking eligibility to vote.");
@@ -84,6 +89,8 @@ public class Terminal {
 			
 			if(!v.isVoting()) {
 				System.out.println("Sorry " + v.getName() + ", at this time we could not confirm your voting status.");
+				sr.nextBytes(password);
+				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! " + v.getName() + ". You are confirmed as voting in election #" + electionId + ".");
@@ -99,9 +106,13 @@ public class Terminal {
 			Constants.VoteStatus status = v.voted();
 			if (status == Constants.VoteStatus.ID_COLLISION) {
 				System.out.println("You ID collides with an existing ID, you will have to pick a new one.");
+				sr.nextBytes(password);
+				v.eraseInfo();
 				return;
 			} else if(status == Constants.VoteStatus.NOT_RECORDED) {
 				System.out.println("At this time, your vote could not be recorded.");
+				sr.nextBytes(password);
+				v.eraseInfo();
 				return;
 			} 
 			System.out.println("Success! Your vote has been recorded.");
@@ -109,6 +120,8 @@ public class Terminal {
 			v.processVote();
 			if(!v.counted()) {
 				System.out.println("Error processing your vote.");
+				sr.nextBytes(password);
+				v.eraseInfo();
 				return;
 			}
 			System.out.println("Success! Your vote has been processed.");
@@ -117,7 +130,6 @@ public class Terminal {
 			System.out.println("Election results are: " + v.results());
 			
 			// "Erase" password in memory by overwriting stored password with random bytes
-			SecureRandom sr = new SecureRandom();
 			sr.nextBytes(password);
 			v.eraseInfo();
 		} catch (InvalidNonceException ine) {
