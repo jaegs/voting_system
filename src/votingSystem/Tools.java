@@ -11,6 +11,8 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 /**
  * Utility class for converting byte arrays to/from objects and reading/writing from files.
@@ -18,6 +20,7 @@ import java.io.ObjectOutputStream;
  *
  */
 public class Tools {
+	private static SecureRandom random = new SecureRandom();
 
 	/**
 	 * Takes a Serializable object and converts it to a byte array.
@@ -64,6 +67,8 @@ public class Tools {
 			e1.printStackTrace();
 		} catch(ClassNotFoundException e2) {
 			e2.printStackTrace();
+		} catch(NullPointerException e3) {
+			return null;
 		}
 		return obj;
 	}
@@ -111,5 +116,25 @@ public class Tools {
 			e.printStackTrace();			
 		}
 		return obj;
+	}
+	
+	/**
+	 * http://stackoverflow.com/questions/8700278/java-securerandom-internal-state
+	 * @param input
+	 * @return
+	 */
+	public static int[] shuffle(int[] input) {
+		int[] output = Arrays.copyOf(input, input.length);
+		for(int i = input.length-1; i>0; i--) {
+			int j = random.nextInt(i+1);
+			int temp = output[i];
+			output[i] = output[j];
+			output[j] = temp;
+		}
+		return output;
+	}
+	
+	public static void printByteArray(byte[] in) {
+		System.out.println(Arrays.toString(in));
 	}
 }

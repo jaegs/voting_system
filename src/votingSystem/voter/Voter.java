@@ -26,6 +26,8 @@ public class Voter {
 	private int vote;
 	private String encryptedVote;
 	private KeyPair voteKeys;
+	private mixNet.Client mixClient = null;
+	private boolean voteAnonymous = false;
 	private static SecureRandom random = new SecureRandom();
 	
 	
@@ -64,7 +66,7 @@ public class Voter {
 	 * @throws IOException
 	 * @throws VotingSecurityException
 	 */
-	public Message prepareMessage(Message send) 
+	public Message prepareMessage(Message send, boolean anonymous) 
 			throws UnknownHostException, IOException, VotingSecurityException  {
 		send.electionId = electionId;
 		int nonce = random.nextInt();
@@ -77,7 +79,15 @@ public class Voter {
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		} 
-		byte[] signedResponse = Client.send(encryptedMsg);
+		byte[] signedResponse;
+		if (anonymous) {
+			if(mixClient == null) {
+				mixClient = new mixNet.Client(Constants.MIX_CLIENT_PORT);
+			}
+			signedResponse = mixClient.send(encryptedMsg);
+		} else {
+			signedResponse = votingSystem.voter.Client.send(encryptedMsg);
+		}
 		byte[] checkedResponse = DigitalSignature.verifySignature(signedResponse, Constants.CTF_PUBLIC_KEY);
 		byte[] responseArr = CheckSum.stripAndCheck(checkedResponse);
 		if(responseArr == null) {
@@ -89,6 +99,11 @@ public class Voter {
 		}
 		
 		return response;
+	}
+	
+	Message prepareMessage(Message send) 
+			throws UnknownHostException, IOException, VotingSecurityException  {
+		return prepareMessage(send, false);
 	}
 
 	public boolean isEligible() 
@@ -134,6 +149,10 @@ public class Voter {
 			System.out.println("Registration Denied.\n");
 		}
 		return response.isVoting;
+	}
+	
+	public void setVoteAnonymous(boolean anon) {
+		voteAnonymous = anon;
 	}
 	
 	public void vote(int vote)
@@ -230,7 +249,8 @@ public class Voter {
 			e.printStackTrace();
 		}
 		send.encryptedVote = encryptedVote;
-		prepareMessage(send);
+		//prepareMessage(send);
+		prepareMessage(send, voteAnonymous);
 		System.out.println("Vote casted!\n");
 	}
 	

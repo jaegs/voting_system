@@ -14,7 +14,7 @@ public final class Constants {
 
 	//Server Constants
 	public static final int PORT = 9001;
-	public static final int POOL_THREADS = 10;
+	public static final int CTF_POOL_THREADS = 4;
 	public static final int MESSAGE_SIZE = 2048;
 	public static final int RSA_SMALL_KEY = 512; //bits
 	public static final int PASSWORD_LENGTH = 60; //Length of BigInteger
@@ -37,4 +37,16 @@ public final class Constants {
 	public static final String SIG_ALG = "SHA1withRSA";
 	public static final String CTF_PUBLIC_KEY_FILE = "bin/votingSystem/ctfpubkey.ser";
 	public static PublicKey CTF_PUBLIC_KEY = (PublicKey) Tools.ReadObjectFromFile(CTF_PUBLIC_KEY_FILE);
+	
+	//Mixnet
+	public static final int[] MIX_PORTS = {9002,9003,9004,9005};
+	public static final int NUM_MIXES = MIX_PORTS.length;
+	public static final String MIXNET_FILE = "mix_pub_keys.ser";
+	public static final int MIX_CTF_PORT = 9006;
+	public static final String MIX_SERVER_KEY_FILE = "mix_server_pub_key.ser";
+	public static final int MIXES_PER_MSG = 3;
+	public static final int MIX_CLIENT_PORT = 9007;
+	
+	//Client
+	public static final int SIMULATION_POOL_THREADS = 4;
 }

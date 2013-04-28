@@ -6,11 +6,15 @@ package votingSystem.cTF;
  */
 
 import votingSystem.Constants;
+import votingSystem.Tools;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import mixNet.Mix;
 
 public class Server implements Runnable{
 
@@ -18,7 +22,6 @@ public class Server implements Runnable{
     protected ServerSocket serverSocket = null;
     protected boolean      isStopped    = false;
     protected Thread       runningThread= null;
-    protected final ExecutorService threadPool = Executors.newFixedThreadPool(Constants.POOL_THREADS);
     private final CTF ctf;
     
     public Server(CTF ctf) {
@@ -29,6 +32,11 @@ public class Server implements Runnable{
         synchronized(this){
             this.runningThread = Thread.currentThread();
         }
+        //Open mix socket on another thread.
+        Mix serverMix = new CTFMixServer(ctf);
+        Tools.WriteObjectToFile(serverMix.getPubKey(), Constants.MIX_SERVER_KEY_FILE);
+        serverMix.start();
+        
         openServerSocket();
         while(!isStopped()){
             Socket clientSocket = null;
@@ -43,12 +51,12 @@ public class Server implements Runnable{
                     "Error accepting client connection", e);
             }
             try {
-				this.threadPool.execute(new ServerThread(clientSocket, ctf));
+				ctf.getThreadPool().execute(new ServerThread(clientSocket, ctf));
 			} catch (IOException e) {
 				throw new RuntimeException("Error reading socket",e);
 			}
         }
-        this.threadPool.shutdown();
+        ctf.getThreadPool().shutdown();
         System.out.println("Server Stopped.") ;
     }
 

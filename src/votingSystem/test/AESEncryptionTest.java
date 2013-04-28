@@ -13,11 +13,13 @@ import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 import org.junit.Test;
 
 import votingSystem.AESEncryption;
 import votingSystem.RSAEncryption;
+import votingSystem.Tools;
 
 public class AESEncryptionTest {
 	@Test	
@@ -41,6 +43,33 @@ public class AESEncryptionTest {
 		
 		assertTrue(Arrays.equals(msg,decryptedMsg));						
 	}
+	
+	@Test
+	public void testAESEncryptDecrypt() {
+		System.out.println("This test only uses AES and not RSA.");
+		String s = "I am testing a long string to see if AES works, because if it doesn't, I will cry very very much. Please work. Don't make me cry.";
+		byte[] msg = s.getBytes();
+		System.out.println("Message: " + s);
+		System.out.println("Message Bytes: " + Arrays.toString(msg));
+		SecretKey k = AESEncryption.genKey();
+		try {
+			byte[] e = AESEncryption.encrypt(msg, k);
+			System.out.println("Encrypted Message: " + new String(e));
+			System.out.println("Encrypted Message Bytes: " + Arrays.toString(e));
+			byte[] d = AESEncryption.decrypt(e, k);
+			System.out.println("Decrypted Message: " + new String(d));
+			System.out.println("Decrypted Message Bytes: " + Arrays.toString(d));		
+			
+			assertTrue(Arrays.equals(msg,d));	
+		} catch (InvalidKeyException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalBlockSizeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}	
+	}
+	
 	
 	@Test
 	public void testInterceptor() throws InvalidKeyException {
