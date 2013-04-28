@@ -304,8 +304,9 @@ public class Voter {
 		send.voter = username;
 		
 		Message response = prepareMessage(send);
-		
-		System.out.println("Failure: " + response.error);
+		if (response.error != null) {
+			System.out.println("Failure: " + response.error);			
+		}
 		return response.passwordChanged;
 	}
 	
