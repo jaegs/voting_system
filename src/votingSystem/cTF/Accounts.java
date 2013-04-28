@@ -107,17 +107,17 @@ public class Accounts{
 			int current = (int) password.charAt(i);
 			
 			//if not a legal character, return false
-			if(i < 33 || i > 126){
+			if(current < 33 || current > 126){
 				return false;
 			}
 			
-			if(48 <= i && i <= 57){
+			if(48 >= current && current <= 57){
 				numbers++;
 			}
-			else if(i >=65 && i <=90){
+			else if(current >=65 && current <=90){
 				uppercase++;
 			}
-			else if(i >= 97 && i <= 122){
+			else if(current >= 97 && current <= 122){
 				lowercase++;
 			}
 			else{
@@ -128,10 +128,6 @@ public class Accounts{
 		
 		//if the password does not have at least one of the subsets, don't allow the change
 		if(numbers == 0 || uppercase == 0 || lowercase == 0 || symbols == 0){
-			System.out.println(numbers);
-			System.out.println(uppercase);
-			System.out.println(lowercase);
-			System.out.println(symbols);
 			return false;
 		}
 		passwords.put(username, password);
