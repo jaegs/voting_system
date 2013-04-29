@@ -42,4 +42,5 @@ public class Message implements Serializable{
 	public Message(Operation operation) {
 		this.operation = operation;
 	}
+	
 }
