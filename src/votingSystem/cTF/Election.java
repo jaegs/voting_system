@@ -15,7 +15,7 @@ import votingSystem.*;
 
 /**
  * Contains all of the election state and methods for managing voters,
- *  processing votes, and responding to voter queries concerning the votersÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
+ *  processing votes, and responding to voter queries concerning the votersÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢
  *   eligibility and vote status. This class is thread safe.
  * @author Benjamin
  *
@@ -118,9 +118,17 @@ public class Election {
 			//System.out.println(getState() == ElectionState.PREVOTE);
 			//System.out.println(accounts.verify(voter, new String(received.password)));
 			//System.out.println(accounts.verifyGroups(received.voter, eligibleGroups));
-			if (getState() == ElectionState.PREVOTE && accounts.verify(voter, new String(received.password)) && accounts.verifyGroups(received.voter, eligibleGroups)) {
-				votingUsers.add(voter);
-		}}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
+			if (getState() != ElectionState.PREVOTE){
+				System.out.println("Election State");
+			}else if(!accounts.verify(voter, new String(received.password))){
+				System.out.println("Username/password combo");
+			}else if(!accounts.verifyGroups(received.voter, eligibleGroups)) {
+				System.out.println("Group sheeeit");
+			}
+			else{
+				votingUsers.add(new String(voter));
+			}
+		}}, Constants.PASSWORD_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public Message isVoting(Message received) {
@@ -132,7 +140,7 @@ public class Election {
 		 */
 		System.out.println("Checking if voter " + received.voter + " is planning to vote.");
 		Message response = new Message(Operation.ISVOTING_R);
-		response.isVoting = votingUsers.contains(received.voter);
+		response.isVoting = votingUsers.contains(new String(received.voter));
 		if(response.isVoting){
 			System.out.println("Voting Confirmed\n");
 		}else{
@@ -167,12 +175,37 @@ public class Election {
 		int nonce = random.nextInt();
 		response.ctfNonce = nonce;
 		
-		System.out.println("CTF NONCE: " + nonce);
+		//System.out.println("CTF NONCE: " + nonce);
 		
 		OutstandingNonces.put(received.voter, nonce);
 		
 		return response;
 	}
+	
+	
+	public Message getNonceAnon(Message received){
+		
+		Message response = new Message(Operation.REQUEST_NONCE_ANON_R);
+		
+		//check to make sure the requestor is a valid voter
+		if(getState() != ElectionState.VOTE
+				|| !(OT.checkSecret(received.voterId))){
+			response.error = "Invalid secret key!";
+			return response;
+		}
+		
+		//generate a nonce, add this to the outstanding nonce map
+		int nonce = random.nextInt();
+		response.ctfNonce = nonce;
+		
+		System.out.println("CTF NONCE: " + nonce);
+		System.out.println("Voter ID: " + new String(received.voterId));
+		
+		OutstandingNonces.put(new String(received.voterId), nonce);
+		
+		return response;
+	}
+	
 	
 	/**
 	 * 
@@ -234,6 +267,8 @@ public class Election {
 		String voterId = new String(received.voterId);
 		System.out.println("VOTE: "+voterId);
 		String encryptedVote = received.encryptedVote;
+	
+		
 		System.out.println("VOTE encvote: "+encryptedVote);
 		//check
 		if(getState() != ElectionState.VOTE
@@ -245,7 +280,7 @@ public class Election {
 		
 		//check the nonce!
 		Integer nonce = new Integer(received.ctfNonce);
-		Integer savedNonce = OutstandingNonces.get(received.voter);
+		Integer savedNonce = OutstandingNonces.get(voterId);
 		savedNonce++;
 		if(!savedNonce.equals(nonce)){
 			response.error = "Nonce's do not match!";
@@ -255,8 +290,10 @@ public class Election {
 		
 		//if someone else has already voted with that voterId
 		if (IdToencryptedVotes.containsKey(received.voterId)) {
+			System.out.println("Adding to collisions");
 			IdCollisions.put(encryptedVote, voterId);
 		} else {
+			System.out.println("Adding to collisions");
 			IdToencryptedVotes.put(voterId, encryptedVote);
 			encryptedVotes.add(encryptedVote);
 		}
@@ -276,6 +313,7 @@ public class Election {
 		System.out.println("Confirming Vote cast...");
 		
 		String encryptedVote = received.encryptedVote;
+	
 		System.out.println("VOTE: "+encryptedVote);
 		Message response = new Message(Operation.VOTED_R);
 		if (encryptedVote != null && 
