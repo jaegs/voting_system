@@ -214,6 +214,8 @@ public class Voter {
 		//System.out.println("K-> " + test);
 		BigInteger v;
 		
+		System.out.println("OTMESSAGES: " + response.OTMessages[b_val]);
+		
 		//try to calculate V
 		try {
 			v = ObliviousTransfer.calculateV(response.OTMessages[b_val], k, response.OTKey);
@@ -268,19 +270,33 @@ public class Voter {
 			return;
 		}
 		
+		System.out.println("OTMESSAGES: " + response2.OTMessages[b_val]);
+		
 		//System.out.println("M-> " + response2.OTMessages[0]);
 		//calculate voterID
 		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
-		voterId = vId.toByteArray();
-		System.out.println("Oblivious Transfer completed" + voterId);
+		String voteId = Base64Coder.encodeLines(vId.toByteArray());
+		voterId = voteId.getBytes();
+		//byte[] voterID = vId.toByteArray();
+		System.out.println("vId toString" + vId.toString());
+		System.out.println("voterID " + new String(voterId));
 		//System.out.println("VoterId: " + voterId);
 		
 		System.out.println("FOURTH RESPONSE");
 		
 		
 		
+		//send the message and check the response for errors
+		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
+		if(response.error != null){
+			System.out.println(response.error);
+			return;
+		}
 		
-		Message nonceRequestAnon = new Message(Operation.REQUEST_NONCE_ANON);
+		System.out.println("NONCE: " + response.ctfNonce);
+		
+		
+		/*Message nonceRequestAnon = new Message(Operation.REQUEST_NONCE_ANON);
 		nonceRequestAnon.voterId = voterId;
 		
 		//send the message and check the response for errors
@@ -288,7 +304,7 @@ public class Voter {
 		if(response.error != null){
 			System.out.println(response.error);
 			return;
-		}
+		}*/
 
 		System.out.println("FOURTH RESPONSE");
 		
@@ -296,6 +312,7 @@ public class Voter {
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
 		send.voterId = voterId;
+		send.voter = name;
 		send.ctfNonce = (response.ctfNonce + 1);
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
 		byte[] voteIdPairArr = Tools.ObjectToByteArray(voteIdPair);
