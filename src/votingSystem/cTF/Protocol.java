@@ -113,6 +113,9 @@ public class Protocol {
 					case REQUEST_NONCE:
 						response = election.getNonce(received);
 						break;
+					case REQUEST_NONCE_ANON:
+						response = election.getNonceAnon(received);
+						break;
 					case GETELECTIONSTATE:
 						election.getElectionState();
 						break;
