@@ -30,12 +30,12 @@ public class Protocol {
 	 * - Contains the election ID
 	 * - Has a fresh randomly generate (SecureRandom.java) nonce
 	 * - Has a checksum (cryptographic hash)
-	 * - Is encrypted with the CTFâ€™s public key
+	 * - Is encrypted with the CTFÃ¢â‚¬â„¢s public key
 	 * 
 	 * Every message sent from the CTF server to the voter client:
 	 * - Includes nonce + 
 	 * - Has a checksum
-	 * - Is signed with the CTFâ€™s private key
+	 * - Is signed with the CTFÃ¢â‚¬â„¢s private key
 	 * @param msg
 	 * @return
 	 */
