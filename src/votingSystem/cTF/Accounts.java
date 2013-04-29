@@ -99,9 +99,15 @@ public class Accounts{
 	 * @return
 	 */
 	public boolean verify(String username, String password) {
+		
+		System.out.println("Username: " + username);
+		System.out.println("Password: " + password);
+		
 		if (!userToPass.containsKey(username))
-			return false;		
+			return false;
+		System.out.println("Stored Password: " + userToPass.get(username));
 		boolean result = password.equals(userToPass.get(username));
+		System.out.println("Result: " + result);
 		return result;
 	}
 	
