@@ -280,7 +280,7 @@ public class Election {
 		
 		//check the nonce!
 		Integer nonce = new Integer(received.ctfNonce);
-		Integer savedNonce = OutstandingNonces.get(voterId);
+		Integer savedNonce = OutstandingNonces.get(received.voter);
 		savedNonce++;
 		if(!savedNonce.equals(nonce)){
 			response.error = "Nonce's do not match!";
@@ -492,8 +492,6 @@ public class Election {
 		//if the received message is not appropriate, add the response
 		if(received.OTMessages == null 
 				|| received.OTMessages[0] == null 
-				|| received.voter == null 
-				|| received.password == null
 				|| received.nonce == null){
 			response.error = "Invalid request!";
 			return response;
