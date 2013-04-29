@@ -38,6 +38,7 @@ public class Accounts{
 			userToGroups = new ConcurrentHashMap<String, Set<Group>>();
 			//Create a default group
 			Group all = new Group("all");
+			this.addGroup(all, new HashSet<String>());
 			
 			for(int i = 0; i < Constants.NUM_VOTERS; i++) {
 				String username = new BigInteger(Constants.VOTER_NAME_LENGTH, random).toString(32);

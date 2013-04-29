@@ -88,7 +88,7 @@ public class Main {
 		acc.createUser(userE, userEGroups, true);
 		try {
 			print("enter \"1\" if you would like to set eligible groups yourself, \"0\" for random");
-			String input = "1";//br.readLine();
+			String input = "0";//br.readLine();
 			if (!input.equals("1")) return null;
 			
 			print("For testing purposes only, these are the passwords for every user");

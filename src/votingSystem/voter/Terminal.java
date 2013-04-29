@@ -29,7 +29,7 @@ public class Terminal {
 			
 			//TIM
 			//PASSWORD CHANGING
-			boolean passwordChanged = false;
+			boolean passwordChanged = true;
 			System.out.print("Enter your username: ");
 			String username = br.readLine();
 			System.out.println("Please change your password!");
@@ -64,11 +64,11 @@ public class Terminal {
 				sr.nextBytes(confpassword);	
 			}
 			
-			System.out.println("Checking eligibility to vote.");
-			if (!v.isEligible(username))  {
-				System.out.println("User is not eligible to vote.");
-				return;
-			}
+//			System.out.println("Checking eligibility to vote.");
+//			if (!v.isEligible(username))  {
+//				System.out.println("User is not eligible to vote.");
+//				return;
+//			}
 				
 			System.out.println("Please enter 'vote' to vote.");	
 			while (!br.readLine().equals("vote")) {
