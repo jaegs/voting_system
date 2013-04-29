@@ -272,17 +272,19 @@ public class Voter {
 		//calculate voterID
 		BigInteger vId = ObliviousTransfer.determineMessage(response2.OTMessages, b_val, k); 
 		voterId = vId.toByteArray();
-		System.out.println("Oblivious Transfer completed");
+		System.out.println("Oblivious Transfer completed" + voterId);
 		//System.out.println("VoterId: " + voterId);
 		
 		System.out.println("FOURTH RESPONSE");
 		
-		String voterIdString = new String(voterId);
-		nonceRequest.voter = voterIdString;
 		
+		
+		
+		Message nonceRequestAnon = new Message(Operation.REQUEST_NONCE_ANON);
+		nonceRequestAnon.voterId = voterId;
 		
 		//send the message and check the response for errors
-		response = prepareMessage(nonceRequest, Operation.REQUEST_NONCE);
+		response = prepareMessage(nonceRequestAnon, Operation.REQUEST_NONCE_ANON);
 		if(response.error != null){
 			System.out.println(response.error);
 			return;
@@ -293,7 +295,6 @@ public class Voter {
 		
 		//create the VOTe to Send
 		Message send = new Message(Operation.VOTE);
-		send.voter = voterIdString;
 		send.voterId = voterId;
 		send.ctfNonce = (response.ctfNonce + 1);
 		VoteIdPair voteIdPair = new VoteIdPair(voterId, vote);
